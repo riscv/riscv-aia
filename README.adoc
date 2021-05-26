@@ -1,0 +1,27 @@
+= RISC-V Advanced Interrupt Architecture (AIA)
+
+The RISC-V Advanced Interrupt Architecture (AIA) builds upon the
+interrupt-handling functionality of the basic RISC-V ISA to add support
+mainly for the following:
+
+* Message-signaled interrupts (MSIs) from devices.
+
+* Direct control of device interrupts (as MSIs) by a guest operating
+system running in virtual supervisor mode (VS mode), reducing the
+reliance on regular hypervisor intervention.
+
+* Additional standard local interrupts for RISC-V harts.
+
+* Intermixing of priorities of local interrupts and device (external)
+interrupts.
+
+* Conditional delegation of local interrupts to lower privilege levels,
+including to virtual machines.
+
+== Licensing
+
+The files in this repository are licensed under the Creative Commons
+Attribution 4.0 International License (CC-BY 4.0).
+The full license text is available at
+https://creativecommons.org/licenses/by/4.0/.
+
