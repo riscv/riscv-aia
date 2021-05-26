@@ -1,0 +1,357 @@
+
+%=======================================================================
+\chapter{Control and Status Registers (CSRs) Added to Harts}
+\label{ch:CSRs}
+\chaptermark{CSRs Added to Harts}
+
+\textbf{%
+Warning!
+This draft specification is likely to change before being accepted as
+standard by the {\RISCV} International Association.%
+}
+\bigskip
+
+For each privilege level at which a {\RISCV} hart can take interrupt
+traps, the Advanced Interrupt Architecture adds CSRs for interrupt
+control and handling.
+
+\begin{commentary}
+The addresses for all CSRs in this document have been carefully
+selected not to conflict with existing allocations, or with other
+likely extensions, so far as is known.
+\end{commentary}
+
+%-----------------------------------------------------------------------
+\section{Machine-level CSRs}
+
+Table~\ref{tab:CSRs-M} lists the CSRs added for machine level.
+
+\begin{table*}[h!]
+\begin{center}
+\begin{tabular}{|l|l|l|l|}
+\hline
+Number & Privilege & Name      & Description \\
+\hline
+\hline
+\multicolumn{4}{|c|}{Machine-Level Window to Indirectly Accessed Registers} \\
+\hline
+\z{0x350} & MRW & \z{miselect} & Machine indirect register select \\
+\z{0x351} & MRW & \z{mireg}    & Machine indirect register alias \\
+\hline
+\multicolumn{4}{|c|}{Machine-Level Interrupts} \\
+\hline
+\z{0xFB0} & MRO & \z{mtopi}    & Machine top interrupt \\
+\hline
+\multicolumn{4}{|c|}{Machine-Level IMSIC Interface (only with an IMSIC)} \\
+\hline
+\z{0x358} & MRW & \z{mseteipnum}
+                   & Machine set external interrupt-pending bit by number \\
+\z{0x359} & MRW & \z{mclreipnum}
+                   & Machine clear external interrupt-pending bit by number \\
+\z{0x35A} & MRW & \z{mseteienum}
+                   & Machine set external interrupt-enable bit by number \\
+\z{0x35B} & MRW & \z{mclreienum}
+                   & Machine clear external interrupt-enable bit by number \\
+\z{0xFA8} & MRO & \z{mclaimei} & Machine claim top external interrupt \\
+\hline
+\multicolumn{4}{|c|}{Virtual Interrupts for Supervisor Level} \\
+\hline
+\z{0x308} & MRW & \z{mvien}    & Machine virtual interrupt enables \\
+\z{0x309} & MRW & \z{mvip}     & Machine virtual interrupt-pending bits \\
+\hline
+\multicolumn{4}{|c|}{%
+  Machine-Level High-Half CSRs for Interrupts 32--63 (RV32 only)} \\
+\hline
+\z{0x313} & MRW & \z{midelegh} & Extension of \z{mideleg} (only with S-mode) \\
+\z{0x314} & MRW & \z{mieh}     & Extension of \z{mie} \\
+\z{0x318} & MRW & \z{mvienh}   & Extension of \z{mvien} (only with S-mode) \\
+\z{0x319} & MRW & \z{mviph}    & Extension of \z{mvip} (only with S-mode) \\
+\z{0x354} & MRW & \z{miph}     & Extension of \z{mip} \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Machine-level CSRs added by the Advanced Interrupt Architecture.}
+\label{tab:CSRs-M}
+\end{table*}
+
+For RV32, the \emph{high-half} CSRs listed in the table extend
+registers \z{mideleg}, \z{mie}, \z{mvien}, \z{mvip}, and \z{mip} to
+support a total of 64 interrupt causes.
+Each low-half register (e.g. \z{mideleg}) covers interrupt numbers
+0--31, one bit per interrupt number, while its high-half partner
+(\z{midelegh}) covers interrupt numbers 32--63, again one bit per
+interrupt number.
+For RV64, a single \mbox{64-bit} CSR (\z{mideleg}) covers the same set
+of interrupt numbers, 0--63.
+The Advanced Interrupt Architecture requires that these high-half CSRs
+exist for RV32, but they may all be merely read-only zeros.
+
+CSRs \z{miselect} and \z{mireg} provide a window for accessing multiple
+registers beyond the CSRs in Table~\ref{tab:CSRs-M}.
+The value of \z{miselect} determines which register is currently
+accessible through alias CSR \z{mireg}.
+\z{miselect} is a {\WARL} register, and it must support a minimum range
+of values depending on the implemented features.
+When an IMSIC is not implemented, \z{miselect} must be able to hold at
+least any \mbox{6-bit} value in the range 0 to \z{0x3F}.
+When an IMSIC is implemented, \z{miselect} must be able to hold any
+\mbox{8-bit} value in the range 0 to \z{0xFF}.
+Values for \z{miselect} in the range 0 to \z{0xFF} are currently
+assigned in subranges as follows:
+\begin{displayLinesTable}[l@{\quad}l]
+\z{0x00}--\z{0x2F} & reserved \\
+\z{0x30}--\z{0x3F} & major interrupt priorities \\
+\z{0x40}--\z{0x6F} & reserved \\
+\z{0x70}--\z{0xFF} & external interrupts (only with an IMSIC) \\
+\end{displayLinesTable}
+\z{miselect} may also support values outside the range
+\z{0x00}--\z{0xFF}, though no standard registers are currently
+allocated to values above \z{0xFF}.
+
+Values of \z{miselect} with the most-significant bit set
+(bit $\mbox{MXLEN - 1} = \mbox{1}$) are designated for custom use,
+presumably for accessing custom registers through \z{mireg}.
+If MXLEN is changed, the most-significant bit of \z{miselect} moves to
+the new position, retaining its value from before.
+An implementation is not required to support any custom values for
+\z{miselect}.
+
+When \z{miselect} is a number in a reserved range (currently
+\z{0x00}--\z{0x2F}, \z{0x40}--\z{0x6F}, or a number above \z{0xFF}
+not designated for custom use), attempts to access \z{mireg} raise an
+illegal instruction exception.
+
+Normally, the range for external interrupts, \z{0x70}--\z{0xFF}, is
+populated only when an IMSIC is implemented; else, attempts to access
+\z{mireg} when \z{miselect} is in this range also cause an illegal
+instruction exception.
+The contents of the external-interrupts region are documented in
+Chapter~\ref{ch:IMSIC} on the IMSIC.
+
+CSR \z{mtopi} reports the highest-priority interrupt that is pending
+and enabled for machine level, as specified in Section~\ref{sec:mtopi}.
+
+Five CSRs, \z{mseteipnum}, \z{mclreipnum}, \z{mseteienum},
+\z{mclreienum}, and \z{mclaimei}, interact with an IMSIC, so exist only
+when an IMSIC is implemented.
+Like the indirectly accessed IMSIC registers, these CSRs are documented
+in Chapter~\ref{ch:IMSIC}.
+
+When \mbox{S-mode} is implemented, CSRs \z{mvien} and \z{mvip}
+(together with their high-half partners for RV32) support interrupt
+filtering and virtual interrupts for supervisor level.
+These facilities are explained in Section~\ref{sec:virtIntrs-S}.
+
+%-----------------------------------------------------------------------
+\section{Supervisor-level CSRs}
+
+Table~\ref{tab:CSRs-S} lists the supervisor-level CSRs that are added
+if the hart implements \mbox{S-mode}.
+The functions of these registers all match their machine-level
+counterparts.
+
+\begin{table*}[h!]
+\begin{center}
+\begin{tabular}{|l|l|l|l|}
+\hline
+Number & Privilege & Name      & Description \\
+\hline
+\hline
+\multicolumn{4}{|c|}{%
+  Supervisor-Level Window to Indirectly Accessed Registers} \\
+\hline
+\z{0x150} & SRW & \z{siselect} & Supervisor indirect register select \\
+\z{0x151} & SRW & \z{sireg}    & Supervisor indirect register alias \\
+\hline
+\multicolumn{4}{|c|}{Supervisor-Level Interrupts} \\
+\hline
+\z{0xDB0} & SRO & \z{stopi}    & Supervisor top interrupt \\
+\hline
+\multicolumn{4}{|c|}{Supervisor-Level IMSIC Interface (only with an IMSIC)} \\
+\hline
+\z{0x158} & SRW & \z{sseteipnum}
+                 & Supervisor set external interrupt-pending bit by number \\
+\z{0x159} & SRW & \z{sclreipnum}
+                 & Supervisor clear external interrupt-pending bit by number \\
+\z{0x15A} & SRW & \z{sseteienum}
+                 & Supervisor set external interrupt-enable bit by number \\
+\z{0x15B} & SRW & \z{sclreienum}
+                 & Supervisor clear external interrupt-enable bit by number \\
+\z{0xDA8} & SRO & \z{sclaimei} & Supervisor claim top external interrupt \\
+\hline
+\multicolumn{4}{|c|}{%
+  Supervisor-Level High-Half CSRs for Interrupts 32--63 (RV32 only)} \\
+\hline
+\z{0x114} & SRW & \z{sieh}     & Extension of \z{sie} \\
+\z{0x154} & SRW & \z{siph}     & Extension of \z{sip} \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Supervisor-level CSRs added by the Advanced Interrupt Architecture.}
+\label{tab:CSRs-S}
+\end{table*}
+
+The space of registers accessible through the \z{siselect}/\z{sireg}
+window is separate from but parallels that of machine level, being for
+supervisor-level interrupts instead of machine-level interrupts.
+The allocated values for \z{siselect} in the range 0 to \z{0xFF} are
+once again these:
+\begin{displayLinesTable}[l@{\quad}l]
+\z{0x00}--\z{0x2F} & reserved \\
+\z{0x30}--\z{0x3F} & major interrupt priorities \\
+\z{0x40}--\z{0x6F} & reserved \\
+\z{0x70}--\z{0xFF} & external interrupts (only with an IMSIC) \\
+\end{displayLinesTable}
+For maximum compatibility, it is recommended that \z{siselect} support
+at least a \mbox{9-bit} range, 0 to \z{0x1FF}, regardless of whether an
+IMSIC exists.
+
+\begin{commentary}
+Because the VS CSR \z{vsiselect} (Section~\ref{ch:CSRs-hypervisor})
+always has at least 9~bits, and like other VS CSRs, \z{vsiselect}
+substitutes for \z{siselect} when executing in a virtual machine
+(\mbox{VS-mode} or \mbox{VU-mode}), implementing a smaller range for
+\z{siselect} allows software to discover it is not running in a virtual
+machine.
+\end{commentary}
+
+Like \z{miselect}, values of \z{siselect} with the most-significant bit
+set (bit $\mbox{SXLEN - 1} = \mbox{1}$) are designated for custom use.
+If SXLEN is changed, the most-significant bit of \z{siselect} moves to
+the new position, retaining its value from before.
+An implementation is not required to support any custom values for
+\z{siselect}.
+
+When \z{siselect} is a number in a reserved range (currently
+\z{0x00}--\z{0x2F}, \z{0x40}--\z{0x6F}, or a number above \z{0xFF}
+not designated for custom use), or in the range \z{0x70}--\z{0xFF}
+when there is no IMSIC, attempts to access \z{sireg} raise an illegal
+instruction exception (unless executing in a virtual machine, covered
+in the next section).
+
+Register \z{stopi} reports the highest-priority interrupt that
+is pending and enabled for supervisor level, as specified in
+Section~\ref{sec:stopi}.
+The IMSIC CSRs, \z{sseteipnum}, \z{sclreipnum}, \z{sseteienum},
+\z{sclreienum}, and \z{sclaimei}, are described with the IMSIC in
+Chapter~\ref{ch:IMSIC}.
+
+%-----------------------------------------------------------------------
+\section{Hypervisor and VS CSRs}
+\label{ch:CSRs-hypervisor}
+
+If a hart implements the Privileged Architecture's hypervisor
+extension, then the hypervisor and VS CSRs listed in
+Table~\ref{tab:CSRs-hypervisor} are also added.
+
+\begin{table*}[h!]
+\begin{center}
+\begin{tabular}{|l|l|l|l|}
+\hline
+Number & Privilege & Name        & Description \\
+\hline
+\hline
+\multicolumn{4}{|c|}{%
+  Virtual Interrupts and Interrupt Priorities for VS Level} \\
+\hline
+\z{0x608} & HRW & \z{hvien}      & Hypervisor virtual interrupt enables \\
+\z{0x609} & HRW & \z{hvicontrol} & Hypervisor virtual interrupt control \\
+\z{0x646} & HRW & \z{hviprio1}   & Hypervisor VS-level interrupt priorities \\
+\z{0x647} & HRW & \z{hviprio2}   & Hypervisor VS-level interrupt priorities \\
+\hline
+\multicolumn{4}{|c|}{VS-Level Window to Indirectly Accessed Registers} \\
+\hline
+\z{0x250} & HRW & \z{vsiselect}
+                   & Virtual supervisor indirect register select \\
+\z{0x251} & HRW & \z{vsireg}
+                   & Virtual supervisor indirect register alias \\
+\hline
+\multicolumn{4}{|c|}{VS-Level Interrupts} \\
+\hline
+\z{0xEB0} & HRO & \z{vstopi}     & Virtual supervisor top interrupt \\
+\hline
+\multicolumn{4}{|c|}{VS-Level IMSIC Interface (only with an IMSIC)} \\
+\hline
+\z{0x258} & HRW & \z{vsseteipnum}
+                   & VS set external interrupt-pending bit by number \\
+\z{0x259} & HRW & \z{vsclreipnum}
+                   & VS clear external interrupt-pending bit by number \\
+\z{0x25A} & HRW & \z{vsseteienum}
+                   & VS set external interrupt-enable bit by number \\
+\z{0x25B} & HRW & \z{vsclreienum}
+                   & VS clear external interrupt-enable bit by number \\
+\hline
+\multicolumn{4}{|c|}{Hypervisor and VS-Level High-Half CSRs (RV32 only)} \\
+\hline
+\z{0x613} & HRW & \z{hidelegh}   & Extension of \z{hideleg} \\
+\z{0x618} & HRW & \z{hvienh}     & Extension of \z{hvien} \\
+\z{0x655} & HRW & \z{hviph}      & Extension of \z{hvip} \\
+\z{0x656} & HRW & \z{hviprio1h}  & Extension of \z{hviprio1} \\
+\z{0x657} & HRW & \z{hviprio2h}  & Extension of \z{hviprio2} \\
+\z{0x214} & HRW & \z{vsieh}      & Extension of \z{vsie} \\
+\z{0x254} & HRW & \z{vsiph}      & Extension of \z{vsip} \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Hypervisor and VS CSRs added by the Advanced Interrupt Architecture.}
+\label{tab:CSRs-hypervisor}
+\end{table*}
+
+The VS CSRs in the table (\z{vsiselect}, \z{vsireg}, \z{vstopi},
+\z{vsseteipnum}, \z{vsclreipnum}, \z{vsseteienum}, and
+\z{vsclreienum}) all match supervisor CSRs, and substitute for those
+supervisor CSRs when executing in a virtual machine (in \mbox{VS-mode}
+or \mbox{VU-mode}).
+
+CSR \z{vsiselect} is required to support at least a \mbox{9-bit} range
+of 0 to \z{0x1FF}, whether or not an IMSIC is implemented.
+As with \z{siselect}, values of \z{vsiselect} with the most-significant
+bit set (bit $\mbox{VSXLEN - 1} = \mbox{1}$) are designated for custom
+use.
+If VSXLEN is changed, the most-significant bit of \z{vsiselect} moves
+to the new position, retaining its value from before.
+
+The space of registers selectable by \z{vsiselect} is more limited than
+for machine and supervisor levels:
+\begin{displayLinesTable}[l@{\quad}l]
+\z{0x000}--\z{0x06F} & inaccessible \\
+\z{0x070}--\z{0x0FF} & external interrupts (IMSIC only), or inaccessible \\
+\z{0x100}--\z{0x1FF} & inaccessible \\
+\end{displayLinesTable}
+When \z{vsiselect} has the number of an \emph{inaccessible} register,
+including values above \z{0x1FF} without the most-significant bit set,
+attempts from \mbox{M-mode} or \mbox{HS-mode} to access \z{vsireg}
+raise an illegal instruction exception, and attempts from
+\mbox{VS-mode} to access \z{sireg} (really \z{vsireg}) raise a virtual
+instruction exception.
+
+\begin{commentary}
+Requiring a range of\/ {\rm 0}--\z{0x1FF} for \z{vsiselect}, even
+though most or all of the space is inaccessible, permits a hypervisor
+to emulate indirectly accessed registers in the implemented range,
+including registers that may be standardized in the future at locations
+\z{0x100}--\z{0x1FF}.
+\end{commentary}
+
+The locations of registers for external interrupts (numbers
+\z{0x70}--\z{0xFF}) are accessible only when field VGEIN of \z{hstatus}
+is the number of an implemented guest external interrupt, not zero.
+If VGEIN is not the number of an implemented guest external interrupt
+(including the case when no IMSIC is implemented), then all non-custom
+values of \z{vsiselect} designate an inaccessible register.
+
+Along the same lines, when \z{hstatus}.VGEIN is not the number of
+an implemented guest external interrupt, attempts from \mbox{M-mode}
+or \mbox{HS-mode} to access CSRs \z{vsseteipnum}, \z{vsclreipnum},
+\z{vsseteienum}, or \z{vsclreienum} raise an illegal instruction
+exception, and attempts from \mbox{VS-mode} to access \z{sseteipnum},
+\z{sclreipnum}, \z{sseteienum}, \z{sclreienum}, or \z{sclaimei} raise a
+virtual instruction exception.
+
+Aside from the high-half CSR \z{hidelegh}, the hypervisor CSRs added
+by the Advanced Interrupt Architecture (\z{hvien}, \z{hvicontrol},
+\z{hviprio1}, and \z{hviprio2}, plus the high-half hypervisor CSRs for
+RV32) augment \z{hvip} for injecting interrupts into VS level.
+The use of these registers is covered in Chapter~\ref{ch:VSLevel} on
+interrupts for virtual machines.
+
