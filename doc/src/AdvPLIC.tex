@@ -664,13 +664,6 @@ Machine MSI address configuration
 }
 \label{sec:AdvPLIC-reg-mmsiaddrcfg}
 
-\textbf{%
-The parameters used to configure MSI addresses will likely change from
-what is currently described here for registers \z{mmsiaddrcfg} and
-\z{mmsiaddrcfgh}.%
-}
-\vspace{3mm}
-
 For machine-level interrupt domains configured in MSI delivery mode
 (register \z{domaincfg} has field DM =~1), registers \z{mmsiaddrcfg}
 and \z{mmsiaddrcfgh} may optionally provide parameters used to
@@ -683,36 +676,35 @@ read-only zeros like other reserved bytes.
 
 When implemented, \z{mmsiaddrcfg} has this format:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
-bits 31:12 & Low Base PPN (\WARL) \\
-bits 10:8  & HXS (\WARL) \\
-bit 0      & L \\
+bits 31:0 & Low Base PPN (\WARL) \\
 \end{displayLinesTable}
-All other bits of \z{mmsiaddrcfg} are reserved and read as zeros.
-Register \z{mmsiaddrcfgh} has this format:\nopagebreak
-\begin{displayLinesTable}[l@{\ \quad}l]
-bits 31:0 & High Base PPN (\WARL) \\
+and \z{mmsiaddrcfgh} has this format:\nopagebreak
+\begin{displayLinesTable}[l@{\quad}l]
+bit 31     & L \\
+bits 28:24 & HHXS (\WARL) \\
+bits 22:20 & LHXS (\WARL) \\
+bits 18:16 & HHXW (\WARL) \\
+bits 15:12 & LHXW (\WARL) \\
+bits 11:0  & High Base PPN (\WARL) \\
 \end{displayLinesTable}
+All other bits of \z{mmsiaddrcfgh} are reserved and read as zeros.
 
 Fields High Base PPN from \z{mmsiaddrcfgh} and Low Base PPN from
-\z{mmsiaddrcfg} concatenate to form a \mbox{52-bit} Base PPN
+\z{mmsiaddrcfg} concatenate to form a \mbox{44-bit} Base PPN
 (Physical Page Number).
-The use of this value and field HXS (Hart Index Shift) for
+The use of this value and fields HHXS (High Hart Index Shift),
+LHXS (Low Hart Index Shift), HHXW (High Hart Index Width),
+and LHXW (Low Hart Index Width) for
 determining target addresses for MSIs is described later, in
 Section~\ref{sec:AdvPLIC-MSIAddrs}.
 
-Fields High Base PPN, Low Base PPN, and HXS are all {\WARL}.
+All fields other than L are {\WARL}.
 An implementation is free to choose what values are supported.
 Typically, some bits are writable while others are read-only constants.
-In the extreme, the values of all three fields may be entirely
+In the extreme, the values of all fields may be entirely
 constant, fixed by the implementation.
 
-\begin{commentary}
-For most \mbox{32-bit} {\RISCV} systems, and for some \mbox{64-bit}
-systems as well, it is expected that \z{mmsiaddrcfgh} will be a
-constant zero.
-\end{commentary}
-
-If bit~L in \z{mmsiaddrcfg} is set to one, \z{mmsiaddrcfg} and
+If bit~L in \z{mmsiaddrcfgh} is set to one, \z{mmsiaddrcfg} and
 \z{mmsiaddrcfgh} are \emph{locked}, and writes to the registers are
 ignored, making the registers effectively read-only.
 When L~=~1, the other fields in \z{mmsiaddrcfg} and \z{mmsiaddrcfgh}
@@ -724,18 +716,18 @@ PLIC but become no longer visible by reading \z{mmsiaddrcfg} and
 
 At system reset, L~is initialized to either zero or one, whichever is
 deemed appropriate for the specific PLIC implementation.
-If reset initializes L to one, either the Base PPN and HXS values are
+If reset initializes L to one, either the other fields are
 hardwired by the PLIC to constants, or the PLIC has a different means,
 outside of this standard, for determining the addresses of outgoing MSI
 writes.
 In the latter case, the other fields in \z{mmsiaddrcfg} and
 \z{mmsiaddrcfgh} may read as zeros, so registers \z{mmsiaddrcfg} and
-\z{mmsiaddrcfgh} have only read-only values \z{0x00000001} and zero
+\z{mmsiaddrcfgh} have only read-only values zero and \z{0x80000000}
 respectively.
 Any time \z{mmsiaddrcfg} or \z{mmsiaddrcfgh} has a different value
-(not \z{0x00000001} or zero respectively), the addresses for
+(not zero or \z{0x80000000} respectively), the addresses for
 outgoing MSI writes directed to machine level must be derivable
-from the visible values of Base PPN and HXS, as specified in
+from the visible values of these registers, as specified in
 Section~\ref{sec:AdvPLIC-MSIAddrs}.
 
 \begin{commentary}
@@ -760,12 +752,12 @@ to configure the pattern of physical addresses for target IMSICs and
 then lock this configuration against subsequent tampering.
 
 PLICs that actually hardwire the IMSIC addresses internally
-can implement these registers simply as read-only with values
-\z{0x00000001} and zero.
+can implement these registers simply as read-only with values zero
+and \z{0x80000000}.
 Or, if the IMSIC addresses must be configured by software but
 the formula is too complex for registers \z{mmsiaddrcfg} and
 \z{mmsiaddrcfgh} to handle, again the registers can be implemented
-simply as read-only with values \z{0x00000001} and zero, and a
+simply as read-only with values zero and \z{8x00000000}, and a
 separate, custom mechanism supplied for configuring the IMSIC
 addresses.
 \end{commentary}
@@ -787,13 +779,6 @@ Supervisor MSI address configuration
 }
 \label{sec:AdvPLIC-reg-smsiaddrcfg}
 
-\textbf{%
-The parameters used to configure MSI addresses will likely change from
-what is currently described here for registers \z{smsiaddrcfg} and
-\z{smsiaddrcfgh}.%
-}
-\vspace{3mm}
-
 For machine-level interrupt domains, registers \z{smsiaddrcfg} and
 \z{smsiaddrcfgh} may optionally provide parameters used by child
 supervisor-level domains to determine the addresses to write outgoing
@@ -813,28 +798,33 @@ can be configured only at its parent machine-level domain.
 
 When implemented, \z{smsiaddrcfg} has this format:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
-bits 31:12 & Low Base PPN (\WARL) \\
-bits 10:8  & HXS (\WARL) \\
-bit 0      & L \\
+bits 31:0 & Low Base PPN (\WARL) \\
 \end{displayLinesTable}
-All other bits of \z{smsiaddrcfg} are reserved and read as zeros.
-Register \z{smsiaddrcfgh} has this format:\nopagebreak
-\begin{displayLinesTable}[l@{\ \quad}l]
-bits 31:0 & High Base PPN (\WARL) \\
+and \z{smsiaddrcfgh} has this format:\nopagebreak
+\begin{displayLinesTable}[l@{\quad}l]
+bit 31     & L \\
+bits 28:24 & HHXS (\WARL) \\
+bits 22:20 & LHXS (\WARL) \\
+bits 18:16 & HHXW (\WARL) \\
+bits 15:12 & LHXW (\WARL) \\
+bits 11:0  & High Base PPN (\WARL) \\
 \end{displayLinesTable}
+All other bits of \z{smsiaddrcfgh} are reserved and read as zeros.
 
 Fields High Base PPN from \z{smsiaddrcfgh} and Low Base PPN from
-\z{smsiaddrcfg} concatenate to form a \mbox{52-bit} Base PPN
+\z{smsiaddrcfg} concatenate to form a \mbox{44-bit} Base PPN
 (Physical Page Number).
-The use of this value and field HXS (Hart Index Shift) for
+The use of this value and fields HHXS (High Hart Index Shift),
+LHXS (Low Hart Index Shift), HHXW (High Hart Index Width),
+and LHXW (Low Hart Index Width) for
 determining target addresses for MSIs is described later, in
 Section~\ref{sec:AdvPLIC-MSIAddrs}.
 
-Fields High Base PPN, Low Base PPN, and HXS are all {\WARL}.
+All fields other than L are {\WARL}.
 An implementation is free to choose what values are supported, just as
 for \z{mmsiaddrcfg} and \z{mmsiaddrcfgh}.
 
-If bit~L in \z{smsiaddrcfg} is set to one, \z{smsiaddrcfg} and
+If bit~L in \z{smsiaddrcfgh} is set to one, \z{smsiaddrcfg} and
 \z{smsiaddrcfgh} are \emph{locked}, read-only.
 When L~=~1, the other fields in \z{smsiaddrcfg} and \z{smsiaddrcfgh}
 may optionally read as zeros.
@@ -845,18 +835,18 @@ PLIC but become no longer visible by reading \z{smsiaddrcfg} and
 
 At system reset, L~is initialized to either zero or one, whichever is
 deemed appropriate for the specific PLIC implementation.
-If reset initializes L to one, either the Base PPN and HXS values are
+If reset initializes L to one, either the other fields are
 hardwired by the PLIC to constants, or the PLIC has a different means,
 outside of this standard, for determining the addresses of outgoing MSI
 writes for supervisor-level child domains of this domain.
 In the latter case, the other fields in \z{smsiaddrcfg} and
 \z{smsiaddrcfgh} may read as zeros, so registers \z{smsiaddrcfg} and
-\z{smsiaddrcfgh} have only read-only values \z{0x00000001} and zero
+\z{smsiaddrcfgh} have only read-only values zero and \z{0x80000000}
 respectively.
 Any time \z{smsiaddrcfg} or \z{smsiaddrcfgh} has a different value
-(not \z{0x00000001} or zero respectively), the addresses for outgoing
+(not zero or \z{0x80000000} respectively), the addresses for outgoing
 MSI writes from supervisor-level child domains must be derivable
-from the visible values of Base PPN and HXS, as specified in
+from the visible values of these registers, as specified in
 Section~\ref{sec:AdvPLIC-MSIAddrs}.
 
 If an implementation supports additional forms of reset for the
@@ -1496,14 +1486,6 @@ cleared.
 \subsection{Addresses and data for outgoing MSIs}
 \label{sec:AdvPLIC-MSIAddrs}
 
-\textbf{%
-The optional configuration of MSI addresses using registers
-\z{mmsiaddrcfg}, \z{mmsiaddrcfgh}, \z{smsiaddrcfg}, and
-\z{smsiaddrcfgh} will likely change from what is currently described in
-this subsection.%
-}
-\vspace{3mm}
-
 To forward interrupts by MSIs, a PLIC must know the MSI target address
 for each hart.
 For any given system, these addresses are fixed and should be hardwired
@@ -1528,11 +1510,27 @@ for an outgoing MSI for interrupt source~$i$ is computed from those
 registers and from the Hart Index field of register \z{target[$i$]} as
 follows:
 \begin{displayLinesTable}
+$g =
+  (\mbox{Hart Index\z{>>}LHXW})\mbox{ \z{\&} }(\mbox{2}^{\rm HHXW}-\mbox{1})$\\
+$h = \mbox{Hart Index \z{\&} }(\mbox{2}^{\rm LHXW}-\mbox{1})$\\
 $\mbox{MSI address} =
-  \bigl(\mbox{Base PPN \z{|} (Hart Index\z{<<}HXS)}\bigr)\mbox{\z{<<}12}$
+  \bigl(\,
+    \mbox{Base PPN \z{|} }(g\mbox{\z{<<}}(\mbox{HHXS}+\mbox{12}))
+      \mbox{ \z{|} }(h\mbox{\z{<<}LHXS})
+  \,\bigr)\mbox{\z{<<}12}$
 \end{displayLinesTable}
-The vertical bar (\z{|}) here represents bitwise logical OR, and
-\z{<<}$\,k$ represents shifting left by $k$ bits.
+Here, \z{<<}$\,k$ and \z{>>}$\,k$ represent shifting left and right by
+$k$ bits, an ampersand (\z{\&}) represents bitwise logical AND, and a
+vertical bar (\z{|}) represents bitwise logical OR.
+Assuming the recommendations of
+Section~\ref{sec:IMSIC-systemMemRegions} are followed for the
+arrangement of IMSIC interrupt files in the machine's address space,
+value $g$ is intended to be the number of a hart group (always zero
+if HHXW =~0), while $h$ is the number of the target hart within that
+group.
+Represented in the terms of Section~\ref{sec:IMSIC-systemMemRegions},
+HHXW =~$j$, LHXW =~$k$, HHXS = ${E-24}$, LHXS = ${C-12}$, and
+Base~PPN = $A$\z{>>}12.
 
 For a supervisor-level domain, if MSI target addresses are determined
 by the parent domain's \z{smsiaddrcfg} and \z{smsiaddrcfgh} registers,
@@ -1545,11 +1543,20 @@ The address for the MSI is then computed using this machine-level hart
 index, the parent domain's \z{smsiaddrcfg} and \z{smsiaddrcfgh}, and
 the Guest Index value from \z{target[$i$]}:
 \begin{displayLinesTable}
+$g =
+  (\mbox{machine-level hart index\z{>>}LHXW})
+    \mbox{ \z{\&} }(\mbox{2}^{\rm HHXW}-\mbox{1})$\\
+$h = \mbox{machine-level hart index \z{\&} }(\mbox{2}^{\rm LHXW}-\mbox{1})$\\
 $\mbox{MSI address} =
-  \bigl(\mbox{Base PPN \z{|} (machine-level hart index\z{<<}HXS)
-      \z{|} Guest Index}\bigr)
-    \mbox{\z{<<}12}$
+  \bigl(\,
+    \mbox{Base PPN \z{|} }(g\mbox{\z{<<}}(\mbox{HHXS}+\mbox{12}))
+      \mbox{ \z{|} }(h\mbox{\z{<<}LHXS})\mbox{ \z{|} Guest Index}
+  \,\bigr)\mbox{\z{<<}12}$
 \end{displayLinesTable}
+
+Represented in the terms of Section~\ref{sec:IMSIC-systemMemRegions},
+HHXW =~$j$, LHXW =~$k$, HHXS = ${E-24}$, LHXS = ${D-12}$, and
+Base~PPN = $B$\z{>>}12.
 
 The data for an outgoing MSI write is taken from the EIID field of
 \z{target[$i$]}, zero-extended to 32~bits.

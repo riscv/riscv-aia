@@ -273,6 +273,150 @@ as executed by the hart.
 \end{commentary}
 
 %-----------------------------------------------------------------------
+\section{Arrangement of the memory regions of multiple interrupt files}
+\label{sec:IMSIC-systemMemRegions}
+
+Each interrupt file that an IMSIC implements has its own memory
+region as described in the previous section, occupying exactly one
+\mbox{4-KiB} page of machine address space.
+When practical, the memory pages of the machine-level interrupt files
+of all IMSICs should be located together in one part of the address
+space, and the memory pages of all supervisor-level and guest interrupt
+files should similarly be located together in another part of the
+address space, according to the rules below.
+
+\begin{commentary}
+The main reason for separating the machine-level interrupt files
+from the other interrupt files in the address space is so harts that
+implement physical memory protection (PMP) can grant supervisor-level
+access to all supervisor-level and guest interrupt files using only a
+single PMP table entry.
+If the memory pages for machine-level interrupt files are instead
+interleaved with those of lower-privilege interrupt files, the number
+of PMP table entries needed for granting supervisor-level access to all
+non-machine-level interrupt files could equal the number of harts in
+the system.
+\end{commentary}
+
+If a machine's construction dictates that harts be subdivided into
+groups, with each group relegated to its own portion of the address
+space, then the best that can be achieved is to locate together the
+machine-level interrupt files of each group of harts separately, and
+likewise locate together the supervisor-level and guest interrupt files
+of each group of harts separately.
+This situation is further addressed later below.
+
+\begin{commentary}
+A system may divide harts into groups in the address space because each
+group exists on a separate chip (or chiplet in a multi-chip module),
+and weaving together the address spaces of the multiple chips is
+impractical.
+In that case, granting supervisor-level access to all non-machine-level
+interrupt files takes one PMP table entry per group.
+\end{commentary}
+
+For the purpose of locating the memory pages of interrupt files in the
+address space, assume each hart (or each hart within a group) has a
+unique hart number that may or may not be related to the unique hart
+identifiers (``hart IDs'') that the RISC-V Privileged Architecture
+assigns to harts.
+For convenient addressing, the memory pages of all machine-level
+interrupt files (or all those of a single group of harts) should be
+arranged so that the address of the machine-level interrupt file for
+hart number~$h$ is given by the formula ${A+h\times\mbox{2}^{C}}$ for
+some integer constants $A$ and~$C$.
+If the largest hart number is $h_{\rm max}$, let
+${k = \lceil\log_{2}(h_{\rm max}+\mbox{1})\rceil}$, the number of bits
+needed to represent any hart number.
+Then the base address $A$ should be aligned to a $\mbox{2}^{k+C}$
+address boundary, so ${A+h\times\mbox{2}^{C}}$ always equals
+$A$~\z{|}~${(h\times\mbox{2}^{C})}$, where the vertical bar (\z{|})
+represents bitwise logical OR.
+
+The smallest that $C$ can be is~12, with $\mbox{2}^{C}$ being the size
+of one \mbox{4-KiB} page.
+If ${C > 12}$, the start of the memory page for each machine-level
+interrupt file is aligned not just to a \mbox{4-KiB} page but to a
+stricter $\mbox{2}^{C}$ address boundary.
+Within the ${\mbox{2}^{k+C}}$-size address range $A$ through
+${A+\mbox{2}^{k+C}-\mbox{1}}$, every \mbox{4-KiB} page that is not
+occupied by a machine-level interrupt file should be filled with
+\mbox{32-bit} words of read-only zeros, such that any read of an
+aligned word returns zero and any write to an aligned word is ignored.
+
+The memory pages of all supervisor-level interrupt files (or all those
+of a single group of harts) should similarly be arranged so that the
+address of the supervisor-level interrupt file for hart number~$h$
+is ${B+h\times\mbox{2}^{D}}$ for some integer constants $B$ and~$D$,
+with the base address $B$ being aligned to a $\mbox{2}^{k+D}$ address
+boundary.
+
+If an IMSIC implements guest interrupt files, the memory pages for the
+IMSIC's supervisor-level interrupt file and for its guest interrupt
+files are contiguous, starting with the supervisor-level interrupt
+file at the lowest address and followed by the guest interrupt files,
+ordered by guest interrupt number.
+Schematically, the memory pages are ordered contiguously as
+\begin{displayLinesTable}
+S,\, $\mbox{G}_{1}$, $\mbox{G}_{2}$, $\mbox{G}_{3}$, \dots
+\end{displayLinesTable}
+where S~is the page for the supervisor-level interrupt file and each
+$\mbox{G}_{i}$ is the page for the interrupt file of guest interrupt
+number~$i$.
+Consequently, the smallest that constant $D$ can be is
+${\lceil\log_{\rm 2}(\mbox{maximum GEILEN}+\mbox{1})\rceil}+12$,
+recalling that GEILEN for each IMSIC is the number of guest interrupt
+files the IMSIC implements.
+
+Within the ${\mbox{2}^{k+D}}$-size address range $B$ through
+${B+\mbox{2}^{k+D}-\mbox{1}}$, every \mbox{4-KiB} page that is not
+occupied by an interrupt file (supervisor-level or guest) should be
+filled with \mbox{32-bit} words of read-only zeros.
+
+When a system divides harts into groups, each in its own
+separate portion of the address space, the memory page
+addresses of interrupt files are expected to follow the formulas
+${g\times\mbox{2}^{E}}+A+{h\times\mbox{2}^{C}}$ for machine-level
+interrupt files, and ${g\times\mbox{2}^{E}}+B+{h\times\mbox{2}^{D}}$
+for supervisor-level interrupt files, with $g$ being a
+\emph{group number}, $h$ being a hart number relative to the group,
+and $E$ being another integer constant $\geq$~${k+\max(C,D)}$ but
+usually significantly larger.
+If the largest group number is $g_{\rm max}$, let
+${j = \lceil\log_{2}(g_{\rm max}+\mbox{1})\rceil}$, the number of bits
+needed to represent any group number.
+Besides being multiples of $\mbox{2}^{k+C}$ and $\mbox{2}^{k+D}$
+respectively, $A$ and $B$ should be chosen so
+\begin{displayLinesTable}[lll]
+$\left((\mbox{2}^{j}-\mbox{1})\times\mbox{2}^{E}\right)$ \z{\&} $A \,=\, 0$ &
+  and &
+  $\left((\mbox{2}^{j}-\mbox{1})\times\mbox{2}^{E}\right)$ \z{\&} $B \,=\, 0$
+\end{displayLinesTable}
+where the ampersands (\z{\&}) represent bitwise logical AND.
+This ensures that
+\begin{displayLinesTable}[lcll]
+$g\times\mbox{2}^{E}+A+h\times\mbox{2}^{C}$ & always equals &
+  $(g\times\mbox{2}^{E})$ \z{|} $A$ \z{|} $(h\times\mbox{2}^{C})$, & and\\
+$g\times\mbox{2}^{E}+B+h\times\mbox{2}^{D}$ & always equals &
+  $(g\times\mbox{2}^{E})$ \z{|} $B$ \z{|} $(h\times\mbox{2}^{D})$.\\
+\end{displayLinesTable}
+
+The requirements for read-only-zero pages apply only within each group.
+That is, for each group~$g$, within the address ranges
+\begin{displayLinesTable}[lcll]
+$g\times\mbox{2}^{E}+A$ & through &
+  $g\times\mbox{2}^{E}+A+\mbox{2}^{k+C}-\mbox{1}$, &
+  and\\
+$g\times\mbox{2}^{E}+B$ & through &
+  $g\times\mbox{2}^{E}+B+\mbox{2}^{k+D}-\mbox{1}$,\\
+\end{displayLinesTable}
+pages not occupied by an interrupt file should be read-only zeros.
+
+See also Section \ref{sec:AdvPLIC-MSIAddrs} for the default algorithms
+an Advanced PLIC may use to determine the destination addresses of
+outgoing MSIs, which should be the addresses of IMSIC interrupt files.
+
+%-----------------------------------------------------------------------
 \section{CSRs for external interrupts via an IMSIC}
 
 Software accesses a hart's IMSIC primarily through the CSRs introduced
