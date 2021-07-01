@@ -371,38 +371,31 @@ When there is a pending-and-enabled major interrupt for machine
 level, field IID (Interrupt Identity) is the major identity number of
 the highest-priority interrupt, and field IPRIO indicates its priority.
 
-The value of field IPRIO depends on parameter \emph{MMAXIPRIO}.
-If not all bytes of the machine-level \z{iprio} array are read-only
-zeros, MMAXIPRIO is the maximum allowed value of an \z{iprio} byte
-(=~${\mbox{2}^\textrm{IPRIOLEN}-\mbox{1}}$).
-On the other hand, if all bytes of the machine-level \z{iprio} array
-are read-only zeros, an implementation may define MMAXIPRIO either as
-${\mbox{2}^\textrm{IPRIOLEN}-\mbox{1}}$ or as~1.
+If all bytes of the machine-level \z{iprio} array are read-only zeros,
+a simplified implementation of field IPRIO is allowed in which its
+value is always 1 whenever \z{mtopi} is not zero.
 
-When \z{mtopi} is not zero, if the priority number for the reported
-interrupt is in the range 1 to MMAXIPRIO, IPRIO is simply that number.
-If the interrupt's priority number is zero or greater than MMAXIPRIO,
-IPRIO is saturated to either 1 or MMAXIPRIO as follows:
+Otherwise, when \z{mtopi} is not zero, if the priority number for the reported
+interrupt is in the range 1 to 255, IPRIO is simply that number.
+If the interrupt's priority number is zero or greater than 255,
+IPRIO is set to either 0 or 255 as follows:
 \begin{itemize}
 
 \item
-If the interrupt's priority number is greater than MMAXIPRIO, then
-IPRIO is MMAXIPRIO (lowest priority).
+If the interrupt's priority number is greater than 255, then
+IPRIO is 255 (lowest priority).
 
 \item
 If the interrupt's priority number is zero and interrupt number IID has
 a default priority higher than a machine external interrupt, then IPRIO
-is~1 (highest priority).
+is~0 (highest priority).
 
 \item
 If the interrupt's priority number is zero and interrupt number IID has
 a default priority lower than a machine external interrupt, then IPRIO
-is MMAXIPRIO (lowest priority).
+is 255 (lowest priority).
 
 \end{itemize}
-
-Note that if MMAXIPRIO =~1, IPRIO is always~1 whenever \z{mtopi} is not
-zero.
 
 The {\RISCV} Privileged Architecture ensures that, when the value
 of \z{mtopi} is not zero, a trap is taken to \mbox{M-mode} for the
@@ -712,38 +705,31 @@ When there is a pending-and-enabled major interrupt for supervisor
 level, field IID is the major identity number of the highest-priority
 interrupt, and field IPRIO indicates its priority.
 
-The value of field IPRIO depends on parameter \emph{SMAXIPRIO}.
-If not all bytes of the supervisor-level \z{iprio} array are read-only
-zeros, SMAXIPRIO is the maximum allowed value of an \z{iprio} byte
-(=~${\mbox{2}^\textrm{IPRIOLEN}-\mbox{1}}$).
-On the other hand, if all bytes of the supervisor-level \z{iprio} array
-are read-only zeros, an implementation may define SMAXIPRIO either as
-${\mbox{2}^\textrm{IPRIOLEN}-\mbox{1}}$ or as~1.
+If all bytes of the supervisor-level \z{iprio} array are read-only
+zeros, a simplified implementation of field IPRIO is allowed in which
+its value is always 1 whenever \z{stopi} is not zero.
 
-When \z{stopi} is not zero, if the priority number for the reported
-interrupt is in the range 1 to SMAXIPRIO, IPRIO is simply that number.
-If the interrupt's priority number is zero or greater than SMAXIPRIO,
-IPRIO is saturated to either 1 or SMAXIPRIO as follows:
+Otherwise, when \z{stopi} is not zero, if the priority number for the reported
+interrupt is in the range 1 to 255, IPRIO is simply that number.
+If the interrupt's priority number is zero or greater than 255,
+IPRIO is set to either 0 or 255 as follows:
 \begin{itemize}
 
 \item
-If the interrupt's priority number is greater than SMAXIPRIO, then
-IPRIO is SMAXIPRIO (lowest priority).
+If the interrupt's priority number is greater than 255, then
+IPRIO is 255 (lowest priority).
 
 \item
 If the interrupt's priority number is zero and interrupt number IID has
 a default priority higher than a supervisor external interrupt, then
-IPRIO is~1 (highest priority).
+IPRIO is~0 (highest priority).
 
 \item
 If the interrupt's priority number is zero and interrupt number IID
 has a default priority lower than a supervisor external interrupt, then
-IPRIO is SMAXIPRIO (lowest priority).
+IPRIO is 255 (lowest priority).
 
 \end{itemize}
-
-Note that if SMAXIPRIO =~1, IPRIO is always~1 whenever \z{stopi} is not
-zero.
 
 The {\RISCV} Privileged Architecture ensures that, when the value
 of \z{stopi} is not zero, a trap is taken to \mbox{S-mode} for the

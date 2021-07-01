@@ -507,6 +507,7 @@ The format of \z{hvicontrol} is:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
 bit 30     & VTI \\
 bits 27:16 & IID (\WARL) \\
+bit 8      & IPRIOM \\
 bits 7:0   & IPRIO \\
 \end{displayLinesTable}
 All other bits of \z{hvicontrol} are reserved and read as zeros.
@@ -515,7 +516,7 @@ When bit VTI (Virtual Trap Interrupt control) =~1, attempts from
 \mbox{VS-mode} to explictly access CSRs \z{sip}, \z{sie}, or, for RV32
 only, \z{siph} or \z{sieh}, cause a virtual instruction exception.
 
-All \z{hvicontrol} fields, VTI, IID, and IPRIO, together can affect
+All \z{hvicontrol} fields together can affect
 the value of CSR \z{vstopi} (Virtual Supervisor Top Interrupt) and
 therefore the interrupt identity reported in \z{vscause} when an
 interrupt traps to \mbox{VS-mode}.
@@ -575,8 +576,7 @@ external interrupt (code 9), with priority numbers assigned by
 \end{tightList}
 
 \item
-if \z{hvicontrol} fields VTI =~1, $\mbox{IID} \neq \mbox{9}$, and
-$\mbox{IPRIO} \neq \mbox{0}$:
+if \z{hvicontrol} fields VTI =~1 and $\mbox{IID} \neq \mbox{9}$:
 \begin{tightList}
 \item[+]
 the major interrupt specified by \z{hvicontrol} fields IID and IPRIO.
@@ -594,6 +594,14 @@ mutually exclusive of one another, and the remaining two items are also
 mutually exclusive of one another.
 \end{commentary}
 
+\begin{commentary}
+When both \z{hstatus}.VGEIN =~0 and \z{hvicontrol}.VTI =~1, the
+absence of an interrupt for VS level can be indicated only by setting
+\z{hvicontrol} fields IID =~9 and IPRIO~=~0.
+Software might want to use the pair IID =~9, IPRIO~=~0 generally to
+represent\/ \emph{no interrupt} in \z{hvicontrol}.
+\end{commentary}
+
 When no interrupt candidates satisfy the conditions of the list above,
 \z{vstopi} is zero.
 Else, \z{vstopi} fields IID and IPRIO are determined by the
@@ -604,11 +612,12 @@ that priority numbers are taken from the candidate list above, not from
 the supervisor-level \z{iprio} array.
 As always, ties in nominal priority are broken by the default priority
 order from Section~\ref{sec:majorIntrs}.
-If the priority number for the highest-priority candidate is within the
-range 1 to 255, IPRIO in \z{vstopi} is that value;
-else, IPRIO is saturated to either 1 or 255 in the manner documented
-for \z{stopi} in Section~\ref{sec:stopi}, assuming parameter
-SMAXIPRIO = 255.
+If bit IPRIOM (IPRIO Mode) of \z{hvicontrol} is zero,
+IPRIO in \z{vstopi} is~1;
+else, if the priority number for the highest-priority candidate is within the
+range 1 to 255, IPRIO is that value;
+else, IPRIO is set to either 0 or 255 in the manner documented
+for \z{stopi} in Section~\ref{sec:stopi}.
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \subsection{Interrupt traps to \mbox{VS-mode}}
