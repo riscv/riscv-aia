@@ -100,6 +100,14 @@ potentially be an adequate subset on their own for \mbox{32-bit}
 {\RISCV} systems.
 \end{commentary}
 
+\begin{commentary}
+If the {\RISCV} Privileged Architecture defines interrupt~0, the
+Advanced Interrupt Architecture needs it to have a default priority
+lower than certain external interrupts.
+See Sections \ref{sec:mtopi} and~\ref{sec:stopi} on CSRs \z{mtopi} and
+\z{stopi}.
+\end{commentary}
+
 Interrupt numbers 64 and above are all designated for custom use.
 If a hart implements custom interrupts with these numbers, their
 positions in the default priority order must be documented for the
@@ -398,6 +406,13 @@ a default priority lower than a machine external interrupt, then IPRIO
 is 255 (lowest priority).
 
 \end{itemize}
+
+\begin{commentary}
+To ensure that \z{mtopi} is never zero when an interrupt is pending
+and enabled for machine level, if major interrupt~0 can trap to
+\hbox{M-mode}, it must have a default priority lower than a machine
+external interrupt.
+\end{commentary}
 
 The {\RISCV} Privileged Architecture ensures that, when the value
 of \z{mtopi} is not zero, a trap is taken to \mbox{M-mode} for the
@@ -733,6 +748,13 @@ has a default priority lower than a supervisor external interrupt, then
 IPRIO is 255 (lowest priority).
 
 \end{itemize}
+
+\begin{commentary}
+To ensure that \z{stopi} is never zero when an interrupt is pending
+and enabled for supervisor level, if major interrupt~0 can trap to
+\hbox{S-mode}, it must have a default priority lower than a supervisor
+external interrupt.
+\end{commentary}
 
 The {\RISCV} Privileged Architecture ensures that, when the value
 of \z{stopi} is not zero, a trap is taken to \mbox{S-mode} for the
