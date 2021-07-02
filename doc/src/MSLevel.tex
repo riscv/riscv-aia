@@ -116,7 +116,8 @@ interrupt sources are assigned the same priority number.
 \section{Defined local interrupts}
 
 The local interrupts currently defined by the Advanced Interrupt
-Architecture are listed here, in order of decreasing default priority:
+Architecture are listed here, in order of decreasing default
+priority:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
 30 & Reserved for standard reporting of bus or system errors \\
 58 & Tentatively reserved for per-core high-power/over-temperature events \\
@@ -357,7 +358,8 @@ machine-level \z{iprio} array to all zeros.
 
 Machine-level CSR \z{mtopi} is read-only with width MXLEN.
 A read of \z{mtopi} returns information about the highest-priority
-pending-and-enabled interrupt for machine level, in this format:
+pending-and-enabled interrupt for machine level, in this
+format:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
 bits 27:16 & IID \\
 bits 7:0   & IPRIO \\
@@ -688,7 +690,8 @@ supervisor-level \z{iprio} array to all zeros.
 
 Supervisor-level CSR \z{stopi} is read-only with width SXLEN.
 A read of \z{stopi} returns information about the highest-priority
-pending-and-enabled interrupt for supervisor level, in this format:
+pending-and-enabled interrupt for supervisor level, in this
+format:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
 bits 27:16 & IID \\
 bits 7:0   & IPRIO \\
