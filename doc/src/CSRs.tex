@@ -255,7 +255,7 @@ Number & Privilege & Name        & Description \\
   Virtual Interrupts and Interrupt Priorities for VS Level} \\
 \hline
 \z{0x608} & HRW & \z{hvien}      & Hypervisor virtual interrupt enables \\
-\z{0x609} & HRW & \z{hvicontrol} & Hypervisor virtual interrupt control \\
+\z{0x609} & HRW & \z{hvictl}     & Hypervisor virtual interrupt control \\
 \z{0x646} & HRW & \z{hviprio1}   & Hypervisor VS-level interrupt priorities \\
 \z{0x647} & HRW & \z{hviprio2}   & Hypervisor VS-level interrupt priorities \\
 \hline
@@ -349,7 +349,7 @@ exception, and attempts from \mbox{VS-mode} to access \z{sseteipnum},
 virtual instruction exception.
 
 Aside from the high-half CSR \z{hidelegh}, the hypervisor CSRs added
-by the Advanced Interrupt Architecture (\z{hvien}, \z{hvicontrol},
+by the Advanced Interrupt Architecture (\z{hvien}, \z{hvictl},
 \z{hviprio1}, and \z{hviprio2}, plus the high-half hypervisor CSRs for
 RV32) augment \z{hvip} for injecting interrupts into VS level.
 The use of these registers is covered in Chapter~\ref{ch:VSLevel} on
