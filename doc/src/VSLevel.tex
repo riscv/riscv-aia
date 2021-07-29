@@ -64,8 +64,8 @@ on the IMSIC, along with the effects of accessing CSRs \z{vsseteipnum},
 \z{vsclreipnum}, \z{vsseteienum}, and \z{vsclreienum}.
 Because all IMSIC interrupt files act identically, the guest interrupt
 file that a virtual hart accesses through CSRs \z{siselect}, \z{sireg},
-\z{sclaimei}, \z{sseteipnum}, \z{sclreipnum}, \z{sseteienum}, and
-\z{sclreienum} is indistinguishable from a true supervisor-level
+\z{sseteipnum}, \z{sclreipnum}, \z{sseteienum}, \z{sclreienum},
+and \z{stopei} is indistinguishable from a true supervisor-level
 interrupt file as seen from \mbox{S-mode} (or \mbox{HS-mode}).
 
 In addition to an IMSIC at each hart, a virtual machine may also need
@@ -539,18 +539,17 @@ VS level, found from among these candidates (prefixed by +~signs):
 
 \item
 if \z{hstatus}.VGEIN is the valid number of a guest interrupt file,
-bit~9 is one in both \z{vsip} and \z{vsie}, and the \z{topei} register
-of the selected guest interrupt file is not zero:
+bit~9 is one in both \z{vsip} and \z{vsie}, and \z{vstopei}
+is not zero:
 \begin{tightList}
 \item[+]
 a supervisor external interrupt (code~9) with the priority number
-indicated by the guest interrupt file's \z{topei} register;
+indicated by \z{vstopei};
 \end{tightList}
 
 \item
 if \z{hstatus}.VGEIN is the valid number of a guest interrupt file,
-bit~9 is one in both \z{vsip} and \z{vsie}, and the \z{topei} register
-of the selected guest interrupt file is zero:
+bit~9 is one in both \z{vsip} and \z{vsie}, and \z{vstopei} is zero:
 \begin{tightList}
 \item[+]
 a supervisor external interrupt (code~9) with priority number 256;

@@ -433,7 +433,7 @@ single guest interrupt file, selected by the VGEIN field of CSR
 
 For machine level, the relevant CSRs are:\nopagebreak
 \begin{displayLinesTable}[l@{\qquad}l@{\qquad}l]
-\z{miselect} & \z{mseteipnum} & \z{mclaimei} \\
+\z{miselect} & \z{mseteipnum} & \z{mtopei} \\
 \z{mireg}    & \z{mclreipnum} \\
              & \z{mseteienum} \\
              & \z{mclreienum} \\
@@ -442,16 +442,16 @@ For machine level, the relevant CSRs are:\nopagebreak
 When supervisor mode is implemented, the set of supervisor-level CSRs
 matches those of machine level:
 \begin{displayLinesTable}[l@{\qquad}l@{\qquad}l]
-\z{siselect} & \z{sseteipnum} & \z{sclaimei} \\
+\z{siselect} & \z{sseteipnum} & \z{stopei} \\
 \z{sireg}    & \z{sclreipnum} \\
              & \z{sseteienum} \\
              & \z{sclreienum} \\
 \end{displayLinesTable}
 
 And when the hypervisor extension is implemented, there is a
-corresponding set of VS CSRs for all registers except \z{sclaimei}:
-\begin{displayLinesTable}[l@{\qquad}l]
-\z{vsiselect} & \z{vsseteipnum} \\
+corresponding set of VS CSRs:
+\begin{displayLinesTable}[l@{\qquad}l@{\qquad}l]
+\z{vsiselect} & \z{vsseteipnum} & \z{vstopei} \\
 \z{vsireg}    & \z{vsclreipnum} \\
               & \z{vsseteienum} \\
               & \z{vsclreienum} \\
@@ -476,7 +476,6 @@ interrupt file:
 \begin{displayLinesTable}[c@{\quad}l]
 \z{0x70} & \z{eidelivery} \\
 \z{0x72} & \z{eithreshold} \\
-\z{0x76} & \z{topei} \\
 \z{0x80} & \z{eip0} \\
 \z{0x81} & \z{eip1} \\
 \dots    & \ \dots \\
@@ -487,7 +486,7 @@ interrupt file:
 \z{0xFF} & \z{eie63} \\
 \end{displayLinesTable}
 
-Register numbers \z{0x71}, \z{0x73}--\z{0x75}, and \z{0x77}--\z{0x7F}
+Register numbers \z{0x71} and \z{0x73}--\z{0x7F}
 are reserved.
 When a \z{*iselect} CSR has one of these values, reads from the
 matching \emph{\texttt{*ireg} CSR} (\z{mireg}, \z{sireg}, or
@@ -577,37 +576,6 @@ When \z{eithreshold} is zero, all enabled interrupt identities
 contribute to signaling interrupts from the interrupt file.
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-\subsection{Top external interrupt register (\zSafe{topei})}
-
-\z{topei} is a read-only register whose value indicates the current
-highest-priority pending-and-enabled interrupt that also exceeds the
-priority threshold specified by \z{eithreshold}, if not zero.
-Interrupts with lower identity numbers have higher priorities.
-
-A read of \z{topei} returns zero either if no interrupt is both
-pending in the \z{eip} array and enabled in the \z{eie} array, or if
-\z{eithreshold} is not zero and no pending-and-enabled interrupt has an
-identity number less than the value of \z{eithreshold}.
-Otherwise, the value returned from a read of \z{topei} has this format:
-\begin{displayLinesTable}[l@{\quad}l]
-bits 26:16 & Interrupt identity \\
-bits 10:0  & Interrupt priority (same as identity) \\
-\end{displayLinesTable}
-All other bit positions are zeros.
-
-The interrupt identity reported in \z{topei} is the minor identity for
-an external interrupt at the attached hart.
-
-\begin{commentary}
-The redundancy in the value read from \z{topei} is consistent with the
-Advanced PLIC, which returns both an interrupt identity number and its
-priority in the same format as above, but with the two components being
-independent of one another.
-\end{commentary}
-
-Writes to \z{topei} are ignored.
-
-%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \subsection{External interrupt-pending registers (\zSafe{eip0}--\zSafe{eip63})}
 
 When the interrupt file's registers are 32~bits (as determined by
@@ -664,15 +632,16 @@ read-only zeros.
 
 Several new machine-level CSRs interact directly with an IMSIC's
 machine-level interrupt file:  \z{mseteipnum}, \z{mclreipnum},
-\z{mseteienum}, \z{mclreienum}, and \z{mclaimei}.
+\z{mseteienum}, \z{mclreienum}, and \z{mtopei}.
 If supervisor mode is implemented, there are several matching
 supervisor CSRs that likewise interact with the supervisor-level
 interrupt file:  \z{sseteipnum}, \z{sclreipnum}, \z{sseteienum},
-\z{sclreienum}, and \z{sclaimei}.
+\z{sclreienum}, and \z{stopei}.
 And if the hypervisor extension is implemented and field VGEIN of
 \z{hstatus} is the number of an implemented guest interrupt file,
 several VS CSRs interact with the chosen guest interrupt file:
-\z{vsseteipnum}, \z{vsclreipnum}, \z{vsseteienum}, and \z{vsclreienum}.
+\z{vsseteipnum}, \z{vsclreipnum}, \z{vsseteienum}, \z{vsclreienum},
+and \z{vstopei}.
 These CSRs are documented by function below:
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -714,23 +683,80 @@ respective interrupt file.
 A read of a \z{*seteienum} or \z{*clreienum} CSR always returns zero.
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-\subsection{Claim top external interrupt (\zSafe{*claimei})}
+\subsection{Top external interrupt (\zSafe{*topei})}
 
-The \emph{\texttt{*claimei} CSRs}, \z{mclaimei} and \z{sclaimei}, are
-read-only.
+The value of a \emph{\texttt{*topei} CSR} (\z{mtopei}, \z{stopei}, or
+\z{vstopei}) indicates the interrupt file's current highest-priority
+pending-and-enabled interrupt that also exceeds the priority threshold
+specified by its \z{eithreshold} register if \z{eithreshold} is not
+zero.
+Interrupts with lower identity numbers have higher priorities.
 
-A read from \z{mclaimei} or \z{sclaimei} returns the same value as the
-\z{topei} register of the respective interrupt file.
-When this value is not zero, a read from \z{mclaimei} or \z{sclaimei}
-has the simultaneous side effect of clearing the pending bit for the
-reported interrupt identity in the interrupt file.
+A read of a \z{*topei} CSR returns zero either if no interrupt
+is both pending in the interrupt file's \z{eip} array and enabled
+in its \z{eie} array, or if \z{eithreshold} is not zero and no
+pending-and-enabled interrupt has an identity number less than the
+value of \z{eithreshold}.
+Otherwise, the value returned from a read of \z{*topei} has this
+format:
+\begin{displayLinesTable}[l@{\quad}l]
+bits 26:16 & Interrupt identity \\
+bits 10:0  & Interrupt priority (same as identity) \\
+\end{displayLinesTable}
+All other bit positions are zeros.
 
-Although there is no VS CSR \z{vsclaimei}, if field VGEIN of
-\z{hstatus} is the number of an implemented guest interrupt file,
-reading \z{sclaimei} in \mbox{VS-mode} of course returns the same value
-as the \z{topei} register of the selected guest interrupt file and,
-if this value is not zero, clears the pending bit for the reported
-interrupt identity in that interrupt file.
+The interrupt identity reported in a \z{*topei} CSR is the minor
+identity for an external interrupt at the hart.
+
+\begin{commentary}
+The redundancy in the value read from a \z{*topei} CSR is consistent
+with the Advanced PLIC, which returns both an interrupt identity
+number and its priority in the same format as above, but with the two
+components being independent of one another.
+\end{commentary}
+
+A write to a \z{*topei} CSR \emph{claims} the reported interrupt
+identity by clearing its pending bit in the interrupt file.
+The value written is ignored;
+rather, the current readable value of the register determines which
+interrupt-pending bit is cleared.
+Specifically, when a \z{*topei} CSR is written, if the register value
+has interrupt identity $i$ in bits 26:16, then the interrupt file's
+pending bit for interrupt~$i$ is cleared.
+When a \z{*topei} CSR's value is zero, a write to the register has no
+effect.
+
+If a read and write of a \z{*topei} CSR are done together by a single
+CSR instruction (CSRRW, CSRRS, or CSRRC), the value returned by the
+read indicates the pending bit that is cleared.
+
+\begin{commentary}
+It is almost always a mistake to write to a \z{*topei} CSR without a
+simultaneous read to learn which interrupt was claimed.
+Note especially, if a read of a \z{*topei} register and a subsequent
+write to the register are done by two separate CSR instructions, then
+a higher-priority interrupt may become newly pending-and-enabled in the
+interrupt file between the two instructions, causing the write to clear
+the pending bit of the new interrupt and not the one reported by the
+read.
+Once the pending bit of the new interrupt is cleared, the interrupt is
+lost.
+
+If it is necessary first to read a \z{*topei} CSR and then subsequently
+claim the interrupt as a separate step, the claim can be safely done by
+writing the interrupt identity to the corresponding \z{*clreipnum} CSR,
+instead of writing to \z{*topei}.
+\end{commentary}
+
+\begin{commentary}
+Because the effect of a combined read-and-write of a \z{*topei} CSR
+can be accomplished equally by a read of \z{*topei} followed by a write
+of the interrupt identity to the corresponding \z{*clreipnum}, the
+\z{*topei} CSRs could have been made read-only without the special
+behavior defined for writes.
+However, condensing these operations into a single CSR access intead of
+two helps to reduce interrupt latency when critical.
+\end{commentary}
 
 %-----------------------------------------------------------------------
 \section{Interrupt delivery and handling}
@@ -746,19 +772,28 @@ bits in hypervisor CSR \z{hgeip}.
 When interrupt delivery is disabled by an interrupt file's
 \z{eidelivery} register (\z{eidelivery} =~0), the interrupt signal from
 the interrupt file is held de-asserted (false).
-When interrupt delivery from the interrupt file is enabled
-(\z{eidelivery} =~1), the interrupt signal from the interrupt file
-is asserted if and only if reading register \z{topei} would return a
-nonzero value.
+When interrupt delivery from an interrupt file is enabled
+(\z{eidelivery} =~1), its interrupt signal is asserted if and only
+if the interrupt file has a pending-and-enabled interrupt that also
+exceeds the priority threshold specified by \z{eithreshold}, if not
+zero.
 
 A trap handler solely for external interrupts via an IMSIC could be
 written roughly as follows:
 \begin{displayLinesTable}
 save processor registers \\
-\z{i = }read CSR \z{mclaimei} or \z{sclaimei} \\
+\z{i = }read CSR \z{mtopei} or \z{stopei}, and write simultaneously to
+ claim the interrupt \\
 \z{i = i>>16} \\
 call the interrupt handler for external interrupt \z{i} (minor identity) \\
 restore processor registers \\
 return from trap \\
 \end{displayLinesTable}
+
+The combined read and write of \z{mtopei} or \z{stopei} in the second
+step can be done by a single CSRRW machine instruction,
+\begin{displayLinesTable}
+\z{csrrw }\textit{rd}\z{,} \z{mtopei} or \z{stopei,} \z{x0} \\
+\end{displayLinesTable}
+where \textit{rd} is the destination register for value~\z{i}.
 
