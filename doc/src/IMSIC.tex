@@ -259,17 +259,23 @@ from some devices.
 A read of \z{seteipnum\_le} or \z{seteipnum\_be} returns zero in all
 cases.
 
-Stores by a hart to an interrupt file's memory-mapped registers
-may be arbitrarily delayed before appearing in the appropriate
-interrupt-pending bits.
-Whether, after accounting for these delays, such writes always
-remain in the same order they were executed by the hart is
-implementation-defined (or possibly platform-defined).
+When not ignored, writes to an interrupt file's memory region are
+guaranteed to be reflected in the interrupt file eventually, but not
+necessarily immediately.
+For a single interrupt file, the effects of multiple writes (stores) to
+its memory region, though arbitrarily delayed, always occur in the same
+order as the \textit{global memory order} of the stores as defined by
+the {\RISCV} Unprivileged ISA.
 
 \begin{commentary}
-It is an open question whether stores from a hart to an interrupt file
-should, in all systems, be required to remain always in the same order
-as executed by the hart.
+In most circumstances, any delay between the completion of a write to
+an interrupt file's memory region and the effect of the write on the
+interrupt file is indistinguishable from other delays in the memory
+system.
+However, if a hart writes to a \z{seteipnum\_le} or \z{seteipnum\_be}
+register of its own IMSIC, then a delay between the completion of the
+store instruction and the consequent setting of an interrupt-pending
+bit in the interrupt file may be visible to the hart.
 \end{commentary}
 
 %-----------------------------------------------------------------------
