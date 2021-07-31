@@ -11,7 +11,7 @@ standard by the {\RISCV} International Association.%
 \bigskip
 
 When the hypervisor extension is implemented, a hart's set of possible
-operating modes includes the \emph{virtual supervisor} (VS) and
+privilege modes includes the \emph{virtual supervisor} (VS) and
 \emph{virtual user} (VU) modes for hosting virtual harts.
 The Advanced Interrupt Architecture adds to the hypervisor extension
 new interrupt facilities aligned with those described earlier for
@@ -622,8 +622,8 @@ for \z{stopi} in Section~\ref{sec:stopi}.
 \subsection{Interrupt traps to \mbox{VS-mode}}
 
 Whenever the value of CSR \z{vstopi} is not zero, if either the current
-operating mode is \mbox{VS-mode} and the SIE bit in CSR \z{vsstatus}
-is set, or the current operating mode is \mbox{VU-mode}, a trap is
+privilege mode is \mbox{VS-mode} and the SIE bit in CSR \z{vsstatus}
+is set, or the current privilege mode is \mbox{VU-mode}, a trap is
 taken to \mbox{VS-mode} for the interrupt indicated by field IID of
 \z{vstopi}.
 

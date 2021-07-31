@@ -176,9 +176,9 @@ This bit then remains set until cleared by software.
 
 As established by the {\RISCV} Privileged Architecture, an interrupt
 traps to \mbox{M-mode} whenever all of the following are true:
-(a)~either the current operating mode is \mbox{M-mode} and
+(a)~either the current privilege mode is \mbox{M-mode} and
 machine-level interrupts are enabled by the MIE bit of \z{mstatus}, or
-the current operating mode has less privilege than \mbox{M-mode};
+the current privilege mode has less privilege than \mbox{M-mode};
 (b)~matching bits in \z{mip}/\z{miph} and \z{mie}/\z{mieh} are both
 one; and
 (c)~if \z{mideleg} exists, the corresponding bit in
@@ -572,9 +572,9 @@ level remains essentially the same as specified by the {\RISCV}
 Privileged Architecture.
 An interrupt traps into \mbox{S-mode} (or \mbox{HS-mode}) whenever all
 of the following are true:
-(a)~either the current operating mode is \mbox{S-mode} and
+(a)~either the current privilege mode is \mbox{S-mode} and
 supervisor-level interrupts are enabled by the SIE bit of \z{sstatus},
-or the current operating mode has less privilege than \mbox{S-mode};
+or the current privilege mode has less privilege than \mbox{S-mode};
 (b)~matching bits in \z{sip}/\z{siph} and \z{sie}/\z{sieh} are both
 one, or, if the hypervisor extension is implemented, matching bits in
 \z{hip} and \z{hie} are both one; and
