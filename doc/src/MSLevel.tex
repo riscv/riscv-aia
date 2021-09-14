@@ -538,8 +538,8 @@ for certain interrupt causes.
 Bits 12:0 in \z{mvien} are reserved and must be read-only zeros.
 Bits 1 and~5 of \z{mvip} are aliases of the same bits in \z{mip}
 (SSIP and STIP) when those bits are writable in \z{mip}.
-When SSIP or STIP is not writable in \z{mip} (such as when optional
-CSR \z{stimecmp} is implemented, making STIP read-only in \z{mip}), the
+When STIP is not writable in \z{mip} (such as when optional
+CSR \z{stimecmp} is implemented), the
 same bit in \z{mvip} is read-only zero.
 Bit~9 of \z{mvip} is an alias of the software-writable bit~9 of \z{mip}
 (SEIP).
