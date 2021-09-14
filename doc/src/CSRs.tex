@@ -52,7 +52,7 @@ Number & Privilege & Name      & Description \\
                    & Machine set external interrupt-enable bit by number \\
 \z{0x35B} & MRW & \z{mclreienum}
                    & Machine clear external interrupt-enable bit by number \\
-\z{0x35D} & MRW & \z{mtopei}   & Machine top external interrupt \\
+\z{0x35C} & MRW & \z{mtopei}   & Machine top external interrupt \\
 \hline
 \multicolumn{4}{|c|}{Virtual Interrupts for Supervisor Level} \\
 \hline
@@ -177,7 +177,7 @@ Number & Privilege & Name      & Description \\
                  & Supervisor set external interrupt-enable bit by number \\
 \z{0x15B} & SRW & \z{sclreienum}
                  & Supervisor clear external interrupt-enable bit by number \\
-\z{0x15D} & SRW & \z{stopei}   & Supervisor top external interrupt \\
+\z{0x15C} & SRW & \z{stopei}   & Supervisor top external interrupt \\
 \hline
 \multicolumn{4}{|c|}{%
   Supervisor-Level High-Half CSRs for Interrupts 32--63 (RV32 only)} \\
@@ -280,7 +280,7 @@ Number & Privilege & Name        & Description \\
                    & VS set external interrupt-enable bit by number \\
 \z{0x25B} & HRW & \z{vsclreienum}
                    & VS clear external interrupt-enable bit by number \\
-\z{0x25D} & SRW & \z{vstopei}    & Virtual supervisor top external interrupt \\
+\z{0x25C} & SRW & \z{vstopei}    & Virtual supervisor top external interrupt \\
 \hline
 \multicolumn{4}{|c|}{Hypervisor and VS-Level High-Half CSRs (RV32 only)} \\
 \hline
