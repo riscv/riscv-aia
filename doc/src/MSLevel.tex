@@ -27,7 +27,7 @@ The Advanced Interrupt Architecture assigns other major interrupt
 identities in the range 16--63 to additional \emph{local interrupts}
 that arise within or in close proximity to the hart, often for
 reporting errors.
-An optional mechanism is also defined that allows software to
+A mechanism is also defined that allows software to
 selectively delegate both local and custom interrupts to the next lower
 privilege level, or in some cases to inject entirely virtual interrupts
 into a lower privilege level.
@@ -451,7 +451,7 @@ complexity.)
 \label{sec:virtIntrs-S}
 
 When supervisor mode is implemented, the Advanced Interrupt
-Architecture adds an optional facility for software filtering
+Architecture adds a facility for software filtering
 of interrupts and for virtual interrupts, making use of new
 CSRs \z{mvien}/\z{mvienh} (Machine Virtual Interrupt Enables) and
 \z{mvip}/\z{mviph} (Machine Virtual Interrupt-Pending bits).
