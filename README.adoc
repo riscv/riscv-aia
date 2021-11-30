@@ -18,6 +18,11 @@ interrupts.
 * Conditional delegation of local interrupts to lower privilege levels,
 including to virtual machines.
 
+== Obtaining the document
+
+A pre-built PDF is usually available under Releases:
+https://github.com/riscv/riscv-aia/releases
+
 == Licensing
 
 The files in this repository are licensed under the Creative Commons
