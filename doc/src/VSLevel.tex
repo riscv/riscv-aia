@@ -20,7 +20,7 @@ supervisor-level interrupts.
 As introduced in Chapter~\ref{ch:CSRs}, several hypervisor and VS CSRs
 are added:  \z{hvien}, \z{hvictl}, \z{hviprio1}, \z{hviprio2},
 \z{vsiselect}, \z{vsireg}, \z{vstopi}, \z{vsseteipnum},
-\z{vsclreipnum}, \z{vsseteienum}, and \z{vsclreienum}.
+\z{vsclreipnum}, \z{vsseteienum}, \z{vsclreienum}, and \z{vstopei}.
 For RV32, the following ``high-half'' CSR partners are also added:
 \z{hidelegh}, \z{hvienh}, \z{hviph}, \z{hviprio1h}, \z{hviprio2h},
 \z{vsiph}, and \z{vsieh}.
@@ -61,7 +61,7 @@ interrupt file.
 The registers of an interrupt file that are accessed indirectly through
 \z{vsiselect} and \z{vireg} are documented in Chapter~\ref{ch:IMSIC}
 on the IMSIC, along with the effects of accessing CSRs \z{vsseteipnum},
-\z{vsclreipnum}, \z{vsseteienum}, and \z{vsclreienum}.
+\z{vsclreipnum}, \z{vsseteienum}, \z{vsclreienum}, and \z{vstopei}.
 Because all IMSIC interrupt files act identically, the guest interrupt
 file that a virtual hart accesses through CSRs \z{siselect}, \z{sireg},
 \z{sseteipnum}, \z{sclreipnum}, \z{sseteienum}, \z{sclreienum},

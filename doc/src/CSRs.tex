@@ -344,7 +344,7 @@ values of \z{vsiselect} designate an inaccessible register.
 Along the same lines, when \z{hstatus}.VGEIN is not the number of
 an implemented guest external interrupt, attempts from \mbox{M-mode}
 or \mbox{HS-mode} to access CSRs \z{vsseteipnum}, \z{vsclreipnum},
-\z{vsseteienum}, or \z{vsclreienum} raise an illegal instruction
+\z{vsseteienum}, \z{vsclreienum}, or \z{vstopei} raise an illegal instruction
 exception, and attempts from \mbox{VS-mode} to access \z{sseteipnum},
 \z{sclreipnum}, \z{sseteienum}, \z{sclreienum}, or \z{stopei} raise a
 virtual instruction exception.
