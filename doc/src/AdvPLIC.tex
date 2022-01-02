@@ -41,7 +41,7 @@ the external interrupt controller for all {\RISCV} harts.
 
 \begin{commentary}
 Because every {\RISCV} hart without an IMSIC has exactly one PLIC
-as its external interrupt controoler, a system with multiple PLICs
+as its external interrupt controller, a system with multiple PLICs
 must partition the harts into disjoint subsets, making each PLIC the
 external interrupt controller for a separate subset of the harts.
 While not prohibited, this arrangement is likely to be less efficient
