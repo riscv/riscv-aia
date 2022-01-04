@@ -515,6 +515,25 @@ All other bits of \z{hvictl} are reserved and read as zeros.
 When bit VTI (Virtual Trap Interrupt control) =~1, attempts from
 \mbox{VS-mode} to explictly access CSRs \z{sip}, \z{sie}, or, for RV32
 only, \z{siph} or \z{sieh}, cause a virtual instruction exception.
+Furthermore, when VTI =~1, a virtual instruction exception is raised
+also for any attempt by the guest to write to a CSR that might
+cause a bit of \z{vsip}/\z{vsiph} to change from one to zero,
+excluding bit~9 for external interrupts (SEIP).
+In particular, if register \z{vstimecmp} is implemented
+(from extension Sstc), then attempts from \mbox{VS-mode}
+to write to \z{stimecmp} or (RV32 only) \z{stimecmph}
+cause a virtual instruction exception when VTI~=~1.
+
+\begin{commentary}
+For standard interrupt numbers in the range 13--63, and for
+software interrupts (SSI), the corresponding interrupt-pending
+bits in \z{vsip}/\z{vsiph} are defined as ``sticky,''
+meaning a guest can clear them only by writing directly
+to \z{sip}/\z{siph} (really \z{vsip}/\z{vsiph}).
+Among the standard-defined interrupts, that leaves only
+timer interrupts (STI), which can potentially be cleared
+in \z{vsip} by writing a new value to \z{vstimecmp}.
+\end{commentary}
 
 All \z{hvictl} fields together can affect
 the value of CSR \z{vstopi} (Virtual Supervisor Top Interrupt) and
