@@ -1081,6 +1081,10 @@ the hart's IMSIC.
 If \z{genmsi} is written while Busy is true, the extempore MSI that was
 previously pending may be discarded without ever being sent.
 
+Extempore MSIs are not affected by the IE bit of the domain's
+\z{domaincfg} register.
+An extempore MSI is sent even if \z{domaincfg}.IE~=~0.
+
 When the interrupt domain is configured in direct delivery mode
 (\z{domaincfg}.DM =~0), register \z{genmsi} is read-only zero.
 
