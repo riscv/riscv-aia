@@ -1093,8 +1093,7 @@ All MSIs previously sent from this PLIC to the same hart must be
 visible at the hart's IMSIC before the extempore MSI becomes visible at
 the hart's IMSIC.
 
-If \z{genmsi} is written while Busy is true, the extempore MSI that was
-previously pending may be discarded without ever being sent.
+While Busy is true, writes to \z{genmsi} are ignored.
 
 Extempore MSIs are not affected by the IE bit of the domain's
 \z{domaincfg} register.
