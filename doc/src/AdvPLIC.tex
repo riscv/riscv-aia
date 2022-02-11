@@ -1282,9 +1282,8 @@ when the rectified input value is low.
 
 \item
 The pending bit is cleared whenever the rectified input value is low,
-or when the interrupt is forwarded by MSI.
-The pending bit cannot be cleared by a write to an \z{in\_clrip}
-register or to \z{clripnum}.
+when the interrupt is forwarded by MSI, or by a relevant write
+to an \z{in\_clrip} register or to \z{clripnum}.
 
 \end{itemize}
 
