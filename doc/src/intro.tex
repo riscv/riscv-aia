@@ -53,7 +53,7 @@ Expand the framework for local interrupts at a {\RISCV} hart.
 
 \item
 Optionally allow software to configure the relative priorities of all
-sources of interupts to a {\RISCV} hart (including the standard timer
+sources of interrupts to a {\RISCV} hart (including the standard timer
 and software interrupts, among others), instead of being limited
 just to the ability of a separate interrupt controller to prioritize
 external interrupts only.
@@ -303,7 +303,7 @@ The Advanced Interrupt Architecture adds considerable support
 for \emph{local interrupts} at a hart, whereby a hart essentially
 interrupts itself in response to asynchronous events, usually errors.
 Local interrupts remain contained within a hart (or close to it),
-so like standard {\RISCV} timer and sofware interrupts, they do not
+so like standard {\RISCV} timer and software interrupts, they do not
 pass through an Advanced PLIC or IMSIC.
 
 %-----------------------------------------------------------------------

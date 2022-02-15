@@ -216,7 +216,7 @@ These memory-mapped registers are located within a naturally aligned
 \mbox{4-KiB} region (a page) of physical address space that exists for
 the interrupt file, i.e., one page per interrupt file.
 
-The layout of an interupt-file's memory region is:\nopagebreak
+The layout of an interrupt-file's memory region is:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l@{\qquad}l]
 offset    & \ size  & register name \\
 \noalign{\medskip}
@@ -761,7 +761,7 @@ can be accomplished equally by a read of \z{*topei} followed by a write
 of the interrupt identity to the corresponding \z{*clreipnum}, the
 \z{*topei} CSRs could have been made read-only without the special
 behavior defined for writes.
-However, condensing these operations into a single CSR access intead of
+However, condensing these operations into a single CSR access instead of
 two helps to reduce interrupt latency when critical.
 \end{commentary}
 

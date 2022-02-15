@@ -46,7 +46,7 @@ same as a regular message-signalled interrupt (MSI)\@.
 In that case, an incoming IPI appears at the destination hart as an
 \emph{external interrupt} routed through the IMSIC, rather than as a
 software interrupt as before.
-However, so long as the same software (e.g.\@ an operating sytem or
+However, so long as the same software (e.g.\@ an operating system or
 machine monitor) is in control at both endpoints of an IPI, source
 and destination, there should be no reason for a destination hart
 to misinterpret the purpose of an incoming external interrupt that

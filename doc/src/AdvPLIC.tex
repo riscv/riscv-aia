@@ -215,7 +215,7 @@ necessary to partition the application harts for multiple OSes,
 machine-level software would need to prevent direct OS access to the
 supervisor-level interrupt domain and instead provide SBI services
 for controlling PLIC interrupts or, alternatively, emulate the control
-interfaces of separate superivsor-level interrupt domains, one for each
+interfaces of separate supervisor-level interrupt domains, one for each
 OS.
 Note that such emulation might still make use of the PLIC's
 physical supervisor-level interrupt domain, but under the control of
@@ -1425,7 +1425,7 @@ identity, if possible.
 See Section~\ref{sec:AdvPLIC-pendingBits} for exactly when the pending
 bit is cleared by a read of \z{claimi}.
 
-A read from \z{claimi} that returns a value of zero has the simulaneous
+A read from \z{claimi} that returns a value of zero has the simultaneous
 side effect of setting the \z{iforce} register to zero.
 
 Writes to \z{claimi} are ignored.
@@ -1639,7 +1639,7 @@ Even after the PLICs are reconfigured, the hart still cannot be safely
 turned off until it is known no more MSIs are destined for it.
 
 The \z{genmsi} register (Section~\ref{sec:AdvPLIC-reg-genmsi}) exists
-to allow software to determinie when all earlier MSIs have arrived at a
+to allow software to determine when all earlier MSIs have arrived at a
 hart.
 To use \z{genmsi} for this purpose, software can dedicate one external
 interrupt identity at each hart's IMSIC interrupt file solely for PLIC

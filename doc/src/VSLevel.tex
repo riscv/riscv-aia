@@ -59,7 +59,7 @@ registers of this guest interrupt file, just as values of \z{siselect}
 in the same range select registers of the IMSIC's true supervisor-level
 interrupt file.
 The registers of an interrupt file that are accessed indirectly through
-\z{vsiselect} and \z{vireg} are documented in Chapter~\ref{ch:IMSIC}
+\z{vsiselect} and \z{vsireg} are documented in Chapter~\ref{ch:IMSIC}
 on the IMSIC, along with the effects of accessing CSRs \z{vsseteipnum},
 \z{vsclreipnum}, \z{vsseteienum}, \z{vsclreienum}, and \z{vstopei}.
 Because all IMSIC interrupt files act identically, the guest interrupt
@@ -513,7 +513,7 @@ bits 7:0   & IPRIO \\
 All other bits of \z{hvictl} are reserved and read as zeros.
 
 When bit VTI (Virtual Trap Interrupt control) =~1, attempts from
-\mbox{VS-mode} to explictly access CSRs \z{sip}, \z{sie}, or, for RV32
+\mbox{VS-mode} to explicitly access CSRs \z{sip}, \z{sie}, or, for RV32
 only, \z{siph} or \z{sieh}, cause a virtual instruction exception.
 Furthermore, when VTI =~1, a virtual instruction exception is raised
 also for any attempt by the guest to write to a CSR that might
