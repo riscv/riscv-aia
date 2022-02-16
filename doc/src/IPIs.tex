@@ -28,7 +28,7 @@ memory.
 \end{commentary}
 
 The same kind of mechanism (but with a different set of addresses) may
-or may not exist for signalling supervisor-level software interrupts
+or may not exist for signaling supervisor-level software interrupts
 (major code~1) at remote harts as well.
 If not directly supported in this way, then a supervisor-level software
 interrupt is typically sent to another hart through an environment call
@@ -40,9 +40,9 @@ machine-level IPI to the destination hart, where software then sets the
 supervisor-level software interrupt-pending bit (SSIP) in CSR \z{mip}.
 
 When harts have IMSICs, instead of using the Privileged Architecture's
-mechanism for signalling software interrupts at remote harts, an IPI
+mechanism for signaling software interrupts at remote harts, an IPI
 can be sent to a hart by writing to the destination hart's IMSIC, the
-same as a regular message-signalled interrupt (MSI)\@.
+same as a regular message-signaled interrupt (MSI)\@.
 In that case, an incoming IPI appears at the destination hart as an
 \emph{external interrupt} routed through the IMSIC, rather than as a
 software interrupt as before.
@@ -54,7 +54,7 @@ represents an IPI.
 
 If harts do not have IMSICs, then the method specified by the {\RISCV}
 Privileged Architecture is assumed to be used for IPIs, with software
-interrupts signalled at destination harts.
+interrupts signaled at destination harts.
 On the other hand, when harts have IMSICs, the machinery for triggering
 software interrupts at remote harts is redundant with the capabilities
 of the IMSICs, so it is downgraded from a requirement to an option,
