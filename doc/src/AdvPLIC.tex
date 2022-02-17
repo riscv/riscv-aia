@@ -487,10 +487,10 @@ harts.
 A given PLIC implementation may support either or both of these
 delivery modes for each interrupt domain.
 
-If the interrupt domain's harts have IMSICs, the relevant interrupt
-files of those IMSICs must support value \z{0x40000000} for register
-\z{eidelivery}, else setting DM to zero (direct delivery mode) will
-always have the same effect as setting IE to zero.
+If DM is set to zero (direct delivery mode) and the interrupt domain's
+harts have IMSICs then the relevant interrupt files of those IMSICs
+must have \z{eidelivery} set to \z{0x40000000} for the interrupts to
+be connected.
 See Sections \ref{sec:IMSIC-reg-eidelivery}
 and~\ref{sec:AdvPLIC-directMode-intrDelivery}.
 
