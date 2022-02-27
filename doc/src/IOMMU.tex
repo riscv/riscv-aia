@@ -53,7 +53,7 @@ For each I/O device connected to the system through an I/O MMU,
 software can configure at the I/O MMU a \emph{device context}, which
 associates with the device a specific virtual address space and any
 other per-device parameters the I/O MMU may support.
-By giving devices each their own seperate device context at an I/O MMU,
+By giving devices each their own separate device context at an I/O MMU,
 each device can be individually configured for a different software
 master, usually a guest OS or the main (host) OS.
 On every memory access made from a device, hardware indicates to
