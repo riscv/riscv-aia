@@ -15,7 +15,7 @@ This document specifies the Advanced Interrupt Architecture for
 (a)~an extension to the standard Privileged Architecture for {\RISCV}
 harts specified in Volume~II of The {\RISCV} Instruction Set Manual;
 (b)~two standard interrupt controllers for {\RISCV} systems, an
-Advanced Platform-Level Interrupt Controller (Advanced PLIC) and an
+Advanced Platform-Level Interrupt Controller (APLIC) and an
 Incoming Message-Signaled Interrupt Controller (IMSIC); and
 (c)~requirements on other system components concerning interrupts.
 
@@ -43,7 +43,8 @@ device standards, in addition to basic wired interrupts.
 
 \item
 For wired interrupts, define a new Platform-Level Interrupt Controller
-(Advanced PLIC) that has an independent control interface for each
+(the Advanced PLIC, or APLIC)
+that has an independent control interface for each
 level of privilege (such as {\RISCV} machine and supervisor levels),
 and that can convert wired interrupts into MSIs for systems supporting
 MSIs.
@@ -141,7 +142,7 @@ Idle (swapped-out) virtual harts having \quad
    & thousands    & \ for memory-resident \\
    &              & \ interrupt files \\
 \hline
-Wired interrupts at a single Advanced PLIC \quad
+Wired interrupts at a single APLIC \quad
    & 1023         & \\
 \hline
 Distinct identities usable for MSIs at each \quad
@@ -188,12 +189,12 @@ and simpler harts without IMSICs.
 When {\RISCV} harts do not have Incoming MSI Controllers, external
 interrupts are signaled to harts through dedicated wires.
 In that case, an \emph{Advanced Platform-Level Interrupt Controller}
-(Advanced PLIC) acts as a traditional central hub for interrupts,
+(APLIC) acts as a traditional central hub for interrupts,
 routing and prioritizing external interrupts for each hart as
 illustrated in Figure~\ref{fig:intrsWithoutIMSICs}.
 Interrupts may be selectively routed either to machine level or to
 supervisor level at each hart.
-The Advanced PLIC is specified in Chapter~\ref{ch:AdvPLIC}.
+The APLIC is specified in Chapter~\ref{ch:AdvPLIC}.
 
 \begin{figure}[th]
 \centerline{\includegraphics[scale=0.55]{intrsWithoutIMSICs.png}}
@@ -213,7 +214,7 @@ can then choose to inject a virtual interrupt into the virtual machine.
 
 \begin{commentary}
 If harts implement the hypervisor extension, it is a topic of ongoing
-study whether an Advanced PLIC should be allowed to route external
+study whether an APLIC should be allowed to route external
 interrupts to be the \emph{guest external interrupts} of the hypervisor
 extension, permitting the delivery of interrupts directly to virtual
 machines without the need for each signaled interrupt to be handled at
@@ -266,12 +267,12 @@ The format of MSIs used by the {\RISCV} Advanced Interrupt Architecture
 is described in that chapter, Section~\ref{sec:MSIEncoding}.
 
 When the harts in a {\RISCV} system have IMSICs, the system will
-normally still contain an Advanced PLIC, but its role is changed.
+normally still contain an APLIC, but its role is changed.
 Instead of signaling interrupts to harts directly by wires as in
-Figure~\ref{fig:intrsWithoutIMSICs}, an Advanced PLIC converts incoming
+Figure~\ref{fig:intrsWithoutIMSICs}, an APLIC converts incoming
 wired interrupts into MSI writes that are sent to harts via their IMSIC
 units.
-Each MSI is sent to a single target hart according to the PLIC's
+Each MSI is sent to a single target hart according to the APLIC's
 configuration set by software.
 
 If {\RISCV} harts implement the Privileged Architecture's hypervisor
@@ -304,7 +305,7 @@ for \emph{local interrupts} at a hart, whereby a hart essentially
 interrupts itself in response to asynchronous events, usually errors.
 Local interrupts remain contained within a hart (or close to it),
 so like standard {\RISCV} timer and software interrupts, they do not
-pass through an Advanced PLIC or IMSIC.
+pass through an APLIC or IMSIC.
 
 %-----------------------------------------------------------------------
 \section{Interrupt identities at a hart}
@@ -372,7 +373,7 @@ Architecture.%
 
 Interrupts from most I/O devices are conveyed to a hart by the
 \emph{external interrupt controller} for the hart, which is either the
-hart's IMSIC (Figure~\ref{fig:intrsWithIMSICs}) or an Advanced PLIC
+hart's IMSIC (Figure~\ref{fig:intrsWithIMSICs}) or an APLIC
 (Figure~\ref{fig:intrsWithoutIMSICs}).
 As Table~\ref{tab:interruptIdents} shows, external interrupts
 at a given privilege level all share a single major identity

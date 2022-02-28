@@ -534,20 +534,20 @@ from this interrupt file are delivered from the IMSIC to the attached
 hart so they appear as a pending external interrupt in the hart's
 \z{mip} or \z{hgeip} CSR.
 Register \z{eidelivery} may optionally also support the direct delivery
-of interrupts from a PLIC (Platform-Level Interrupt Controller) to the
-attached hart.
+of interrupts from a PLIC (Platform-Level Interrupt Controller)
+or APLIC (Advanced PLIC) to the attached hart.
 Three possible values are currently defined for \z{eidelivery}:
 \begin{displayLinesTable}[r@{\ }l]
 0              & = Interrupt delivery is disabled \\
 1              & = Interrupt delivery from the interrupt file is enabled \\
-\z{0x40000000} & = Interrupt delivery from a PLIC is enabled (optional)\\
+\z{0x40000000} & = Interrupt delivery from a PLIC or APLIC is enabled (optional)\\
 \end{displayLinesTable}
 
-If \z{eidelivery} supports value \z{0x40000000}, then a specific PLIC
+If \z{eidelivery} supports value \z{0x40000000}, then a specific PLIC or APLIC
 in the system may act as an alternate external interrupt controller for
 the attached hart at the same privilege level as this interrupt file.
 When \z{eidelivery} is \z{0x40000000}, the interrupt file functions the
-same as though \z{eidelivery} is~0, and the PLIC replaces the interrupt
+same as though \z{eidelivery} is~0, and the PLIC or APLIC replaces the interrupt
 file in supplying pending external interrupts at this privilege level
 at the hart.
 
@@ -559,7 +559,7 @@ after reset.
 \begin{commentary}
 \z{eidelivery} value \z{0x40000000} supports system software that is
 oblivious to IMSICs and assumes instead that the external interrupt
-controller is a PLIC.
+controller is a PLIC or APLIC.
 Such software may exist either because it predates the existence of
 IMSICs or because bypassing IMSICs is believed to reduce programming
 effort.

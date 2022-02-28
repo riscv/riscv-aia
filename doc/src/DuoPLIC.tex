@@ -29,33 +29,33 @@ That chapter has since been removed from more recent versions of
 \textit{The {\RISCV} Instruction Set Manual}.%
 }
 To ease the transition of software from the original PLIC to the
-Advanced PLIC, a {\RISCV} system may have a \emph{\mbox{Duo-PLIC\/}}
+APLIC, a {\RISCV} system may have a \emph{\mbox{Duo-PLIC\/}}
 that software can configure to act as either form of PLIC.
-A \mbox{Duo-PLIC} is an extension of an Advanced PLIC, having all the
-usual memory-mapped interfaces of an Advanced PLIC, plus, at some other
+A \mbox{Duo-PLIC} is an extension of an APLIC, having all the
+usual memory-mapped interfaces of an APLIC, plus, at some other
 memory addresses, the memory-mapped interface of an original {\RISCV}
 PLIC too.
 When the \mbox{Duo-PLIC} has \emph{compatibility mode} enabled,
 interrupts from the \mbox{Duo-PLIC} to harts are controlled exclusively
 by the original PLIC side of the \mbox{Duo-PLIC};
 and when compatibility mode is disabled, interrupts to harts
-are controlled exclusively by the Advanced PLIC side of the
+are controlled exclusively by the APLIC side of the
 \mbox{Duo-PLIC}.
 A \mbox{Duo-PLIC} comes out of reset with compatibility mode enabled,
-so older software with no knowledge of an Advanced PLIC can see the
+so older software with no knowledge of an APLIC can see the
 \mbox{Duo-PLIC} as an original PLIC.
 
 When compatibility mode is enabled so a \mbox{Duo-PLIC} acts as an
 original PLIC, the \mbox{Duo-PLIC} supports only the direct delivery of
 interrupts to harts, not the forwarding of interrupts by MSIs.
 When compatibility mode is disabled and the \mbox{Duo-PLIC} acts as
-an Advanced PLIC, direct delivery mode is supported for all interrupt
+an APLIC, direct delivery mode is supported for all interrupt
 domains, and MSI delivery mode may optionally be supported.
-Hence, for each Advanced PLIC interrupt domain, field DM
+Hence, for each APLIC interrupt domain, field DM
 (Delivery Mode) of the \z{domaincfg} register is either read-only zero
 or writable, but is not read-only one.
 
-In the memory-mapped control region for the Advanced PLIC root
+In the memory-mapped control region for the APLIC root
 interrupt domain (only), a \mbox{Duo-PLIC} adds to the \z{domaincfg}
 register a CM (Compatibility Mode) field in bit~6.
 The complete format of the root interrupt domain's \z{domaincfg} is
@@ -70,7 +70,7 @@ bit 0      & BE (\WARL) \\
 \end{displayLinesTable}
 All other register bits are reserved and read as zeros.
 
-Reset initializes the Advanced PLIC root domain's \z{domaincfg}
+Reset initializes the APLIC root domain's \z{domaincfg}
 register with CM =~1 and with all other writable bits zeros.
 
 When CM~=~1 (compatibility mode enabled):
@@ -81,12 +81,12 @@ For each \emph{context} implemented by the original PLIC side of the
 \mbox{Duo-PLIC}, the output interrupt for that context becomes the
 interrupt signal delivered from the \mbox{Duo-PLIC} to the specific
 hart and privilege level specified by the implementation.
-Other than the CM field of the Advanced PLIC root domain's
-\z{domaincfg} register, the state of the Advanced PLIC side of the
+Other than the CM field of the APLIC root domain's
+\z{domaincfg} register, the state of the APLIC side of the
 \mbox{Duo-PLIC} is irrelevant to the interrupts delivered to harts.
 
 \item
-In the memory-mapped control region for each Advanced PLIC interrupt
+In the memory-mapped control region for each APLIC interrupt
 domain:
 \begin{itemize}
 
@@ -115,7 +115,7 @@ When CM~=~0 (compatibility mode disabled):
 \begin{itemize}
 
 \item
-Interrupts to harts are determined by the Advanced PLIC side of the
+Interrupts to harts are determined by the APLIC side of the
 \mbox{Duo-PLIC}, as specified in Chapter~\ref{ch:AdvPLIC}.
 The state of the original PLIC side of the \mbox{Duo-PLIC} is
 irrelevant.
@@ -132,7 +132,7 @@ enabled, the registers of the original PLIC side of the \mbox{Duo-PLIC}
 obtain valid and consistent but otherwise {\unspecified} values.
 
 If the \mbox{Duo-PLIC}'s compatibility mode is changed from
-enabled to disabled, the registers of the Advanced PLIC side of
+enabled to disabled, the registers of the APLIC side of
 the \mbox{Duo-PLIC} obtain valid and consistent but otherwise
 {\unspecified} values, except for the \z{domaincfg} registers
 and, if they exist, the registers that configure MSI addresses
@@ -142,20 +142,20 @@ and, if they exist, the registers that configure MSI addresses
 field~CM, of course.)
 
 The endianness of the memory-mapped registers of the original PLIC side
-of the \mbox{Duo-PLIC} is not affected by the BE field of any Advanced
-PLIC \z{domaincfg} register.
+of the \mbox{Duo-PLIC} is not affected by the BE field of any
+APLIC \z{domaincfg} register.
 For most, maybe all versions of an original PLIC, the registers are
 always little-endian.
 
 The number of interrupt priority levels supported by the original PLIC
-side of a \mbox{Duo-PLIC} is the same as that of the Advanced PLIC side
+side of a \mbox{Duo-PLIC} is the same as that of the APLIC side
 when in direct delivery mode.
 Hence, the number of integer bits to store a priority number, IPRIOLEN,
 is a constant for a \mbox{Duo-PLIC} (in the range 1 to 8 as usual),
 independent of whether compatibility mode is enabled or disabled.
 
 However, an original PLIC encodes priorities in the opposite order
-from an IMSIC or Advanced PLIC, with number 1 being interpreted as the
+from an IMSIC or APLIC, with number 1 being interpreted as the
 lowest priority and larger numbers as higher priorities.
 When a \mbox{Duo-PLIC} is acting as an original PLIC and reports to
 a hart an interrupt priority number (see Chapter~\ref{ch:MSLevel}

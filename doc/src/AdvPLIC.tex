@@ -1,8 +1,8 @@
 
 %=======================================================================
-\chapter{Advanced Platform-Level Interrupt Controller (PLIC)}
+\chapter{Advanced Platform-Level Interrupt Controller (APLIC)}
 \label{ch:AdvPLIC}
-\chaptermark{Advanced PLIC}
+\chaptermark{APLIC}
 
 \textbf{%
 Warning!
@@ -28,111 +28,111 @@ current computer platforms, unlike MSIs, making another reason for many
 commodity devices or controllers to choose wired interrupts over MSIs,
 when not implementing a standard like PCI Express that dictates MSIs.
 
-In a machine without IMSICs, every {\RISCV} hart accepts interrupts
-from exactly one PLIC that is the \emph{external interrupt controller}
-for that hart.
-A hart's external interrupt controller (the PLIC) signals interrupts
-to the hart through a dedicated connection, usually a wire, for each
-privilege level that the hart may receive interrupts.
-(Recall Figure~\ref{fig:intrsWithoutIMSICs} on
-page~\pageref{fig:intrsWithoutIMSICs}.)
-A system without IMSICs will typically have only one PLIC, serving as
-the external interrupt controller for all {\RISCV} harts.
-
-\begin{commentary}
-Because every {\RISCV} hart without an IMSIC has exactly one PLIC
-as its external interrupt controller, a system with multiple PLICs
-must partition the harts into disjoint subsets, making each PLIC the
-external interrupt controller for a separate subset of the harts.
-While not prohibited, this arrangement is likely to be less efficient
-than having all harts share a single PLIC.
-\end{commentary}
-
-{\RISCV} harts that employ IMSICs as their external interrupt
-controllers can receive external interrupts only in the form of MSIs.
-In that case, the role of a PLIC is to convert wired interrupts into
-MSIs for harts.
-(Recall Figure~\ref{fig:intrsWithIMSICs} on
-page~\pageref{fig:intrsWithIMSICs}.)
-The PLIC is said to \emph{forward} incoming wire-signaled interrupts to
-harts by sending MSIs to the harts.
-
-When harts have IMSICs to support MSIs, a system may easily contain
-multiple PLICs for converting wired interrupts into MSIs, with each
-PLIC forwarding interrupts from a different subset of devices.
-Multiple PLICs are presumably more likely to arise when groups of
-devices are physically distant from one another, perhaps even on
-separate chips (including chiplets in a multi-chip module).
-
-This chapter specifies an \emph{Advanced PLIC} that is not backward
+This chapter specifies an \emph{Advanced PLIC} (APLIC) that is not backward
 compatible with the earlier {\RISCV} PLIC.
 Full conformance to the Advanced Interrupt Architecture requires the
-Advanced PLIC.
+APLIC.
 However, a workable system can be built substituting the older PLIC
 instead, assuming only wired interrupts to harts, not MSIs.
 Chapter~\ref{ch:DuoPLIC} describes a \emph{\mbox{Duo-PLIC\/}} that is
 software-configurable to act as either an original {\RISCV} PLIC or an
-Advanced PLIC.
+APLIC.
 
 \begin{commentary}
 We intend eventually to provide a free example parameterized
-implementation of an Advanced PLIC, written in portable SystemVerilog,
+implementation of an APLIC, written in portable SystemVerilog,
 that we expect will be suitable for many {\RISCV} systems without
 modification.
 \end{commentary}
 
+In a machine without IMSICs, every {\RISCV} hart accepts interrupts
+from exactly one PLIC or APLIC that is the \emph{external interrupt controller}
+for that hart.
+A hart's external interrupt controller (the PLIC or APLIC) signals interrupts
+to the hart through a dedicated connection, usually a wire, for each
+privilege level that the hart may receive interrupts.
+(Recall Figure~\ref{fig:intrsWithoutIMSICs} on
+page~\pageref{fig:intrsWithoutIMSICs}.)
+A system without IMSICs will typically have only one PLIC or APLIC, serving as
+the external interrupt controller for all {\RISCV} harts.
+
+\begin{commentary}
+Because every {\RISCV} hart without an IMSIC has exactly one PLIC or APLIC
+as its external interrupt controller, a system with multiple APLICs
+must partition the harts into disjoint subsets, making each APLIC the
+external interrupt controller for a separate subset of the harts.
+While not prohibited, this arrangement is likely to be less efficient
+than having all harts share a single APLIC.
+\end{commentary}
+
+{\RISCV} harts that employ IMSICs as their external interrupt
+controllers can receive external interrupts only in the form of MSIs.
+In that case, the role of an APLIC is to convert wired interrupts into
+MSIs for harts.
+(Recall Figure~\ref{fig:intrsWithIMSICs} on
+page~\pageref{fig:intrsWithIMSICs}.)
+The APLIC is said to \emph{forward} incoming wire-signaled interrupts to
+harts by sending MSIs to the harts.
+
+When harts have IMSICs to support MSIs, a system may easily contain
+multiple APLICs for converting wired interrupts into MSIs, with each
+APLIC forwarding interrupts from a different subset of devices.
+Multiple APLICs are presumably more likely to arise when groups of
+devices are physically distant from one another, perhaps even on
+separate chips (including chiplets in a multi-chip module).
+
 %-----------------------------------------------------------------------
 \section{Interrupt sources and identities}
 
-An individual PLIC supports a fixed number of \emph{interrupt sources},
+An individual APLIC supports a fixed number of \emph{interrupt sources},
 corresponding exactly with the set of physical incoming interrupt
-wires at the PLIC.
+wires at the APLIC.
 Most often, each source's incoming wire is connected to the output
 interrupt wire from a single device or device controller.
 (For level-sensitive interrupts, the interrupt outputs of multiple
 devices or controllers may be combined to drive the incoming wire of a
-single interrupt source at a PLIC.
+single interrupt source at an APLIC.
 An interrupt source's incoming wire might also be simply tied high or
 low, if, for example, the source will always be configured as Detached.
 See Section~\ref{sec:AdvPLIC-reg-sourcecfg} for a description of
 \emph{source modes}.)
 
-Each of a PLIC's interrupt sources has a fixed unique
+Each of an APLIC's interrupt sources has a fixed unique
 \emph{identity number} in the range 1 to~$N$, where $N$ is the total
-number of sources at the PLIC.
-The number zero is not a valid interrupt identity number at a PLIC.
-The maximum number of interrupt sources an Advanced PLIC may support is
+number of sources at the APLIC.
+The number zero is not a valid interrupt identity number at an APLIC.
+The maximum number of interrupt sources an APLIC may support is
 1023.
 
-When a PLIC delivers interrupts directly to harts at a given
-privilege level (rather than forwarding interrupts as MSIs), the PLIC
+When an APLIC delivers interrupts directly to harts at a given
+privilege level (rather than forwarding interrupts as MSIs), the APLIC
 is the external interrupt controller for the harts at that privilege
-level, and the interrupt identities at the PLIC become directly the
+level, and the interrupt identities at the APLIC become directly the
 \emph{minor identities} for external interrupts at the harts.
 
-On the other hand, when a PLIC forwards interrupts by MSIs, software
+On the other hand, when an APLIC forwards interrupts by MSIs, software
 configures a new interrupt identity number for the outgoing MSIs of
 each source.
 Consequently, in this case, the source identity numbers at a given
-PLIC only distinguish the incoming interrupts at the PLIC and have no
-relevance outside the PLIC.
+APLIC only distinguish the incoming interrupts at the APLIC and have no
+relevance outside the APLIC.
 
 %-----------------------------------------------------------------------
 \section{Interrupt domains}
 
-An Advanced PLIC supports one or more \emph{interrupt domains}, each
+An APLIC supports one or more \emph{interrupt domains}, each
 associated with a subset of {\RISCV} harts at one privilege level
 (machine or supervisor level).
 The harts within an interrupt domain are those that the domain can
 interrupt at the corresponding privilege level.
 Each domain has its own memory-mapped control region in the machine's
-address space that appears to control a complete, separate PLIC,
+address space that appears to control a complete, separate APLIC,
 though in fact all domain interfaces together access a single combined
 interrupt controller.
 
 Figures \ref{fig:AdvPLIC-ex-1Domain} through
 \ref{fig:AdvPLIC-ex-3Domains} depict some possible hierarchies of
-interrupt domains implemented by an Advanced PLIC in a {\RISCV} system.
+interrupt domains implemented by an APLIC in a {\RISCV} system.
 
 The first figure represents a minimal system that has a single hart not
 supporting supervisor mode, with a single interrupt domain for machine
@@ -140,7 +140,7 @@ level on that hart.
 The next figure, \ref{fig:AdvPLIC-ex-2Domains}, shows a basic
 arrangement for a larger system designed for symmetric multiprocessing
 (SMP), with multiple harts that all implement supervisor mode.
-In such cases, the PLIC will usually provide a separate interrupt
+In such cases, the APLIC will usually provide a separate interrupt
 domain for supervisor level, as the figure portrays.
 This supervisor-level interrupt domain allows an operating system,
 running in \mbox{S-mode} on the multiple harts, to have direct control
@@ -161,18 +161,18 @@ hart.%
 \centerline{\includegraphics[scale=0.55]{AdvPLIC-ex-2Domains.png}}
 \caption{%
 An example system with four harts that implement \mbox{M-mode} and
-\mbox{S-mode}, with two PLIC interrupt domains, one each for machine
+\mbox{S-mode}, with two APLIC interrupt domains, one each for machine
 and supervisor levels.%
 }
 \label{fig:AdvPLIC-ex-2Domains}
 \end{figure}
 
-A PLIC's interrupt domains are arranged in a tree hierarchy, with the
+An APLIC's interrupt domains are arranged in a tree hierarchy, with the
 root domain always being at machine level.
 Incoming interrupt wires arrive first at the root domain.
 Each domain may then selectively delegate all or a subset of interrupt
 sources to its child domains in the hierarchy.
-Within a given PLIC, interrupt source numbers are invariant across all
+Within a given APLIC, interrupt source numbers are invariant across all
 domains, so source identity number~$i$ always refers to the same source
 in every domain, corresponding to incoming wire number~$i$.
 For an interrupt domain below the root, interrupt sources not delegated
@@ -206,7 +206,7 @@ cooperatively controlled by software at the same privilege level.
 In particular, a single operating system should control all of the
 harts associated with a supervisor-level interrupt domain.
 In the examples of Figures \ref{fig:AdvPLIC-ex-2Domains}
-and~\ref{fig:AdvPLIC-ex-3Domains}, control of the PLIC's
+and~\ref{fig:AdvPLIC-ex-3Domains}, control of the APLIC's
 supervisor-level interrupt domain could not be safely split among
 multiple independent OSes.
 
@@ -214,15 +214,15 @@ Given the domain hierarchies depicted in the figures, if it were
 necessary to partition the application harts for multiple OSes,
 machine-level software would need to prevent direct OS access to the
 supervisor-level interrupt domain and instead provide SBI services
-for controlling PLIC interrupts or, alternatively, emulate the control
+for controlling APLIC interrupts or, alternatively, emulate the control
 interfaces of separate supervisor-level interrupt domains, one for each
 OS.
-Note that such emulation might still make use of the PLIC's
+Note that such emulation might still make use of the APLIC's
 physical supervisor-level interrupt domain, but under the control of
 machine-level software.
 \end{commentary}
 
-A PLIC's interrupt domain hierarchy satisfies these rules:
+An APLIC's interrupt domain hierarchy satisfies these rules:
 \begin{itemize}
 
 \item
@@ -241,17 +241,17 @@ mixture of methods among the harts.
 
 \end{itemize}
 
-When a {\RISCV} hart's external interrupt controller is a PLIC, not an
-IMSIC, the hart can be within only one interrupt domain of this PLIC at
+When a {\RISCV} hart's external interrupt controller is an APLIC, not an
+IMSIC, the hart can be within only one interrupt domain of this APLIC at
 each privilege level.
 
 On the other hand, a hart that has an IMSIC for its external interrupt
-controller may, at each privilege level, be in multiple PLIC interrupt
-domains, even those of the same PLIC, and may potentially receive MSIs
-from multiple different PLICs in the machine.
+controller may, at each privilege level, be in multiple APLIC interrupt
+domains, even those of the same APLIC, and may potentially receive MSIs
+from multiple different APLICs in the machine.
 
 A platform might give software a way to choose between multiple
-interrupt domain hierarchies for any given PLIC.
+interrupt domain hierarchies for any given APLIC.
 Any such configurability is outside the scope of this specification,
 but should be available to machine level only.
 
@@ -266,8 +266,8 @@ any relationship to the unique hart identifier (``hart ID'') that the
 {\RISCV} Privileged Architecture assigns to the hart.
 Two different interrupt domains may employ entirely different index
 numbers for the same set of harts.
-However, if any of a PLIC's interrupt domains can forward interrupts by
-MSI, then all machine-level domains of the PLIC share a common mapping
+However, if any of an APLIC's interrupt domains can forward interrupts by
+MSI, then all machine-level domains of the APLIC share a common mapping
 of index numbers to harts.
 
 \begin{commentary}
@@ -278,7 +278,7 @@ index numbers.
 %-----------------------------------------------------------------------
 \section{Overview of interrupt control for a single domain}
 
-Each interrupt domain implemented by a PLIC has its own separate
+Each interrupt domain implemented by an APLIC has its own separate
 physical control interface that is memory-mapped in the machine's
 address space, allowing access to each domain to be easily regulated
 by both PMP (physical memory protection) and page-based address
@@ -290,7 +290,7 @@ a root domain, without visibility of the domains above it in the
 hierarchy.
 
 An individual interrupt domain has the following components for each
-interrupt source at the PLIC:
+interrupt source at the APLIC:
 \begin{itemize}
 
 \item
@@ -323,9 +323,9 @@ controlling interrupt delivery to harts, one instance per hart in the
 domain.
 
 \begin{commentary}
-Although a PLIC with multiple interrupt domains may appear to duplicate
+Although an APLIC with multiple interrupt domains may appear to duplicate
 the per-source state listed above (source configuration, etc.) by a
-factor equal to the number of domains, in fact, PLIC implementations
+factor equal to the number of domains, in fact, APLIC implementations
 can exploit the fact that each source is ultimately active in only one
 domain.
 In all domains to which a specific interrupt source has not been
@@ -337,7 +337,7 @@ zeros, requiring no physical register bits.
 \section{Memory-mapped control region for an interrupt domain}
 \label{sec:AdvPLIC-domainControlRegion}
 
-For each interrupt domain that a PLIC supports, there is a dedicated
+For each interrupt domain that an APLIC supports, there is a dedicated
 memory-mapped control region for managing interrupts in that domain.
 This control region is a multiple of 4~KiB in size and aligned to a
 \mbox{4-KiB} address boundary.
@@ -406,7 +406,7 @@ for the interrupt domain.
 IDC structures are used only when the domain is configured to deliver
 interrupts directly to harts instead of being forwarded by MSIs.
 An interrupt domain that supports only interrupt forwarding by MSIs
-and not the direct delivery of interrupts by the PLIC does not need IDC
+and not the direct delivery of interrupts by the APLIC does not need IDC
 structures in its control region.
 
 The first IDC structure, if any, is for the hart with index number~0;
@@ -452,7 +452,7 @@ The registers of the first 16~KiB of an interrupt domain's control
 region (all but the IDC structures) are documented individually below.
 IDC structures are documented later, in
 Section~\ref{sec:AdvPLIC-directMode},
-``Interrupt delivery directly by the PLIC.''
+``Interrupt delivery directly by the APLIC.''
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \subsection{Domain configuration (\zSafe{domaincfg})}
@@ -480,11 +480,11 @@ The two possible values for DM are:
 1~=~MSI delivery mode\\
 \end{displayLinesTable}
 In \emph{direct delivery mode}, interrupts are prioritized and signaled
-directly to harts by the PLIC itself.
-In \emph{MSI delivery mode}, interrupts are forwarded by the PLIC
+directly to harts by the APLIC itself.
+In \emph{MSI delivery mode}, interrupts are forwarded by the APLIC
 as MSIs to harts, presumably for further handling by IMSICs at those
 harts.
-A given PLIC implementation may support either or both of these
+A given APLIC implementation may support either or both of these
 delivery modes for each interrupt domain.
 
 If the interrupt domain's harts have IMSICs, the relevant interrupt
@@ -523,7 +523,7 @@ known, so subsequent writes should not need to repeat the same trick.
 
 At system reset, all writable bits in \z{domaincfg} are initialized to
 zero, including~IE.
-If an implementation supports additional forms of reset for the PLIC,
+If an implementation supports additional forms of reset for the APLIC,
 it is implementation-defined (or possibly platform-defined) how these
 other resets may affect \z{domaincfg}.
 
@@ -668,7 +668,7 @@ For machine-level interrupt domains, registers \z{mmsiaddrcfg}
 and \z{mmsiaddrcfgh} may optionally provide parameters used to
 determine the addresses to write outgoing MSIs.
 
-If no interrupt domain of the PLIC supports MSI delivery
+If no interrupt domain of the APLIC supports MSI delivery
 mode (\z{domaincfg}.DM is read-only zero for all domains),
 these two registers are not implemented for any domain.
 Otherwise, they are implemented for the root domain, and may
@@ -722,7 +722,7 @@ may optionally all read as zeros.
 In that case, if these other fields were given nonzero values
 when L was first set in the root domain,
 their values are retained internally by the
-PLIC but become no longer visible by reading \z{mmsiaddrcfg} and
+APLIC but become no longer visible by reading \z{mmsiaddrcfg} and
 \z{mmsiaddrcfgh}.
 
 Setting \z{mmsiaddrcfgh}.L to one also locks registers
@@ -731,9 +731,9 @@ subsection, if those registers are implemented as well.
 
 For the root domain, L~is initialized at
 system reset to either zero or one, whichever is
-deemed appropriate for the specific PLIC implementation.
+deemed appropriate for the specific APLIC implementation.
 If reset initializes L to one, either the other fields are
-hardwired by the PLIC to constants, or the PLIC has a different means,
+hardwired by the APLIC to constants, or the APLIC has a different means,
 outside of this standard, for determining the addresses of outgoing MSI
 writes.
 In the latter case, the other fields in \z{mmsiaddrcfg} and
@@ -755,11 +755,11 @@ fields either are read-only copies of \z{mmsiaddrcfg} and
 Giving software the ability to arbitrarily determine the addresses to
 which MSIs are sent, even if allowed only for machine level, permits
 bypassing physical memory protection (PMP).
-For PLICs that support MSI delivery mode, it is recommended, if
-feasible, that the PLIC internally hardwire the physical addresses for
+For APLICs that support MSI delivery mode, it is recommended, if
+feasible, that the APLIC internally hardwire the physical addresses for
 all target IMSICs, putting those addresses beyond the reach of software
 to change.
-However, not all PLIC implementations will be able to follow that
+However, not all APLIC implementations will be able to follow that
 recommendation.
 
 It is expected that most systems will arrange the
@@ -771,7 +771,7 @@ sufficiently trusted machine-level software, early after system reset,
 to configure the pattern of physical addresses for target IMSICs and
 then lock this configuration against subsequent tampering.
 
-PLICs that actually hardwire the IMSIC addresses internally
+APLICs that actually hardwire the IMSIC addresses internally
 can implement these registers simply as read-only with values zero
 and \z{0x80000000}.
 Or, if the IMSIC addresses must be configured by software but
@@ -782,7 +782,7 @@ separate, custom mechanism supplied for configuring the IMSIC
 addresses.
 \end{commentary}
 
-If a PLIC supports additional forms of reset
+If an APLIC supports additional forms of reset
 besides system reset, it is implementation-defined (or possibly
 platform-defined) how these other resets may affect \z{mmsiaddrcfg} and
 \z{mmsiaddrcfgh} (as well as \z{smsiaddrcfg} and \z{smsiaddrcfgh})
@@ -807,7 +807,7 @@ MSIs.
 
 Registers \z{smsiaddrcfg} and \z{smsiaddrcfgh} are implemented
 by a domain if the domain implements \z{mmsiaddrcfg} and
-\z{mmsiaddrcfgh} and the PLIC has at least one supervisor-level
+\z{mmsiaddrcfgh} and the APLIC has at least one supervisor-level
 interrupt domain.
 If the registers are not implemented, the eight bytes at their
 locations are simply read-only zeros like other reserved bytes.
@@ -854,11 +854,11 @@ MSI-address-configuration fields are hidden (so \z{mmsiaddrcfgh}
 reads as \z{0x80000000} and registers \z{mmsiaddrcfg},
 \z{smsiaddrcfg}, and \z{smsiaddrcfgh} all read as zeros),
 then whatever values \z{smsiaddrcfg} and \z{smsiaddrcfgh} had when
-\z{mmsiaddrcfgh}.L was first set are retained internally by the PLIC,
+\z{mmsiaddrcfgh}.L was first set are retained internally by the APLIC,
 though those values are no longer visible by reading the registers.
 Alternatively, if system reset initializes \z{mmsiaddrcfgh}.L =~1 in
 the root domain, and if all MSI-address-configuration fields never
-appear as anything other than zeros, then the PLIC implementation
+appear as anything other than zeros, then the APLIC implementation
 has some other, possibly nonstandard, means for determining
 the addresses of outgoing MSIs, as discussed in the previous
 subsection, \ref{sec:AdvPLIC-reg-mmsiaddrcfg}.
@@ -1051,15 +1051,15 @@ may be useful as a write port for MSIs from some devices.
 
 When the interrupt domain is configured in MSI delivery mode
 (\z{domaincfg}.DM =~1), register \z{genmsi} can be used to cause an
-\emph{extempore} MSI to be sent from the PLIC to a hart.
+\emph{extempore} MSI to be sent from the APLIC to a hart.
 The main purpose for this function is to assist in establishing
-a temporary known ordering between a hart's writes to the PLIC's
-registers and the transmission of MSIs from the PLIC to the hart, as
+a temporary known ordering between a hart's writes to the APLIC's
+registers and the transmission of MSIs from the APLIC to the hart, as
 explained later in Section~\ref{sec:AdvPLIC-MSISync}.
 
 \begin{commentary}
 For other purposes, sending an MSI to a hart is usually better done by
-writing directly to the hart's IMSIC, rather than employing a PLIC as
+writing directly to the hart's IMSIC, rather than employing an APLIC as
 an intermediary.
 Use of the \z{genmsi} register should be minimized to avoid it becoming
 a bottleneck.
@@ -1086,10 +1086,10 @@ destination hart at machine level, and for a supervisor-level interrupt
 domain, an extempore MSI is sent to the destination hart at supervisor
 level.
 
-A pending extempore MSI should be sent by the PLIC with minimal delay.
-Once it has left the PLIC and the PLIC is able to accept a new write to
+A pending extempore MSI should be sent by the APLIC with minimal delay.
+Once it has left the APLIC and the APLIC is able to accept a new write to
 \z{genmsi} for another extempore MSI, Busy reverts to false.
-All MSIs previously sent from this PLIC to the same hart must be
+All MSIs previously sent from this APLIC to the same hart must be
 visible at the hart's IMSIC before the extempore MSI becomes visible at
 the hart's IMSIC.
 
@@ -1133,7 +1133,7 @@ interrupts from this source will be delivered.
 Field IPRIO (Interrupt Priority) specifies the \emph{priority number}
 for the interrupt source.
 This field is a {\WARL} unsigned integer of \emph{IPRIOLEN} bits, where
-IPRIOLEN is a constant parameter for the given PLIC, in the range of
+IPRIOLEN is a constant parameter for the given APLIC, in the range of
 1 to~8.
 Only values 1 through $\mbox{2}^{\textrm{IPRIOLEN}} - \mbox{1}$ are
 allowed for IPRIO, not zero.
@@ -1229,7 +1229,7 @@ The pending bit is set to one only by a relevant write to a \z{setip}
 or \z{setipnum} register.
 
 \item
-The pending bit is cleared when the interrupt is claimed at the PLIC or
+The pending bit is cleared when the interrupt is claimed at the APLIC or
 forwarded by MSI, or by a relevant write to an \z{in\_clrip} register
 or to \z{clripnum}.
 
@@ -1244,7 +1244,7 @@ rectified input value, or by a relevant write to a \z{setip} or
 \z{setipnum} register.
 
 \item
-The pending bit is cleared when the interrupt is claimed at the PLIC or
+The pending bit is cleared when the interrupt is claimed at the APLIC or
 forwarded by MSI, or by a relevant write to an \z{in\_clrip} register
 or to \z{clripnum}.
 
@@ -1262,7 +1262,7 @@ register.
 
 \item
 The pending bit is cleared whenever the rectified input value is low.
-The pending bit is not cleared by a claim of the interrupt at the PLIC,
+The pending bit is not cleared by a claim of the interrupt at the APLIC,
 nor can it be cleared by a write to an \z{in\_clrip} register or to
 \z{clripnum}.
 
@@ -1299,11 +1299,11 @@ cause the source's interrupt-pending bit to be set to one, as specified
 in Section~\ref{sec:AdvPLIC-reg-sourcecfg}.
 
 %-----------------------------------------------------------------------
-\section{Interrupt delivery directly by the PLIC}
+\section{Interrupt delivery directly by the APLIC}
 \label{sec:AdvPLIC-directMode}
 
 When an interrupt domain is in direct delivery mode
-(\z{domaincfg}.DM =~0), interrupts are delivered from the PLIC to harts
+(\z{domaincfg}.DM =~0), interrupts are delivered from the APLIC to harts
 by a unique signal to each hart, usually a dedicated wire.
 In this case, the domain's memory-mapped control region contains at the
 end an array of interrupt delivery control (IDC) structures, one IDC
@@ -1333,11 +1333,11 @@ optionally be all read-only zeros.
 Otherwise, the registers are documented individually below.
 
 \begin{commentary}
-A particular Advanced PLIC might be built to support up to some maximum
+A particular APLIC might be built to support up to some maximum
 number of harts without complete knowledge of the set of hart index
 numbers the system will employ in each interrupt domain.
-In that case, for the hart index numbers that are unused, the PLIC may
-have IDC structures that are functional within the PLIC (not read-only
+In that case, for the hart index numbers that are unused, the APLIC may
+have IDC structures that are functional within the APLIC (not read-only
 zeros) but simply left unconnected to any physical harts.
 \end{commentary}
 
@@ -1434,24 +1434,24 @@ Writes to \z{claimi} are ignored.
 \subsection{Interrupt delivery and handling}
 \label{sec:AdvPLIC-directMode-intrDelivery}
 
-When an interrupt domain is configured so the PLIC delivers interrupts
-directly to harts (field DM of \z{domaincfg} is zero), the PLIC
+When an interrupt domain is configured so the APLIC delivers interrupts
+directly to harts (field DM of \z{domaincfg} is zero), the APLIC
 supplies the \emph{external interrupt} signals, at the domain's
 privilege level, for all harts of the domain, so long as one of the
 following is true:
 (a)~the harts do not have IMSICs, or
 (b)~the \z{eidelivery} registers of the relevant IMSIC interrupt files
 are set to \z{0x40000000} (Section~\ref{sec:IMSIC-reg-eidelivery}).
-For a machine-level domain, the interrupt signals from the PLIC appear
+For a machine-level domain, the interrupt signals from the APLIC appear
 as bit MEIP (Machine External Interrupt-Pending) in each hart's \z{mip}
 CSR.
 For a supervisor-level domain, the interrupt signals appear as bit
 SEIP (Supervisor External Interrupt-Pending) in each hart's \z{mip} and
 \z{sip} CSRs.
 Each interrupt signal may be arbitrarily delayed traveling from the
-PLIC to the proper hart.
+APLIC to the proper hart.
 
-At the PLIC, each interrupt signal to a hart is derived from the IE
+At the APLIC, each interrupt signal to a hart is derived from the IE
 field of register \z{domaincfg} and the current state of the hart's IDC
 structure in the memory-mapped control region for the domain.
 If either \z{domaincfg}.IE =~0 or interrupt delivery to the hart
@@ -1461,24 +1461,24 @@ When \z{domaincfg}.IE =~1 and interrupt delivery is enabled
 (\z{idelivery} =~1), the interrupt signal is asserted whenever either
 register \z{iforce} or \z{topi} is not zero.
 
-Due to likely delay in the communication between a PLIC and a hart, it
+Due to likely delay in the communication between an APLIC and a hart, it
 may happen that an external interrupt trap is taken, yet no interrupt
 is pending and enabled for the hart when a read of the hart's
 \z{claimi} register actually occurs.
 In such a circumstance, the interrupt identity reported by the claim
 will be zero, resulting in an apparent \emph{spurious interrupt} from
-the PLIC.
+the APLIC.
 Portable software must be prepared for the possibility of spurious
-interrupts at the PLIC, which can safely be ignored and should be rare.
+interrupts at the APLIC, which can safely be ignored and should be rare.
 For testing purposes, a spurious interrupt can be triggered for a hart
 by setting an IDC structure's \z{iforce} register to~1.
 
-A trap handler solely for external interrupts via an Advanced PLIC
+A trap handler solely for external interrupts via an APLIC
 could be written roughly as follows:
 
 \begin{displayLinesTable}
 save processor registers \\
-\z{i = }read register \z{claimi} from the hart's IDC structure at the PLIC \\
+\z{i = }read register \z{claimi} from the hart's IDC structure at the APLIC \\
 \z{i = i>>16} \\
 call the interrupt handler for external interrupt \z{i} (minor identity) \\
 restore processor registers \\
@@ -1503,11 +1503,11 @@ cleared.
 \subsection{Addresses and data for outgoing MSIs}
 \label{sec:AdvPLIC-MSIAddrs}
 
-To forward interrupts by MSIs, a PLIC must know the MSI target address
+To forward interrupts by MSIs, an APLIC must know the MSI target address
 for each hart.
 For any given system, these addresses are fixed and should be hardwired
-into the PLIC if possible.
-However, some PLIC implementations may require that software supply the
+into the APLIC if possible.
+However, some APLIC implementations may require that software supply the
 MSI target addresses.
 In that case, the root domain's registers \z{mmsiaddrcfg},
 \z{mmsiaddrcfgh}, \z{smsiaddrcfg}, and \z{smsiaddrcfgh}
@@ -1585,16 +1585,16 @@ register.
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \subsection{Special consideration for level-sensitive interrupt sources}
 
-As soon as a level-sensitive interrupt is forwarded by MSI, the PLIC
+As soon as a level-sensitive interrupt is forwarded by MSI, the APLIC
 clears the pending bit for the interrupt source and then ignores the
 source until its incoming signal has been de-asserted.
 Clearing the pending bit when an MSI is sent is obviously necessary to
-avoid a constant stream of repeated MSIs from the PLIC to the target
+avoid a constant stream of repeated MSIs from the APLIC to the target
 hart for the same interrupt.
 However, after an interrupt service routine has addressed a cause found
 for the interrupt, the incoming interrupt wire might remain asserted at
-the PLIC for another reason, despite that the interrupt's pending bit
-at the PLIC was cleared and will remain so without intervention from
+the APLIC for another reason, despite that the interrupt's pending bit
+at the APLIC was cleared and will remain so without intervention from
 software.
 If the interrupt service routine then exits without further action,
 a continued interrupt from this source might never receive attention.
@@ -1603,9 +1603,9 @@ To avoid dropping interrupts in this way, the interrupt service routine
 for a level-sensitive interrupt may do one of the following before
 exiting:
 
-The first option is to test whether the interrupt wire into the PLIC
+The first option is to test whether the interrupt wire into the APLIC
 is still asserted, by reading the appropriate \z{in\_clrip} register at
-the PLIC.
+the APLIC.
 If the incoming interrupt is still asserted, the body of the interrupt
 service routine may be repeated to find and address an additional
 interrupt cause before the source wire is tested again.
@@ -1614,48 +1614,48 @@ routine may safely exit, as any new interrupt assertion will cause the
 pending bit to become set and a new MSI sent to the hart.
 
 A second option is for the interrupt service routine to write the
-PLIC's source identity number for the interrupt to the domain's
+APLIC's source identity number for the interrupt to the domain's
 \z{setipnum} register just before exiting.
 This will cause the interrupt's pending bit to be set to one again if
 the source is still asserting an interrupt, but not if the source is
 not asserting an interrupt.
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-\subsection{Synchronizing interactions between a hart and the PLIC}
+\subsection{Synchronizing interactions between a hart and the APLIC}
 \label{sec:AdvPLIC-MSISync}
 
-When a PLIC sends an MSI to a hart, there is an unspecified travel
+When an APLIC sends an MSI to a hart, there is an unspecified travel
 delay before the MSI is observed at the hart's IMSIC.
-Consequently, after a PLIC's configuration is changed by writing to a
-PLIC register, harts may continue to see MSIs arrive from the PLIC from
+Consequently, after an APLIC's configuration is changed by writing to an
+APLIC register, harts may continue to see MSIs arrive from the APLIC from
 the time before the write, for an unspecified amount of time.
 
 It is sometimes necessary to know when no more of these late MSIs can
 arrive.
 For example, if a hart will be turned off (``powered down''), all
 interrupts directed to it must be redirected to other harts, which may
-involve reconfiguring one or more PLICs.
-Even after the PLICs are reconfigured, the hart still cannot be safely
+involve reconfiguring one or more APLICs.
+Even after the APLICs are reconfigured, the hart still cannot be safely
 turned off until it is known no more MSIs are destined for it.
 
 The \z{genmsi} register (Section~\ref{sec:AdvPLIC-reg-genmsi}) exists
 to allow software to determine when all earlier MSIs have arrived at a
 hart.
 To use \z{genmsi} for this purpose, software can dedicate one external
-interrupt identity at each hart's IMSIC interrupt file solely for PLIC
+interrupt identity at each hart's IMSIC interrupt file solely for APLIC
 synchronization.
-Assuming there are multiple harts, a PLIC's \z{genmsi} register should
+Assuming there are multiple harts, an APLIC's \z{genmsi} register should
 also be protected by a standard mutual-exclusion lock.
-The following sequence can then be used to synchronize between a PLIC
+The following sequence can then be used to synchronize between an APLIC
 and a specific hart:
 \begin{enumerate}
 
 \item
 At the hart's IMSIC, clear the pending bit for the specific minor
-interrupt identity $i$ used exclusively for PLIC synchronization.
+interrupt identity $i$ used exclusively for APLIC synchronization.
 
 \item
-Acquire the shared lock for the PLIC's \z{genmsi} register.
+Acquire the shared lock for the APLIC's \z{genmsi} register.
 
 \item
 Write \z{genmsi} to generate an MSI to the hart with interrupt
@@ -1674,6 +1674,6 @@ hart's IMSIC until it is found set.
 \end{enumerate}
 The loops of steps 4 and 6 are expected normally to succeed very
 quickly, often on the first or second attempt.
-When this sequence is complete, all earlier MSIs from the PLIC must
+When this sequence is complete, all earlier MSIs from the APLIC must
 also have arrived at the hart's IMSIC.
 

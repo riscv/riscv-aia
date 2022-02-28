@@ -17,11 +17,11 @@ and supervisor-level timer interrupts (7~and~5), and machine- and
 supervisor-level software interrupts (3~and~1).
 Beyond these major labels, the \emph{external} interrupts at each
 privilege level are given secondary, minor identities by an external
-interrupt controller such as a PLIC or IMSIC, distinguishing interrupts
+interrupt controller such as an APLIC or IMSIC, distinguishing interrupts
 from different devices or causes.
 These minor identities for external interrupts were covered in Chapters
-\ref{ch:IMSIC} and~\ref{ch:AdvPLIC} specifying the IMSIC and Advanced
-PLIC components.
+\ref{ch:IMSIC} and~\ref{ch:AdvPLIC} specifying the IMSIC and
+APLIC components.
 
 The Advanced Interrupt Architecture assigns other major interrupt
 identities in the range 16--63 to additional \emph{local interrupts}
@@ -35,7 +35,7 @@ into a lower privilege level.
 Lastly, an optional facility lets software assign priorities to major
 interrupts (such as the timer and software interrupts, and any local
 interrupts) such that they may mix with the priorities set for external
-interrupts by a PLIC or IMSIC.
+interrupts by a PLIC, APLIC, or IMSIC.
 
 %-----------------------------------------------------------------------
 \section{Interrupt allocations and default priorities}
@@ -160,7 +160,7 @@ interrupt actually cause the local interrupt to be raised.
 For example, a single {\RISCV} system might report bus errors in
 multiple ways, depending on where in the system the error is detected.
 Some bus errors might signal the standard local interrupt (number~30),
-while others are reported as external interrupts, routed through a PLIC
+while others are reported as external interrupts, routed through an APLIC
 or IMSIC.
 
 %-----------------------------------------------------------------------
@@ -248,10 +248,10 @@ the \emph{\texttt{iprio} array} for machine level.
 The width of priority numbers for external interrupts is
 \emph{IPRIOLEN}.
 This parameter is affected by the main external interrupt controller
-for the hart, either a PLIC or an IMSIC.
+for the hart, whether a PLIC, APLIC, or IMSIC.
 
-For a PLIC, IPRIOLEN is in the range 1--8 as specified in
-Chapter~\ref{ch:AdvPLIC} on the Advanced PLIC.
+For an APLIC, IPRIOLEN is in the range 1--8 as specified in
+Chapter~\ref{ch:AdvPLIC} on the APLIC.
 
 For an IMSIC, IPRIOLEN is 6, 7, or~8.
 IPRIOLEN may be 6 only if the number of external interrupt identities
@@ -309,7 +309,7 @@ on interrupt priority.
 \hline
          & Priority number in & Priority number from & Priority number in \\
 Priority & machine-level      & interrupt controller & machine-level \\
-order    & \z{iprio} array    & (PLIC or IMSIC)      & \z{iprio} array \\
+order    & \z{iprio} array    & (APLIC or IMSIC)     & \z{iprio} array \\
 \hline
 \hline
 Highest  & 0                  &                      & \\
@@ -662,7 +662,7 @@ on interrupt priority.
 \hline
          & Priority number in & Priority number from & Priority number in \\
 Priority & supervisor-level   & interrupt controller & supervisor-level \\
-order    & \z{iprio} array    & (PLIC or IMSIC)      & \z{iprio} array \\
+order    & \z{iprio} array    & (APLIC or IMSIC)     & \z{iprio} array \\
 \hline
 \hline
 Highest  & 0                  &                      & \\

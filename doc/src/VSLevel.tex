@@ -69,21 +69,21 @@ and \z{stopei} is indistinguishable from a true supervisor-level
 interrupt file as seen from \mbox{S-mode} (or \mbox{HS-mode}).
 
 In addition to an IMSIC at each hart, a virtual machine may also need
-to see a PLIC.
+to see a PLIC or APLIC.
 However, unlike an IMSIC's ability to provide physical guest interrupt
-files for virtual harts, a PLIC must be emulated for a virtual machine
+files for virtual harts, a PLIC or APLIC must be emulated for a virtual machine
 by the hypervisor.
 
 \begin{commentary}
 The Advanced Interrupt Architecture does not currently include hardware
-assistance for virtualizing a PLIC.
+assistance for virtualizing an APLIC.
 For small numbers of harts, such hardware would be substantially larger
 than that required to implement guest interrupt files for an IMSIC.
 It is assumed that most high-performance I/O can be done through
 devices that can send MSIs directly to guest interrupt files (such as
 devices attached through a PCI Express interconnect).
 For the types of devices whose interrupts must go through a (virtual)
-PLIC, the overhead cost of emulating the PLIC is expected to be less
+APLIC, the overhead cost of emulating the APLIC is expected to be less
 significant.
 \end{commentary}
 
@@ -99,16 +99,16 @@ of asserting a VS-level external interrupt is more trouble than just
 writing to \z{vsseteipnum} to set a specific interrupt-pending bit in
 the guest interrupt file.
 
-In the special case that an emulated Advanced PLIC for a virtual
+In the special case that an emulated APLIC for a virtual
 machine has a wired interrupt source that equates to an actual
-interrupt source of a real Advanced PLIC, if software running in this
-virtual machine configures its virtual PLIC to forward interrupts from
+interrupt source of a real APLIC, if software running in this
+virtual machine configures its virtual APLIC to forward interrupts from
 that source as MSIs to a specific virtual hart, the hypervisor can
-configure the real PLIC to forward the actual interrupts directly as
+configure the real APLIC to forward the actual interrupts directly as
 MSIs to the virtual hart's guest interrupt file.
 In this way, although the hypervisor must trap and emulate the virtual
 machine's memory accesses that configure the forwarding of interrupts
-at the virtual PLIC, the interrupts themselves can be converted
+at the virtual APLIC, the interrupts themselves can be converted
 automatically into real MSIs for the guest interrupt file, without the
 hypervisor being invoked for each arriving interrupt.
 
@@ -121,7 +121,7 @@ to directly control a physical device that sends MSIs:
 First, each virtual hart must have a guest interrupt file assigned to
 it, giving each its own apparent IMSIC within the virtual machine.
 Second, interrupts from the device must be signaled by wire through
-an Advanced PLIC that can translate these interrupts into MSIs, or the
+an APLIC that can translate these interrupts into MSIs, or the
 system must have an I/O MMU that can translate the addresses of MSI
 memory writes made by the device itself.
 
@@ -176,12 +176,12 @@ implemented interrupt-pending bits (the \z{eip} array).
 Modify the relevant translation tables at all I/O MMUs so that MSIs for
 this virtual interrupt file are now sent to the new physical interrupt
 file.
-Likewise, if any interrupts at a PLIC are forwarded by MSIs to the old
-interrupt file, reconfigure the PLIC to send them to the new interrupt
+Likewise, if any interrupts at an APLIC are forwarded by MSIs to the old
+interrupt file, reconfigure the APLIC to send them to the new interrupt
 file.
-As needed, synchronize with all I/O MMUs and PLICs to ensure that no
+As needed, synchronize with all I/O MMUs and APLICs to ensure that no
 straggler MSIs will arrive at the old interrupt file after this step.
-Synchronizing with an Advanced PLIC can be accomplished using the
+Synchronizing with an APLIC can be accomplished using the
 algorithm of Section~\ref{sec:AdvPLIC-MSISync}.
 
 \item
