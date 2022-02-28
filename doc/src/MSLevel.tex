@@ -66,6 +66,7 @@ Highest & 63, 62, 31, 30, 61, 60, & Even numbers are standard local
         & \ 9, 1, 5  & Supervisor interrupts:  external, software, timer \\
         & 12         & Supervisor guest external interrupt \\
         & 10, 2, 6   & VS interrupts:  external, software, timer \\
+        & 13         & Counter overflow interrupt \\
 \cline{2-3}
         & 47, 46, 23, 22, 45, 44, & Even numbers are standard local
                                      interrupts \\
@@ -123,8 +124,13 @@ interrupt sources are assigned the same priority number.
 %-----------------------------------------------------------------------
 \section{Defined local interrupts}
 
-The local interrupts currently defined by the Advanced Interrupt
-Architecture are listed here, in order of decreasing default
+The {\RISCV} Privileged Architecture currently defines one local
+interrupt:\nopagebreak
+\begin{displayLinesTable}[l@{\quad}l]
+13 & Counter overflow interrupt\ \ (from extension Sscofpmf) \\
+\end{displayLinesTable}
+The Advanced Interrupt Architecture defines these additional
+local interrupts, listed in order of decreasing default
 priority:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
 30 & Reserved for standard reporting of bus or system errors \\
@@ -166,7 +172,8 @@ or IMSIC.
 %-----------------------------------------------------------------------
 \section{Interrupts at machine level}
 
-When a hart implements one of the local interrupts defined by the
+When a hart implements one of the standard local interrupts defined by
+the {\RISCV} Privileged Architecture (number 13, 14, or 15) or by the
 Advanced Interrupt Architecture (an even interrupt number in the
 range 16--62), the corresponding bit position is writable in both
 \z{mip}/\z{miph} and \z{mie}/\z{mieh}.
@@ -563,7 +570,7 @@ and \z{mvip}/\z{mviph} do not exist.
 \section{Interrupts at supervisor level}
 \label{sec:intrs-S}
 
-If a local interrupt defined by the Advanced Interrupt Architecture
+If a standard local interrupt
 becomes pending (=~1) in \z{sip}/\z{siph}, the bit in \z{sip}/\z{siph}
 is writable and will remain set until cleared by software.
 
