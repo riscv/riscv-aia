@@ -515,10 +515,16 @@ All other bits of \z{hvictl} are reserved and read as zeros.
 When bit VTI (Virtual Trap Interrupt control) =~1, attempts from
 \mbox{VS-mode} to explicitly access CSRs \z{sip}, \z{sie}, or, for RV32
 only, \z{siph} or \z{sieh}, cause a virtual instruction exception.
-Furthermore, when VTI =~1, a virtual instruction exception is raised
-also for any attempt by the guest to write to a CSR that might
-cause a bit of \z{vsip}/\z{vsiph} to change from one to zero,
-excluding bit~9 for external interrupts (SEIP).
+Furthermore, for any given CSR, if there is some circumstance in which
+a write to the register may cause a bit of \z{vsip}/\z{vsiph} to change
+from one to zero, excluding bit~9 for external interrupts (SEIP),
+then when VTI =~1, a virtual instruction exception is raised
+also for any attempt by the guest to write this register.
+Both the value being written to the CSR and the value of
+\z{vsip}/\z{vsiph} (before or after) are ignored for determining
+whether to raise the exception.
+(Hence a write would not actually need to change a bit of
+\z{vsip}/\z{vsiph} from one to zero for the exception to be raised.)
 In particular, if register \z{vstimecmp} is implemented
 (from extension Sstc), then attempts from \mbox{VS-mode}
 to write to \z{stimecmp} or (RV32 only) \z{stimecmph}
