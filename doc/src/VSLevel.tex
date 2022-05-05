@@ -272,29 +272,20 @@ of interrupts for VS level, using hypervisor CSRs \z{hviprio1} and
 and \z{hviprio2h}.
 The subset of major interrupt numbers whose priority may be configured
 in hardware are these:
-\begin{displayLinesTable}[r@{\quad}l]
- 1 & Supervisor software interrupt \\
- 5 & Supervisor timer interrupt \\
-13 & Counter overflow interrupt \\
-14 & (Reserved interrupt) \\
-15 & \quad '' \\
-16 & \quad '' \\
-18 & Debug/trace interrupt \\
-20 & (Reserved interrupt) \\
-22 & \quad '' \\
-24 & \quad '' \\
-26 & \quad '' \\
-28 & \quad '' \\
-30 & (Reserved for standard reporting of bus or system errors) \\
+\begin{displayLinesTable}[c@{\quad}l]
+\ 1    & Supervisor software interrupt \\
+\ 5    & Supervisor timer interrupt \\
+ 13    & Counter overflow interrupt \\
+14--23 & \em Reserved for standard local interrupts \\
 \end{displayLinesTable}
 For interrupts directed to VS level, software-configurable priorities
-are not supported in hardware for custom interrupts or for any
-interrupt numbers higher than~30.
+are not supported in hardware for standard local interrupts
+in the range 32--48.
 
 \begin{commentary}
-If priority configurability is desired for custom interrupts, it can
-be supported by custom CSRs in addition to what is defined here for
-standard interrupts.
+For custom interrupts, priority configurability may be
+supported in hardware by custom CSRs, expanding upon
+\z{hviprio1} and \z{hviprio2} for standard interrupts.
 \end{commentary}
 
 For RV32, registers \z{hviprio1}, \z{hviprio1h}, \z{hviprio2}, and
@@ -302,14 +293,14 @@ For RV32, registers \z{hviprio1}, \z{hviprio1h}, \z{hviprio2}, and
 
 RV32 \z{hviprio1}:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
-bits 7:0   & Reserved for priority number for interrupt 0; reads as zero \\
+bits 7:0   & \em Reserved for priority number for interrupt 0; reads as zero \\
 bits 15:8  & Priority number for interrupt 1, supervisor software interrupt \\
-bits 23:16 & Reserved for priority number for interrupt 4; reads as zero \\
+bits 23:16 & \em Reserved for priority number for interrupt 4; reads as zero \\
 bits 31:24 & Priority number for interrupt 5, supervisor timer interrupt \\
 \end{displayLinesTable}
 RV32 \z{hviprio1h}:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
-bits 7:0   & Reserved for priority number for interrupt 8; reads as zero \\
+bits 7:0   & \em Reserved for priority number for interrupt 8; reads as zero \\
 bits 15:8  & Priority number for interrupt 13, counter overflow interrupt \\
 bits 23:16 & Priority number for interrupt 14 \\
 bits 31:24 & Priority number for interrupt 15 \\
@@ -317,16 +308,16 @@ bits 31:24 & Priority number for interrupt 15 \\
 RV32 \z{hviprio2}:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
 bits 7:0   & Priority number for interrupt 16 \\
-bits 15:8  & Priority number for interrupt 18, debug/trace interrupt \\
-bits 23:16 & Priority number for interrupt 20 \\
-bits 31:24 & Priority number for interrupt 22 \\
+bits 15:8  & Priority number for interrupt 17 \\
+bits 23:16 & Priority number for interrupt 18 \\
+bits 31:24 & Priority number for interrupt 19 \\
 \end{displayLinesTable}
 RV32 \z{hviprio2h}:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
-bits 7:0   & Priority number for interrupt 24 \\
-bits 15:8  & Priority number for interrupt 26 \\
-bits 23:16 & Priority number for interrupt 28 \\
-bits 31:24 & Priority number for interrupt 30 \\
+bits 7:0   & Priority number for interrupt 20 \\
+bits 15:8  & Priority number for interrupt 21 \\
+bits 23:16 & Priority number for interrupt 22 \\
+bits 31:24 & Priority number for interrupt 23 \\
 \end{displayLinesTable}
 
 For RV64, registers \z{hviprio1} and \z{hviprio2} are the \mbox{64-bit}
@@ -335,11 +326,11 @@ high-half partners:
 
 RV64 \z{hviprio1}:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
-bits 7:0   & Reserved for priority number for interrupt 0; reads as zero \\
+bits 7:0   & \em Reserved for priority number for interrupt 0; reads as zero \\
 bits 15:8  & Priority number for interrupt 1, supervisor software interrupt \\
-bits 23:16 & Reserved for priority number for interrupt 4; reads as zero \\
+bits 23:16 & \em Reserved for priority number for interrupt 4; reads as zero \\
 bits 31:24 & Priority number for interrupt 5, supervisor timer interrupt \\
-bits 39:32 & Reserved for priority number for interrupt 8; reads as zero \\
+bits 39:32 & \em Reserved for priority number for interrupt 8; reads as zero \\
 bits 47:40 & Priority number for interrupt 13, counter overflow interrupt \\
 bits 55:48 & Priority number for interrupt 14 \\
 bits 63:56 & Priority number for interrupt 15 \\
@@ -347,13 +338,13 @@ bits 63:56 & Priority number for interrupt 15 \\
 RV64 \z{hviprio2}:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
 bits 7:0   & Priority number for interrupt 16 \\
-bits 15:8  & Priority number for interrupt 18, debug/trace interrupt \\
-bits 23:16 & Priority number for interrupt 20 \\
-bits 31:24 & Priority number for interrupt 22 \\
-bits 39:32 & Priority number for interrupt 24 \\
-bits 47:40 & Priority number for interrupt 26 \\
-bits 55:48 & Priority number for interrupt 28 \\
-bits 63:56 & Priority number for interrupt 30 \\
+bits 15:8  & Priority number for interrupt 17 \\
+bits 23:16 & Priority number for interrupt 18 \\
+bits 31:24 & Priority number for interrupt 19 \\
+bits 39:32 & Priority number for interrupt 20 \\
+bits 47:40 & Priority number for interrupt 21 \\
+bits 55:48 & Priority number for interrupt 22 \\
+bits 63:56 & Priority number for interrupt 23 \\
 \end{displayLinesTable}
 
 Each priority number in \z{hviprio1}/\z{hviprio1h} and
@@ -531,7 +522,8 @@ to write to \z{stimecmp} or (RV32 only) \z{stimecmph}
 cause a virtual instruction exception when VTI~=~1.
 
 \begin{commentary}
-For standard interrupt numbers in the range 13--63, and for
+For the standard local interrupts
+(major identities 13--23 and 32--47), and for
 software interrupts (SSI), the corresponding interrupt-pending
 bits in \z{vsip}/\z{vsiph} are defined as ``sticky,''
 meaning a guest can clear them only by writing directly

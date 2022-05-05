@@ -23,8 +23,8 @@ These minor identities for external interrupts were covered in Chapters
 \ref{ch:IMSIC} and~\ref{ch:AdvPLIC} specifying the IMSIC and
 APLIC components.
 
-The Advanced Interrupt Architecture assigns other major interrupt
-identities in the range 16--63 to additional \emph{local interrupts}
+The Advanced Interrupt Architecture reserves another 24 major
+interrupt identities for additional \emph{local interrupts}
 that arise within or in close proximity to the hart, often for
 reporting errors.
 A mechanism is also defined that allows software to
@@ -38,14 +38,13 @@ interrupts) such that they may mix with the priorities set for external
 interrupts by a PLIC, APLIC, or IMSIC.
 
 %-----------------------------------------------------------------------
-\section{Interrupt allocations and default priorities}
+\section{Defined major interrupts and default priorities}
 \label{sec:majorIntrs}
 
-The base {\RISCV} Privileged Architecture designates major interrupt
-numbers 16 and above as being for platform or custom use.
-The Advanced Interrupt Architecture allocates 24 of these interrupt
-numbers to standardize as local interrupts, and leaves the rest for
-custom use.
+Table~\ref{tab:majorIntrs} lists all the major interrupts
+currently defined for {\RISCV} harts.
+At this time, the only standard major interrupts are those
+specified by the {\RISCV} Privileged Architecture.
 
 \begin{table*}[h!]
 \begin{center}
@@ -55,12 +54,77 @@ Default        &                         & \\
 priority order & Major interrupt numbers & \multicolumn{1}{c|}{Description} \\
 \hline
 \hline
-Highest & 63, 62, 31, 30, 61, 60, & Even numbers are standard local
-                                     interrupts \\
-        & 59, 58, 29, 28, 57, 56, & \ or reserved; odd numbers are
-                                     designated \\
-        & 55, 54, 27, 26, 53, 52, & \ for custom use \\
-        & 51, 50, 25, 24, 49, 48  & \\
+Highest & 11, 3, 7   & Machine interrupts:  external, software, timer \\
+        & \ 9, 1, 5  & Supervisor interrupts:  external, software, timer \\
+        & 12         & Supervisor guest external interrupt \\
+        & 10, 2, 6   & VS interrupts:  external, software, timer \\
+Lowest  & 13         & Counter overflow interrupt \\
+\hline
+\end{tabular}
+\end{center}
+\caption{%
+The standard major interrupt codes, listed in default priority order.
+Currently, all standard codes are defined by
+the {\RISCV} Privileged Architecture.%
+}
+\label{tab:majorIntrs}
+\end{table*}
+
+\begin{table*}[h!]
+\begin{center}
+\begin{tabular}{|c|l|}
+\hline
+                          & \\
+Major interrupt numbers   & \hspace{10mm}Category \\
+\hline
+\hline
+\begin{tabular}{@{}c@{}}
+  \ 0--12 \\
+  13--15 \\
+\end{tabular} &
+    \begin{tabular}{@{}l@{}}
+      Not local interrupts \\
+      Local interrupts \\
+    \end{tabular}
+      $\left\}\begin{tabular}{l@{}}
+        Assigned by the \\
+        \quad Privileged Architecture \\
+      \end{tabular}\right.$ \\
+\hline
+16--23                    & Local interrupts\\
+24--31                    & \em Designated for custom use \\
+32--47                    & Local interrupts \\
+\mbox{\ $\geq \mbox{48}$} & \em Designated for custom use \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Categorization of current and future major interrupts.}
+\label{tab:majorIntrCategories}
+\end{table*}
+
+Of the major interrupts controlled by the Privileged Architecture
+(numbers 0--15), the Advanced Interrupt Architecture categorizes the
+counter overflow interrupt (code~13) as a \emph{local interrupt}.
+It is assumed furthermore that any future definitions for
+reserved interrupt numbers 14 and 15 will also be local interrupts.
+Major interrupt numbers 16--23 and 32--47 are additionally reserved for
+standard local interrupts that other {\RISCV} extensions may define.
+The remaining major interrupts allocated to the Privileged
+Architecture, numbers 0--12, are categorized as not local interrupts.
+Taken altogether, Table~\ref{tab:majorIntrCategories}
+summarizes the Advanced Interrupt Architecture's categorization
+of all major interrupt identities.
+
+\begin{commentary}
+For the standard local interrupts not defined by the
+{\RISCV} Privileged Architecture (numbers 16--23 and 32--47),
+the current plan is to assign default priorities
+in the order shown in this table:
+\begin{center}
+\begin{tabular}{|c|l|l|}
+\hline
+Highest & 47, 23, 46, 45, 22, 44, & \\
+        & 43, 21, 42, 41, 20, 40  & \\
 \cline{2-3}
         & 11, 3, 7   & Machine interrupts:  external, software, timer \\
         & \ 9, 1, 5  & Supervisor interrupts:  external, software, timer \\
@@ -68,53 +132,60 @@ Highest & 63, 62, 31, 30, 61, 60, & Even numbers are standard local
         & 10, 2, 6   & VS interrupts:  external, software, timer \\
         & 13         & Counter overflow interrupt \\
 \cline{2-3}
-        & 47, 46, 23, 22, 45, 44, & Even numbers are standard local
-                                     interrupts \\
-        & 43, 42, 21, 20, 41, 40, & \ or reserved; odd numbers are
-                                     designated \\
-        & 39, 38, 19, 18, 37, 36, & \ for custom use \\
-Lowest  & 35, 34, 17, 16, 33, 32  & \\
+        & 39, 19, 38, 37, 18, 36, & \\
+Lowest  & 35, 17, 34, 33, 16, 32  & \\
 \hline
 \end{tabular}
 \end{center}
-\caption{%
-The default priority order for major interrupts 0--63.
-Interrupt~63 has the highest default priority, and interrupt~32 has the
-lowest default priority.%
-}
-\label{tab:defaultIntrPrios}
-\end{table*}
+Among interrupts 16--23, a higher interrupt number conveys
+higher default priority, and likewise for interrupts 32--47.
+These two groups are interleaved together in the complete order,
+and the Privileged Architecture's standard interrupts, 0--15,
+are inserted into the middle of the sequence.
+This proposed default priority order is arranged so that
+interrupts 0--31 can potentially be an adequate subset on their
+own for \mbox{32-bit} {\RISCV} systems.
 
-Table~\ref{tab:defaultIntrPrios} shows the allocation of major
-interrupt numbers 0--63, listed in default priority order from highest
-to lowest.
-Note that, for interrupts with major identities in the range 16--31, a
-higher interrupt number conveys higher default priority, and likewise
-for major identities in the range 32--63.
-These two groups are interleaved together in the complete order, and
-the Privileged Architecture's standard interrupts, 0--15, are inserted
-into the middle of the sequence.
-
-\begin{commentary}
-The default priority order is arranged so that interrupts 0--31 can
-potentially be an adequate subset on their own for \mbox{32-bit}
-{\RISCV} systems.
+In actuality, future {\RISCV} extensions may or may not stick to
+this plan for the default priority order of interrupts they define.
 \end{commentary}
 
 \begin{commentary}
-If the {\RISCV} Privileged Architecture defines interrupt~0, the
+In addition to the existing major interrupts of
+Table~\ref{tab:majorIntrs}, the following
+local interrupts are tentatively proposed,
+listed in order of decreasing default priority:\nopagebreak
+\begin{displayLinesTable}[l@{\quad}l]
+23 & Bus or system error \\
+45 & Per-core high-power or over-temperature event \\
+43 & High-priority RAS event \\
+\noalign{\smallskip}
+35 & Low-priority RAS event \\
+17 & Debug/trace interrupt \\
+\end{displayLinesTable}
+\noindent
+These local interrupts are expected to be
+specified by other {\RISCV} extensions.
+Be aware, this list is not final and may change
+as the relevant extensions are developed and ratified.
+\emph{RAS} is an abbreviation for \emph{Reliability, Availability, and
+Serviceability}.
+\end{commentary}
+
+\begin{commentary}
+If a future version of the {\RISCV} Privileged Architecture
+defines interrupt~0, the
 Advanced Interrupt Architecture needs it to have a default priority
 lower than certain external interrupts.
 See Sections \ref{sec:mtopi} and~\ref{sec:stopi} on CSRs \z{mtopi} and
 \z{stopi}.
 \end{commentary}
 
-Interrupt numbers 64 and above are all designated for custom use.
-If a hart implements custom interrupts with these numbers, their
+Interrupt numbers 24--31 and 48 and higher
+are all designated for custom use.
+If a hart implements any custom interrupts, their
 positions in the default priority order must be documented for the
 hart.
-Default priority order is standardized by the Advanced Interrupt
-Architecture only for interrupts 0--63.
 
 When a hart supports the arbitrary configuration of interrupt
 priorities by software (described in later sections), the default
@@ -122,62 +193,15 @@ priority order still remains relevant for breaking ties when two
 interrupt sources are assigned the same priority number.
 
 %-----------------------------------------------------------------------
-\section{Defined local interrupts}
-
-The {\RISCV} Privileged Architecture currently defines one local
-interrupt:\nopagebreak
-\begin{displayLinesTable}[l@{\quad}l]
-13 & Counter overflow interrupt\ \ (from extension Sscofpmf) \\
-\end{displayLinesTable}
-The Advanced Interrupt Architecture defines these additional
-local interrupts, listed in order of decreasing default
-priority:\nopagebreak
-\begin{displayLinesTable}[l@{\quad}l]
-30 & Reserved for standard reporting of bus or system errors \\
-58 & Tentatively reserved for per-core high-power/over-temperature events \\
-54 & Reserved for standard high-priority RAS events \\
-\noalign{\bigskip}
-38 & Reserved for standard low-priority RAS events \\
-18 & Debug/trace interrupt \\
-\end{displayLinesTable}
-\emph{RAS} is an abbreviation for \emph{Reliability, Availability, and
-Serviceability}.
-
-\begin{commentary}
-The Advanced Interrupt Architecture reserves local interrupt numbers
-for use by other {\RISCV} standards.
-Complete facilities for managing bus or system errors,
-high-power/over-temperature events, RAS events, or debug/trace
-interrupts are not defined here.
-\end{commentary}
-
-The Advanced Interrupt Architecture does not itself require that all
-local interrupts it defines be implemented.
-A {\RISCV} hart may implement any subset of them, or none of them.
-For whichever ones are implemented, the corresponding bits in CSRs
-\z{mip}/\z{miph} and \z{mie}/\z{mieh} must be writable, and the
-corresponding bits in \z{mideleg}/\z{midelegh} (if those CSRs exist
-because supervisor mode is implemented) may each either be writable or
-be hardwired to zero.
-
-Even when a defined local interrupt is implemented, it is not
-necessarily the case that all events matching the description for that
-interrupt actually cause the local interrupt to be raised.
-For example, a single {\RISCV} system might report bus errors in
-multiple ways, depending on where in the system the error is detected.
-Some bus errors might signal the standard local interrupt (number~30),
-while others are reported as external interrupts, routed through an APLIC
-or IMSIC.
-
-%-----------------------------------------------------------------------
 \section{Interrupts at machine level}
 
-When a hart implements one of the standard local interrupts defined by
-the {\RISCV} Privileged Architecture (number 13, 14, or 15) or by the
-Advanced Interrupt Architecture (an even interrupt number in the
-range 16--62), the corresponding bit position is writable in both
-\z{mip}/\z{miph} and \z{mie}/\z{mieh}.
-An occurrence of the interrupt event causes the interrupt-pending bit
+For whichever standard local interrupts are
+implemented, the corresponding bits in CSRs
+\z{mip}/\z{miph} and \z{mie}/\z{mieh} must be writable, and the
+corresponding bits in \z{mideleg}/\z{midelegh} (if those CSRs exist
+because supervisor mode is implemented) must each either be writable or
+be hardwired to zero.
+An occurrence of a local interrupt event causes the interrupt-pending bit
 in \z{mip}/\z{miph} to be set to one.
 This bit then remains set until cleared by software.
 
@@ -193,7 +217,8 @@ one; and
 
 When multiple interrupt causes are ready to trigger simultaneously, the
 interrupt taken first is determined by priority order, which may be the
-default order specified earlier, or may be a modified order configured
+default order specified in the previous section
+(\ref{sec:majorIntrs}), or may be a modified order configured
 by software.
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
