@@ -19,8 +19,7 @@ supervisor-level interrupts.
 
 As introduced in Chapter~\ref{ch:CSRs}, several hypervisor and VS CSRs
 are added:  \z{hvien}, \z{hvictl}, \z{hviprio1}, \z{hviprio2},
-\z{vsiselect}, \z{vsireg}, \z{vstopi}, \z{vsseteipnum},
-\z{vsclreipnum}, \z{vsseteienum}, \z{vsclreienum}, and \z{vstopei}.
+\z{vsiselect}, \z{vsireg}, \z{vstopei}, and \z{vstopi}.
 For RV32, the following ``high-half'' CSR partners are also added:
 \z{hidelegh}, \z{hvienh}, \z{hviph}, \z{hviprio1h}, \z{hviprio2h},
 \z{vsiph}, and \z{vsieh}.
@@ -60,11 +59,9 @@ in the same range select registers of the IMSIC's true supervisor-level
 interrupt file.
 The registers of an interrupt file that are accessed indirectly through
 \z{vsiselect} and \z{vsireg} are documented in Chapter~\ref{ch:IMSIC}
-on the IMSIC, along with the effects of accessing CSRs \z{vsseteipnum},
-\z{vsclreipnum}, \z{vsseteienum}, \z{vsclreienum}, and \z{vstopei}.
+on the IMSIC, along with IMSIC-only CSR \z{vstopei}.
 Because all IMSIC interrupt files act identically, the guest interrupt
 file that a virtual hart accesses through CSRs \z{siselect}, \z{sireg},
-\z{sseteipnum}, \z{sclreipnum}, \z{sseteienum}, \z{sclreienum},
 and \z{stopei} is indistinguishable from a true supervisor-level
 interrupt file as seen from \mbox{S-mode} (or \mbox{HS-mode}).
 
@@ -91,13 +88,11 @@ When a virtual hart appears to have an IMSIC because a guest interrupt
 file is assigned to it, all external interrupts, real or emulated,
 destined for the virtual hart must go through this perceived IMSIC.
 A hypervisor can easily inject an emulated external interrupt into the
-guest interrupt file selected by \z{hstatus}.VGEIN simply by writing to
-CSR \z{vsseteipnum}.
-When a virtual hart has a guest interrupt file, there is no reason
-for a hypervisor to set bit VSEIP in CSR \z{hvip}, as this method
-of asserting a VS-level external interrupt is more trouble than just
-writing to \z{vsseteipnum} to set a specific interrupt-pending bit in
-the guest interrupt file.
+guest interrupt file selected by \z{hstatus}.VGEIN
+by setting a bit in the interrupt-pending array
+indirectly accessed through \z{vsiselect} and \z{vsireg}.
+When a virtual hart has a guest interrupt file, a hypervisor
+is not normally expected to set bit VSEIP in CSR \z{hvip}.
 
 In the special case that an emulated APLIC for a virtual
 machine has a wired interrupt source that equates to an actual

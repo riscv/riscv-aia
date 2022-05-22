@@ -439,29 +439,20 @@ single guest interrupt file, selected by the VGEIN field of CSR
 \z{hstatus}.
 
 For machine level, the relevant CSRs are:\nopagebreak
-\begin{displayLinesTable}[l@{\qquad}l@{\qquad}l]
-\z{miselect} & \z{mseteipnum} & \z{mtopei} \\
-\z{mireg}    & \z{mclreipnum} \\
-             & \z{mseteienum} \\
-             & \z{mclreienum} \\
+\begin{displayLinesTable}
+\z{miselect} \qquad \z{mireg} \qquad \z{mtopei} \\
 \end{displayLinesTable}
 
 When supervisor mode is implemented, the set of supervisor-level CSRs
 matches those of machine level:
-\begin{displayLinesTable}[l@{\qquad}l@{\qquad}l]
-\z{siselect} & \z{sseteipnum} & \z{stopei} \\
-\z{sireg}    & \z{sclreipnum} \\
-             & \z{sseteienum} \\
-             & \z{sclreienum} \\
+\begin{displayLinesTable}
+\z{siselect} \qquad \z{sireg} \qquad \z{stopei} \\
 \end{displayLinesTable}
 
 And when the hypervisor extension is implemented, there is a
 corresponding set of VS CSRs:
-\begin{displayLinesTable}[l@{\qquad}l@{\qquad}l]
-\z{vsiselect} & \z{vsseteipnum} & \z{vstopei} \\
-\z{vsireg}    & \z{vsclreipnum} \\
-              & \z{vsseteienum} \\
-              & \z{vsclreienum} \\
+\begin{displayLinesTable}
+\z{vsiselect} \qquad \z{vsireg} \qquad \z{vstopei} \\
 \end{displayLinesTable}
 
 As explained in Chapter~\ref{ch:CSRs}, registers \z{miselect} and
@@ -508,9 +499,9 @@ Registers \z{eie0} through \z{eie63} contain the enable bits for
 the same interrupt identities, and are collectively called the
 \emph{\texttt{eie} array}.
 
-The indirectly accessed interrupt-file registers, and the other CSRs
-that directly interact with external interrupts (\z{mseteipnum},
-\z{mclreipnum}, etc.), are all documented in more detail in the next
+The indirectly accessed interrupt-file registers
+and CSRs \z{mtopei}, \z{stopei}, and \z{vstopei}
+are all documented in more detail in the next
 two sections.
 
 %-----------------------------------------------------------------------
@@ -635,62 +626,17 @@ to a supported interrupt identity (such as bit~0 of \z{eie0}) are
 read-only zeros.
 
 %-----------------------------------------------------------------------
-\section{CSRs directly affecting an interrupt file}
+\section{%
+Top external interrupt CSRs (\zSafe{mtopei}, \zSafe{stopei}, \zSafe{vstopei})%
+}
 
-Several new machine-level CSRs interact directly with an IMSIC's
-machine-level interrupt file:  \z{mseteipnum}, \z{mclreipnum},
-\z{mseteienum}, \z{mclreienum}, and \z{mtopei}.
-If supervisor mode is implemented, there are several matching
-supervisor CSRs that likewise interact with the supervisor-level
-interrupt file:  \z{sseteipnum}, \z{sclreipnum}, \z{sseteienum},
-\z{sclreienum}, and \z{stopei}.
+CSR \z{mtopei} interacts directly with
+an IMSIC's machine-level interrupt file.
+If supervisor mode is implemented, CSR \z{stopei} interacts
+directly with the supervisor-level interrupt file.
 And if the hypervisor extension is implemented and field VGEIN of
 \z{hstatus} is the number of an implemented guest interrupt file,
-several VS CSRs interact with the chosen guest interrupt file:
-\z{vsseteipnum}, \z{vsclreipnum}, \z{vsseteienum}, \z{vsclreienum},
-and \z{vstopei}.
-These CSRs are documented by function below:
-
-%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-\subsection{%
-Set/clear external interrupt-pending bit by number
-(\zSafe{*seteipnum} and \zSafe{*clreipnum})%
-}
-
-If $i$ is an implemented interrupt identity number in the respective
-interrupt file, writing value $i$ to a \emph{\texttt{*seteipnum} CSR}
-(\z{mseteipnum}, \z{sseteipnum}, or \z{vsseteipnum}) causes the pending
-bit for interrupt~$i$ to be set to one in the interrupt file, while
-writing $i$ to a \emph{\texttt{*clreipnum} CSR} (\z{mclreipnum},
-\z{sclreipnum}, or \z{vsclreipnum}) causes the pending bit for
-interrupt~$i$ to be cleared in the interrupt file.
-A write to a \z{*seteipnum} or \z{*clreipnum} CSR is ignored if the
-value written is not an implemented interrupt identity number for the
-respective interrupt file.
-
-A read of a \z{*seteipnum} or \z{*clreipnum} CSR always returns zero.
-
-%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-\subsection{%
-Set/clear external interrupt-enable bit by number
-(\zSafe{*seteienum} and \zSafe{*clreienum})%
-}
-
-If $i$ is an implemented interrupt identity number in the respective
-interrupt file, writing value $i$ to a \emph{\texttt{*seteienum} CSR}
-(\z{mseteienum}, \z{sseteienum}, or \z{vsseteienum}) causes the enable
-bit for interrupt~$i$ to be set to one in the interrupt file, while
-writing $i$ to a \emph{\texttt{*clreienum} CSR} (\z{mclreienum},
-\z{sclreienum}, or \z{vsclreienum}) causes the enable bit for
-interrupt~$i$ to be cleared in the interrupt file.
-A write to a \z{*seteienum} or \z{*clreienum} CSR is ignored if the
-value written is not an implemented interrupt identity number for the
-respective interrupt file.
-
-A read of a \z{*seteienum} or \z{*clreienum} CSR always returns zero.
-
-%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-\subsection{Top external interrupt (\zSafe{*topei})}
+\z{vstopei} interacts with the chosen guest interrupt file.
 
 The value of a \emph{\texttt{*topei} CSR} (\z{mtopei}, \z{stopei}, or
 \z{vstopei}) indicates the interrupt file's current highest-priority
@@ -751,18 +697,9 @@ lost.
 
 If it is necessary first to read a \z{*topei} CSR and then subsequently
 claim the interrupt as a separate step, the claim can be safely done by
-writing the interrupt identity to the corresponding \z{*clreipnum} CSR,
+clearing the pending bit in the \z{eip} array
+via \z{*siselect} and \z{*sireg},
 instead of writing to \z{*topei}.
-\end{commentary}
-
-\begin{commentary}
-Because the effect of a combined read-and-write of a \z{*topei} CSR
-can be accomplished equally by a read of \z{*topei} followed by a write
-of the interrupt identity to the corresponding \z{*clreipnum}, the
-\z{*topei} CSRs could have been made read-only without the special
-behavior defined for writes.
-However, condensing these operations into a single CSR access instead of
-two helps to reduce interrupt latency when critical.
 \end{commentary}
 
 %-----------------------------------------------------------------------
