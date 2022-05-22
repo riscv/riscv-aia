@@ -470,6 +470,13 @@ aliases of bits in \z{hie}.
 As usual, bits that are not writable in \z{vsie}/\z{vsieh} must be
 read-only zeros.
 
+If a bit of \z{hideleg}/\z{hidelegh} is zero and the corresponding bit 
+in \z{hvien}/\z{hvienh} is changed from zero to one, then the value 
+of the matching bit in \z{vsie}/\z{vsieh} becomes {\unspecified}.
+Likewise, if a bit of \z{hvien}/\z{hvienh} is one and the corresponding 
+bit in \z{hideleg}/\z{hidelegh} is changed from one to zero, the value
+of the matching bit in \z{vsie}/\z{vsieh} again becomes {\unspecified}.
+
 For interrupt numbers 13--63, implementations may freely choose which
 bits of \z{hvien}/\z{hvienh} are writable and which bits are read-only
 zero or one.

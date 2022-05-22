@@ -528,6 +528,13 @@ else it is an independent writable bit.
 As usual, bits that are not writable in \z{sie}/\z{sieh} must be
 read-only zeros.
 
+If a bit of \z{mideleg}/\z{midelegh} is zero and the corresponding bit
+in \z{mvien}/\z{mvienh} is changed from zero to one, then the value
+of the matching bit in \z{sie}/\z{sieh} becomes {\unspecified}.
+Likewise, if a bit of \z{mvien}/\z{mvienh} is one and the corresponding
+bit in \z{mideleg}/\z{midelegh} is changed from one to zero, the value
+of the matching bit in \z{sie}/\z{sieh} again becomes {\unspecified}.
+
 For interrupt numbers 13--63, implementations may freely choose which
 bits of \z{mvien}/\z{mvienh} are writable and which bits are read-only
 zero or one.
