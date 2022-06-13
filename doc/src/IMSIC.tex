@@ -542,6 +542,9 @@ same as though \z{eidelivery} is~0, and the PLIC or APLIC replaces the interrupt
 file in supplying pending external interrupts at this privilege level
 at the hart.
 
+Guest interrupt files do not support
+value \z{0x40000000} for \z{eidelivery}.
+
 Reset initializes \z{eidelivery} to \z{0x40000000} if that value is
 supported;
 otherwise, \z{eidelivery} has an {\unspecified} valid value (0~or~1)
