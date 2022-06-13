@@ -317,9 +317,9 @@ interrupt trap.
 Interrupt causes that are standardized by the Privileged Architecture
 have major identities in the range 0--15, while numbers 16 and higher
 are officially available for platform standards or for custom use.
-The Advanced Interrupt Architecture claims further authority over the
-even identity numbers in the range 16--62, leaving the odd numbers in
-that range and all major identities 63 and higher still free for custom
+The Advanced Interrupt Architecture claims further authority over
+identity numbers in the ranges 16--23 and 32--47, leaving numbers in the
+range 24--31 and all major identities 48 and higher still free for custom
 use.
 Table~\ref{tab:interruptIdents} characterizes all major interrupt
 identities with this extension.
@@ -357,10 +357,10 @@ Major identity & Minor identity & \\
 14--15               & -- & \em Reserved by Privileged Architecture \\
 \hline
 \hline
-even numbers, 16--62 & -- & Local interrupts, \emph{or reserved} \\
-odd numbers, 17--63  & -- & \em Designated for custom use \\
-\hline
-$\geq \mbox{64}$     & -- & \em Designated for custom use \\
+16--23         & --       & \em Reserved for standard local interrupts \\
+24--31         & --       & \em Designated for custom use \\
+32--47         & --       & \em Reserved for standard local interrupts \\
+$\geq \mbox{48}$ & --     & \em Designated for custom use \\
 \hline
 \end{tabular}
 \end{center}
