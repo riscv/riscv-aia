@@ -40,19 +40,9 @@ Number & Privilege & Name      & Description \\
 \hline
 \multicolumn{4}{|c|}{Machine-Level Interrupts} \\
 \hline
+\z{0x35C} & MRW & \z{mtopei}   & Machine top external interrupt
+                                  (only with an IMSIC) \\
 \z{0xFB0} & MRO & \z{mtopi}    & Machine top interrupt \\
-\hline
-\multicolumn{4}{|c|}{Machine-Level IMSIC Interface (only with an IMSIC)} \\
-\hline
-\z{0x358} & MRW & \z{mseteipnum}
-                   & Machine set external interrupt-pending bit by number \\
-\z{0x359} & MRW & \z{mclreipnum}
-                   & Machine clear external interrupt-pending bit by number \\
-\z{0x35A} & MRW & \z{mseteienum}
-                   & Machine set external interrupt-enable bit by number \\
-\z{0x35B} & MRW & \z{mclreienum}
-                   & Machine clear external interrupt-enable bit by number \\
-\z{0x35C} & MRW & \z{mtopei}   & Machine top external interrupt \\
 \hline
 \multicolumn{4}{|c|}{Virtual Interrupts for Supervisor Level} \\
 \hline
@@ -128,14 +118,12 @@ instruction exception.
 The contents of the external-interrupts region are documented in
 Chapter~\ref{ch:IMSIC} on the IMSIC.
 
+CSR \z{mtopei} also exists only when an IMSIC is implemented,
+so is documented in Chapter~\ref{ch:IMSIC}
+along with the indirectly accessed IMSIC registers.
+
 CSR \z{mtopi} reports the highest-priority interrupt that is pending
 and enabled for machine level, as specified in Section~\ref{sec:mtopi}.
-
-Five CSRs, \z{mseteipnum}, \z{mclreipnum}, \z{mseteienum},
-\z{mclreienum}, and \z{mtopei}, interact with an IMSIC, so exist only
-when an IMSIC is implemented.
-Like the indirectly accessed IMSIC registers, these CSRs are documented
-in Chapter~\ref{ch:IMSIC}.
 
 When \mbox{S-mode} is implemented, CSRs \z{mvien} and \z{mvip}
 (together with their high-half partners for RV32) support interrupt
@@ -165,19 +153,9 @@ Number & Privilege & Name      & Description \\
 \hline
 \multicolumn{4}{|c|}{Supervisor-Level Interrupts} \\
 \hline
+\z{0x15C} & SRW & \z{stopei}   & Supervisor top external interrupt
+                                  (only with an IMSIC) \\
 \z{0xDB0} & SRO & \z{stopi}    & Supervisor top interrupt \\
-\hline
-\multicolumn{4}{|c|}{Supervisor-Level IMSIC Interface (only with an IMSIC)} \\
-\hline
-\z{0x158} & SRW & \z{sseteipnum}
-                 & Supervisor set external interrupt-pending bit by number \\
-\z{0x159} & SRW & \z{sclreipnum}
-                 & Supervisor clear external interrupt-pending bit by number \\
-\z{0x15A} & SRW & \z{sseteienum}
-                 & Supervisor set external interrupt-enable bit by number \\
-\z{0x15B} & SRW & \z{sclreienum}
-                 & Supervisor clear external interrupt-enable bit by number \\
-\z{0x15C} & SRW & \z{stopei}   & Supervisor top external interrupt \\
 \hline
 \multicolumn{4}{|c|}{%
   Supervisor-Level High-Half CSRs for Interrupts 32--63 (RV32 only)} \\
@@ -229,12 +207,11 @@ when there is no IMSIC, attempts to access \z{sireg} raise an illegal
 instruction exception (unless executing in a virtual machine, covered
 in the next section).
 
+CSR \z{stopei} is described with the IMSIC in Chapter~\ref{ch:IMSIC}.
+
 Register \z{stopi} reports the highest-priority interrupt that
 is pending and enabled for supervisor level, as specified in
 Section~\ref{sec:stopi}.
-The IMSIC CSRs, \z{sseteipnum}, \z{sclreipnum}, \z{sseteienum},
-\z{sclreienum}, and \z{stopei}, are described with the IMSIC in
-Chapter~\ref{ch:IMSIC}.
 
 %-----------------------------------------------------------------------
 \section{Hypervisor and VS CSRs}
@@ -268,19 +245,9 @@ Number & Privilege & Name        & Description \\
 \hline
 \multicolumn{4}{|c|}{VS-Level Interrupts} \\
 \hline
+\z{0x25C} & HRW & \z{vstopei}    & Virtual supervisor top external interrupt
+                                    (only with an IMSIC) \\
 \z{0xEB0} & HRO & \z{vstopi}     & Virtual supervisor top interrupt \\
-\hline
-\multicolumn{4}{|c|}{VS-Level IMSIC Interface (only with an IMSIC)} \\
-\hline
-\z{0x258} & HRW & \z{vsseteipnum}
-                   & VS set external interrupt-pending bit by number \\
-\z{0x259} & HRW & \z{vsclreipnum}
-                   & VS clear external interrupt-pending bit by number \\
-\z{0x25A} & HRW & \z{vsseteienum}
-                   & VS set external interrupt-enable bit by number \\
-\z{0x25B} & HRW & \z{vsclreienum}
-                   & VS clear external interrupt-enable bit by number \\
-\z{0x25C} & HRW & \z{vstopei}    & Virtual supervisor top external interrupt \\
 \hline
 \multicolumn{4}{|c|}{Hypervisor and VS-Level High-Half CSRs (RV32 only)} \\
 \hline
@@ -298,9 +265,9 @@ Number & Privilege & Name        & Description \\
 \label{tab:CSRs-hypervisor}
 \end{table*}
 
-The VS CSRs in the table (\z{vsiselect}, \z{vsireg}, \z{vstopi},
-\z{vsseteipnum}, \z{vsclreipnum}, \z{vsseteienum}, and
-\z{vsclreienum}) all match supervisor CSRs, and substitute for those
+The VS CSRs in the table (\z{vsiselect}, \z{vsireg},
+\z{vstopei}, \z{vstopi}, and, for RV32, \z{vsieh} and \z{vsiph})
+all match supervisor CSRs, and substitute for those
 supervisor CSRs when executing in a virtual machine (in \mbox{VS-mode}
 or \mbox{VU-mode}).
 
@@ -343,10 +310,9 @@ values of \z{vsiselect} designate an inaccessible register.
 
 Along the same lines, when \z{hstatus}.VGEIN is not the number of
 an implemented guest external interrupt, attempts from \mbox{M-mode}
-or \mbox{HS-mode} to access CSRs \z{vsseteipnum}, \z{vsclreipnum},
-\z{vsseteienum}, \z{vsclreienum}, or \z{vstopei} raise an illegal instruction
-exception, and attempts from \mbox{VS-mode} to access \z{sseteipnum},
-\z{sclreipnum}, \z{sseteienum}, \z{sclreienum}, or \z{stopei} raise a
+or \mbox{HS-mode} to access CSR \z{vstopei}
+raise an illegal instruction exception,
+and attempts from \mbox{VS-mode} to access \z{stopei} raise a
 virtual instruction exception.
 
 Aside from the high-half CSR \z{hidelegh}, the hypervisor CSRs added
