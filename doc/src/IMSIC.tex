@@ -359,10 +359,10 @@ boundary.
 
 If an IMSIC implements guest interrupt files, the memory pages for the
 IMSIC's supervisor-level interrupt file and for its guest interrupt
-files are contiguous, starting with the supervisor-level interrupt
+files should be contiguous, starting with the supervisor-level interrupt
 file at the lowest address and followed by the guest interrupt files,
 ordered by guest interrupt number.
-Schematically, the memory pages are ordered contiguously as
+Schematically, the memory pages should be ordered contiguously as
 \begin{displayLinesTable}
 S,\, $\mbox{G}_{1}$, $\mbox{G}_{2}$, $\mbox{G}_{3}$, \dots
 \end{displayLinesTable}
@@ -381,13 +381,13 @@ filled with \mbox{32-bit} words of read-only zeros.
 
 When a system divides harts into groups, each in its own
 separate portion of the address space, the memory page
-addresses of interrupt files are expected to follow the formulas
+addresses of interrupt files should follow the formulas
 ${g\times\mbox{2}^{E}}+A+{h\times\mbox{2}^{C}}$ for machine-level
 interrupt files, and ${g\times\mbox{2}^{E}}+B+{h\times\mbox{2}^{D}}$
 for supervisor-level interrupt files, with $g$ being a
 \emph{group number}, $h$ being a hart number relative to the group,
 and $E$ being another integer constant $\geq$~${k+\max(C,D)}$ but
-usually significantly larger.
+usually much larger.
 If the largest group number is $g_{\rm max}$, let
 ${j = \lceil\log_{2}(g_{\rm max}+\mbox{1})\rceil}$, the number of bits
 needed to represent any group number.
@@ -398,7 +398,7 @@ $\left((\mbox{2}^{j}-\mbox{1})\times\mbox{2}^{E}\right)$ \z{\&} $A \,=\, 0$ &
   and &
   $\left((\mbox{2}^{j}-\mbox{1})\times\mbox{2}^{E}\right)$ \z{\&} $B \,=\, 0$
 \end{displayLinesTable}
-where the ampersands (\z{\&}) represent bitwise logical AND.
+where an ampersand (\z{\&}) represents bitwise logical AND.
 This ensures that
 \begin{displayLinesTable}[lcll]
 $g\times\mbox{2}^{E}+A+h\times\mbox{2}^{C}$ & always equals &
@@ -407,7 +407,8 @@ $g\times\mbox{2}^{E}+B+h\times\mbox{2}^{D}$ & always equals &
   $(g\times\mbox{2}^{E})$ \z{|} $B$ \z{|} $(h\times\mbox{2}^{D})$.\\
 \end{displayLinesTable}
 
-The requirements for read-only-zero pages apply only within each group.
+Infilling with read-only-zero pages is expected
+only within each group, not between separate groups.
 Specifically, if $g$ is any integer between 0 and ${\mbox{2}^{j}-1}$
 inclusive, then within the address ranges,
 \begin{displayLinesTable}[lcll]
