@@ -65,7 +65,7 @@ extension, provide sufficient assistance for virtualizing these same
 interrupt facilities for virtual machines.
 
 \item
-With the help of an I/O MMU (memory management unit) for redirecting
+With the help of an \mbox{IOMMU} (I/O memory management unit) for redirecting
 MSIs, maximize the opportunities and ability for a guest operating
 system running in a virtual machine to have direct control of devices
 with minimal involvement of a hypervisor.
@@ -134,10 +134,10 @@ Active virtual harts having direct control of \quad
    & 31 for RV32, & {\RISCV} hypervisor extension; \\
 \ a device, per physical hart
    & 63 for RV64  & \ IMSICs with guest interrupt\\
-   &              & \ files; and an I/O MMU \\
+   &              & \ files; and an IOMMU \\
 \hline
 Idle (swapped-out) virtual harts having \quad
-   & potentially  & An I/O MMU with support \\
+   & potentially  & An IOMMU with support \\
 \ direct control of a device, per physical hart \quad
    & thousands    & \ for memory-resident \\
    &              & \ interrupt files \\
@@ -281,10 +281,10 @@ delivering interrupts to virtual machines.
 Besides Chapter~\ref{ch:IMSIC} on the IMSIC, see
 Chapter~\ref{ch:VSLevel} which specifically covers interrupts to
 virtual machines.
-If the system also contains an I/O MMU to perform address translation
+If the system also contains an \mbox{IOMMU} to perform address translation
 of memory accesses made by I/O devices, then MSIs from those same
 devices may require special handling.
-This topic is addressed in Chapter~\ref{ch:IOMMU}, ``I/O MMU Support
+This topic is addressed in Chapter~\ref{ch:IOMMU}, ``\mbox{IOMMU} Support
 for MSIs to Virtual Machines.''
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

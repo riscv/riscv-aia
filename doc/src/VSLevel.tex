@@ -117,7 +117,7 @@ First, each virtual hart must have a guest interrupt file assigned to
 it, giving each its own apparent IMSIC within the virtual machine.
 Second, interrupts from the device must be signaled by wire through
 an APLIC that can translate these interrupts into MSIs, or the
-system must have an I/O MMU that can translate the addresses of MSI
+system must have an \mbox{IOMMU} that can translate the addresses of MSI
 memory writes made by the device itself.
 
 If a guest OS directly controls a device capable of sending MSIs, it
@@ -125,13 +125,13 @@ will naturally configure MSIs at the device with the guest physical
 addresses the OS sees for the IMSICs of its virtual harts, not knowing
 that these addresses are only virtual.
 When the device performs a memory write for an MSI, the destination
-address of this write must be translated by the I/O MMU from the
+address of this write must be translated by the \mbox{IOMMU} from the
 guest physical address assigned by the guest OS into the true physical
 address of the target guest interrupt file, using a translation table
 supplied by the hypervisor.
 
-By design, the translation an I/O MMU must do for device MSIs is
-fundamentally no different than the address translation the I/O MMU
+By design, the translation an \mbox{IOMMU} must do for device MSIs is
+fundamentally no different than the address translation the \mbox{IOMMU}
 already must perform for other memory accesses from the same device,
 converting guest physical addresses into true physical addresses.
 Because each virtual hart is assigned a dedicated, physical guest
@@ -168,13 +168,13 @@ At the new interrupt file, set \z{eidelivery} =~0, and zero all
 implemented interrupt-pending bits (the \z{eip} array).
 
 \item
-Modify the relevant translation tables at all I/O MMUs so that MSIs for
+Modify the relevant translation tables at all \mbox{IOMMUs} so that MSIs for
 this virtual interrupt file are now sent to the new physical interrupt
 file.
 Likewise, if any interrupts at an APLIC are forwarded by MSIs to the old
 interrupt file, reconfigure the APLIC to send them to the new interrupt
 file.
-As needed, synchronize with all I/O MMUs and APLICs to ensure that no
+As needed, synchronize with all \mbox{IOMMUs} and APLICs to ensure that no
 straggler MSIs will arrive at the old interrupt file after this step.
 Synchronizing with an APLIC can be accomplished using the
 algorithm of Section~\ref{sec:AdvPLIC-MSISync}.
