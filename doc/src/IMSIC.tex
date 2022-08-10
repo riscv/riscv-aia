@@ -159,7 +159,7 @@ When the hypervisor extension is implemented and a device is being
 managed directly by a guest operating system, MSI addresses from the
 device are initially guest physical addresses, as they are configured
 at the device by the guest OS.
-These guest addresses must be translated by an I/O MMU, which gets
+These guest addresses must be translated by an \mbox{IOMMU}, which gets
 configured by the hypervisor to redirect those MSIs to the interrupt
 files for the correct guest external interrupts.
 For more on this topic, see Chapter~\ref{ch:IOMMU}.
