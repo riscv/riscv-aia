@@ -25,6 +25,7 @@ likely extensions, so far as is known.
 \section{Machine-level CSRs}
 
 Table~\ref{tab:CSRs-M} lists the CSRs added for machine level.
+Each of these registers is MXLEN bits in size.
 
 \begin{table*}[h!]
 \begin{center}
@@ -135,6 +136,7 @@ These facilities are explained in Section~\ref{sec:virtIntrs-S}.
 
 Table~\ref{tab:CSRs-S} lists the supervisor-level CSRs that are added
 if the hart implements \mbox{S-mode}.
+Each of these registers is SXLEN bits in size.
 The functions of these registers all match their machine-level
 counterparts.
 
@@ -220,6 +222,10 @@ Section~\ref{sec:stopi}.
 If a hart implements the Privileged Architecture's hypervisor
 extension, then the hypervisor and VS CSRs listed in
 Table~\ref{tab:CSRs-hypervisor} are also added.
+The VS CSRs are all VSXLEN bits wide,
+while the hypervisor CSRs are all HSXLEN bits.
+(\textit{HSXLEN} is just another name for
+SXLEN for hypervisor-extended \mbox{S-mode}).
 
 \begin{table*}[h!]
 \begin{center}

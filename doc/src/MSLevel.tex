@@ -590,6 +590,19 @@ Bit~9 of\/ \z{mvip} makes the software-writable SEIP bit of\/ \z{mip}
 directly accessible by itself.
 \end{commentary}
 
+When the hypervisor extension is implemented, if a bit is
+zero in the same position in both \z{mideleg}/\z{midelegh}
+and \z{mvien}/\z{mvienh}, then that bit is read-only zero in
+\z{hideleg}/\z{hidelegh} (in addition to being read-only zero
+in \z{sip}/\z{siph}, \z{sie}/\z{sieh}, \z{hip}, and \z{hie}).
+But if a bit for one of interrupts 13--63 is a one in
+either \z{mideleg}/\z{midelegh} or \z{mvien}/\z{mvienh},
+then the same bit in \z{hideleg}/\z{hidelegh} may be writable
+or may be read-only zero, depending on the implementation.
+No bits in \z{hideleg}/\z{hidelegh} are ever read-only ones.
+The {\RISCV} Privileged Architecture further
+constrains bits 12:0 of \z{hideleg}.
+
 When supervisor mode is implemented, the minimal required
 implementation of \z{mvien}/\z{mvienh} and \z{mvip}/\z{mviph} has all
 bits being read-only zeros except for \z{mvip} bits 1, 5, and~9, which
@@ -756,8 +769,8 @@ The value of \z{stopi} is zero unless:
 (a)~there is an interrupt that is both pending in \z{sip}/\z{siph}
 and enabled in \z{sie}/\z{sieh}, or, if the hypervisor extension is
 implemented, both pending in \z{hip} and enabled in \z{hie}; and
-(b)~if CSR \z{sideleg} or \z{hideleg} exists, the interrupt is not
-delegated to a lower privilege level.
+(b)~the interrupt is not delegated to a lower privilege level
+(by \z{hideleg}, if the hypervisor extension is implemented),
 When there is a pending-and-enabled major interrupt for supervisor
 level, field IID is the major identity number of the highest-priority
 interrupt, and field IPRIO indicates its priority.
