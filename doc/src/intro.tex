@@ -4,9 +4,8 @@
 \label{ch:intro}
 
 \textbf{%
-Warning!
-This draft specification is likely to change before being accepted as
-standard by the {\RISCV} International Association.%
+This chapter is considered stable but could still change before being
+ratified as standard by the {\RISCV} International Association.%
 }
 \bigskip
 
@@ -488,4 +487,45 @@ For the reasons already given, the Advanced PLIC supports sending each
 signaled interrupt to only a single hart chosen by software, not to
 multiple harts.
 \end{commentary}
+
+%-----------------------------------------------------------------------
+\section{ISA extensions Smaia and Ssaia}
+
+The Advanced Interrupt Architecture (AIA) defines two names for
+extensions to the {\RISCV} instruction set architecture (ISA),
+one for machine-level execution environments,
+and another for supervisor-level environments.
+For a machine-level environment, extension \textbf{Smaia} encompasses
+all added CSRs and all modifications to interrupt response behavior
+that the AIA specifies for a hart, over all privilege levels.
+For a supervisor-level environment, extension \textbf{Ssaia} is
+essentially the same as Smaia except excluding the machine-level
+CSRs and behavior not directly visible to supervisor level.
+
+Extensions Smaia and Ssaia cover only
+those AIA features that impact the ISA at a hart.
+Although the following are described or discussed
+in this document as part of the AIA, they are not implied by
+Smaia or Ssaia because the components are categorized as non-ISA:
+APLICs, Duo-PLICs, IOMMUs, and any mechanisms for initiating
+interprocessor interrupts apart from writing to IMSICs.
+
+As revealed in subsequent chapters, the exact set
+of CSRs and behavior added by the AIA, and hence
+implied by Smaia or Ssaia, depends on some other factors:
+the base ISA's XLEN (RV32 or RV64), whether \mbox{S-mode}
+and the hypervisor extension are implemented,
+and whether the hart has an IMSIC.
+But individual AIA extension names are not
+provided for each possible valid subset.
+Rather, the different combinations are inferable
+from the intersection of features indicated (such as
+RV64I + \mbox{S-mode} + Smaia, but without the hypervisor extension).
+
+Software development tools like compilers and assemblers need not
+be concerned about whether an IMSIC exists but should just
+allow attempts to access the IMSIC CSRs (described in Chapters
+\ref{ch:CSRs} and~\ref{ch:IMSIC}) if Smaia or Ssaia is indicated.
+Without an actual IMSIC, such attempts may trap,
+but that is not a problem for the development tools.
 

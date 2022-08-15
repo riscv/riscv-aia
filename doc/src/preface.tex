@@ -1,0 +1,59 @@
+
+%=======================================================================
+\chapter{Preface}
+
+This document describes an Advanced Interrupt Architecture
+being proposed for {\RISCV} systems.
+
+No part of this document has yet been ratified
+by the {\RISCV} International Association.
+The table below shows the current status of each chapter,
+and also indicates which chapters specify extensions to the
+{\RISCV} ISA (instruction set architecture) and which are non-ISA.
+
+{
+\begin{table}[hbt]
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+Chapter                                                  & ISA? & Status \\
+\hline
+\hline
+1.\ Introduction                                         & ---  & Stable \\
+2.\ Control and Status Registers (CSRs) Added to Harts   & Yes  & Stable \\
+3.\ Incoming MSI Controller (IMSIC)                      & Yes  & Stable \\
+4.\ Advanced Platform-Level Interrupt Controller (APLIC) & No   & Stable \\
+5.\ Duo-PLIC                                             & No   & Draft \\
+6.\ Interrupts for Machine and Supervisor Levels         & Yes  & Stable \\
+7.\ Interrupts for Virtual Machines (VS Level)           & Yes  & Stable \\
+8.\ Interprocessor Interrupts (IPIs)                     & No   & Stable \\
+9.\ IOMMU Support for MSIs to Virtual Machines           & No   & Draft \\
+\hline
+\end{tabular}
+\end{table}
+}
+
+The chapters marked in the table as \emph{Stable} are not expected
+to change significantly before being put up for ratification,
+but changes of all kinds are still possible nonetheless.
+The chapters marked \emph{Draft} are very much
+at risk of changing before ratification.
+An implementation adhering to the current document might not conform
+to an eventual ratified Advanced Interrupt Architecture for {\RISCV}.
+
+Concerning the two chapters that remain in draft state:
+\begin{itemize}
+
+\item
+The authors are not aware that any implementation of
+a Duo-PLIC yet exists, even one just for simulation.
+So long as that remains true, the Duo-PLIC specification of
+Chapter~\ref{ch:DuoPLIC} will not advance beyond draft status.
+
+\item
+A separate standard is being developed for IOMMUs in {\RISCV} systems.
+Chapter~\ref{ch:IOMMU} about an IOMMU's support for MSIs
+(message-signaled interrupts) is expected to be finalized
+only in conjunction with the full {\RISCV} IOMMU specification.  
+\end{itemize}
+
