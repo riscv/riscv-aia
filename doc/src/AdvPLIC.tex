@@ -20,7 +20,7 @@ But even in machines where harts have IMSICs and most interrupts are
 communicated via MSIs, it is not unusual for some device interrupts
 still to be signaled by dedicated wires.
 In particular, for devices (or device controllers) that do not
-otherwise need to be bus masters in the system, the cost of supporting
+otherwise need to be bus controllers in the system, the cost of supporting
 MSIs is especially high, so wired interrupts are a frugal alternative.
 Wired interrupts also continue to be universally supported by all
 current computer platforms, unlike MSIs, making another reason for many
@@ -189,7 +189,7 @@ application harts, even at machine level.
 \caption{%
 A {\RISCV} system that extends the example of
 Figure~\ref{fig:AdvPLIC-ex-2Domains} with a fifth \mbox{M-mode}-only
-``master'' hart, with a separate machine-level interrupt domain above
+``main'' hart, with a separate machine-level interrupt domain above
 the other domains.%
 }
 \label{fig:AdvPLIC-ex-3Domains}
