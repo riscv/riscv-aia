@@ -455,6 +455,7 @@ Section~\ref{sec:AdvPLIC-directMode},
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \subsection{Domain configuration (\zSafe{domaincfg})}
+\label{sec:AdvPLIC-reg-domaincfg}
 
 The \z{domaincfg} register has this format:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
@@ -1206,6 +1207,28 @@ written.
 If field DM of register \z{domaincfg} is changed, the \z{target}
 registers for all active interrupt sources within the domain become
 {\unspecified} valid values.
+
+%-----------------------------------------------------------------------
+\section{Reset}
+
+Upon reset of an APLIC, all its state becomes
+valid and consistent but otherwise {\unspecified}, except for:
+\begin{tightList}
+
+\item
+the \z{domaincfg} register of each interrupt domain
+(Section~\ref{sec:AdvPLIC-reg-domaincfg});
+
+\item
+possibly the MSI address configuration registers of machine-level
+interrupt domains (Sections \ref{sec:AdvPLIC-reg-mmsiaddrcfg}
+and \ref{sec:AdvPLIC-reg-smsiaddrcfg}); and
+
+\item
+the Busy bit of each interrupt domain's \z{genmsi} register,
+if it exists (Section \ref{sec:AdvPLIC-reg-genmsi}).
+
+\end{tightList}
 
 %-----------------------------------------------------------------------
 \section{Precise effects on interrupt-pending bits}
