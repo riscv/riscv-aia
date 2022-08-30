@@ -102,17 +102,6 @@ Any such configurability is outside the scope of this specification.
 It is recommended, however, that only machine level be given the power
 to change the sizes of interrupt files.
 
-If an IMSIC contains a supervisor-level interrupt file and software at
-the attached hart enables \mbox{S-mode} that was previously disabled
-(e.g. by changing bit~S of CSR \z{misa} from zero to one), all state
-of the supervisor-level interrupt file is valid and consistent but
-otherwise {\unspecified}.
-Likewise, if an IMSIC contains guest interrupt files and software at
-the attached hart enables the hypervisor extension that was previously
-disabled (e.g. by changing bit~H of \z{misa} from zero to one), all
-state of the IMSIC's guest interrupt files is valid and consistent but
-otherwise {\unspecified}.
-
 %-----------------------------------------------------------------------
 \section{MSI encoding}
 \label{sec:MSIEncoding}
@@ -204,6 +193,26 @@ highest-priority interrupts was considered worth any discomfort that
 may be felt from interrupt priorities being the reverse of the natural
 number order.
 \end{commentary}
+
+%-----------------------------------------------------------------------
+\section{Reset and revealed state}
+
+Upon reset of an IMSIC, all the state of its interrupt files
+becomes valid and consistent but otherwise {\unspecified},
+except possibly for the \z{eidelivery} register of
+machine-level and supervisor-level interrupt files,
+as specified in Section~\ref{sec:IMSIC-reg-eidelivery}.
+
+If an IMSIC contains a supervisor-level interrupt file and software at
+the attached hart enables \mbox{S-mode} that was previously disabled
+(e.g. by changing bit~S of CSR \z{misa} from zero to one), all state
+of the supervisor-level interrupt file is valid and consistent but
+otherwise {\unspecified}.
+Likewise, if an IMSIC contains guest interrupt files and software at
+the attached hart enables the hypervisor extension that was previously
+disabled (e.g. by changing bit~H of \z{misa} from zero to one), all
+state of the IMSIC's guest interrupt files is valid and consistent but
+otherwise {\unspecified}.
 
 %-----------------------------------------------------------------------
 \section{Memory region for an interrupt file}
