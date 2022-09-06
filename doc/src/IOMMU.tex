@@ -38,7 +38,8 @@ processes MSIs directed to virtual machines.
 Most other functions and details of an \mbox{IOMMU} are beyond the scope of
 this standard, and must be specified elsewhere.
 
-If a single physical I/O device can be subdivided for multiple masters,
+If a single physical I/O device can be subdivided for
+control by multiple separate device drivers,
 each sub-device is referred to here as one device.
 
 %-----------------------------------------------------------------------
@@ -54,9 +55,9 @@ software can configure at the \mbox{IOMMU} a \emph{device context}, which
 associates with the device a specific virtual address space and any
 other per-device parameters the \mbox{IOMMU} may support.
 By giving devices each their own separate device context at an \mbox{IOMMU},
-each device can be individually configured for a different software
-master, usually a guest OS or the main (host) OS.
-On every memory access made from a device, hardware indicates to
+each device can be individually configured for a separate
+operating system, which may be a guest OS or the main (host) OS.
+On every memory access initiated by a device, hardware indicates to
 the \mbox{IOMMU} the originating device by some form of unique device
 identifier, which the \mbox{IOMMU} uses to locate the appropriate device
 context within data structures supplied by software.
