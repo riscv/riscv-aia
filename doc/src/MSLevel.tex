@@ -102,16 +102,17 @@ Major interrupt numbers   & \hspace{10mm}Category \\
 \end{table*}
 
 Of the major interrupts controlled by the Privileged Architecture
-(numbers 0--15), the Advanced Interrupt Architecture categorizes the
+(numbers 0--15), this Advanced Interrupt Architecture (AIA) categorizes the
 counter overflow interrupt (code~13) as a \emph{local interrupt}.
 It is assumed furthermore that any future definitions for
 reserved interrupt numbers 14 and 15 will also be local interrupts.
-Major interrupt numbers 16--23 and 32--47 are additionally reserved for
+The AIA additionally reserves
+major interrupt numbers 16--23 and 32--47 for
 standard local interrupts that other {\RISCV} extensions may define.
 The remaining major interrupts allocated to the Privileged
 Architecture, numbers 0--12, are categorized as not local interrupts.
 Taken altogether, Table~\ref{tab:majorIntrCategories}
-summarizes the Advanced Interrupt Architecture's categorization
+summarizes the AIA's categorization
 of all major interrupt identities.
 
 \begin{commentary}
