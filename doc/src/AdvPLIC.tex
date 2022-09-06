@@ -20,12 +20,13 @@ But even in machines where harts have IMSICs and most interrupts are
 communicated via MSIs, it is not unusual for some device interrupts
 still to be signaled by dedicated wires.
 In particular, for devices (or device controllers) that do not
-otherwise need to be bus masters in the system, the cost of supporting
+otherwise need to initiate bus transactions
+in the system, the cost of supporting
 MSIs is especially high, so wired interrupts are a frugal alternative.
 Wired interrupts also continue to be universally supported by all
 current computer platforms, unlike MSIs, making another reason for many
 commodity devices or controllers to choose wired interrupts over MSIs,
-when not implementing a standard like PCI Express that dictates MSIs.
+unless implementing a standard like PCI Express that dictates MSIs.
 
 This chapter specifies an \emph{Advanced PLIC} (APLIC) that is not backward
 compatible with the earlier {\RISCV} PLIC.
@@ -189,7 +190,7 @@ application harts, even at machine level.
 \caption{%
 A {\RISCV} system that extends the example of
 Figure~\ref{fig:AdvPLIC-ex-2Domains} with a fifth \mbox{M-mode}-only
-``master'' hart, with a separate machine-level interrupt domain above
+``manager'' hart, with a separate machine-level interrupt domain above
 the other domains.%
 }
 \label{fig:AdvPLIC-ex-3Domains}
@@ -323,7 +324,7 @@ domain.
 
 \begin{commentary}
 Although an APLIC with multiple interrupt domains may appear to duplicate
-the per-source state listed above (source configuration, etc.) by a
+the per-source state listed above (source configuration, etc.)\ by a
 factor equal to the number of domains, in fact, APLIC implementations
 can exploit the fact that each source is ultimately active in only one
 domain.
@@ -487,10 +488,11 @@ harts.
 A given APLIC implementation may support either or both of these
 delivery modes for each interrupt domain.
 
-If the interrupt domain's harts have IMSICs, the relevant interrupt
-files of those IMSICs must support value \z{0x40000000} for register
-\z{eidelivery}, else setting DM to zero (direct delivery mode) will
-always have the same effect as setting IE to zero.
+If the interrupt domain's harts have IMSICs,
+then unless the relevant interrupt
+files of those IMSICs support value \z{0x40000000} for register
+\z{eidelivery}, setting DM to zero (direct delivery mode) will
+have the same effect as setting IE to zero.
 See Sections \ref{sec:IMSIC-reg-eidelivery}
 and~\ref{sec:AdvPLIC-directMode-intrDelivery}.
 
@@ -622,8 +624,8 @@ read-only zero.
 If source~$i$ is changed from inactive to an active mode, the
 interrupt source's pending and enable bits remain zeros, unless set
 automatically for a reason specified later in this section or in
-Section~\ref{sec:AdvPLIC-pendingBits}, and \z{target[$i$]} becomes an
-{\unspecified} valid value.
+Section~\ref{sec:AdvPLIC-pendingBits}, and the defined subfields
+of \z{target[$i$]} obtain {\unspecified} values.
 
 When a source is configured as Detached, its wire input is ignored;
 however, the interrupt-pending bit may still be set by a write to a
@@ -765,6 +767,7 @@ recommendation.
 It is expected that most systems will arrange the
 physical addresses of target IMSICs in a simple
 linear correspondence with hart index numbers.
+(See Section~\ref{sec:IMSIC-systemMemRegions}.)
 Registers \z{mmsiaddrcfg} and \z{mmsiaddrcfgh} (along with
 \z{smsiaddrcfg} and \z{smsiaddrcfgh} from the next subsection) allow
 sufficiently trusted machine-level software, early after system reset,
@@ -1115,6 +1118,10 @@ interrupts from the source are signaled or forwarded.
 The exact interpretation of \z{target[$i$]} depends on the delivery
 mode configured by field DM of register \z{domaincfg}.
 
+If \z{domaincfg}.DM is changed, the \z{target} registers
+for all active interrupt sources within the domain obtain
+{\unspecified} values in all fields defined for the new delivery mode.
+
 %--------------------
 \subsubsection*{Active source, direct delivery mode}
 
@@ -1200,13 +1207,6 @@ EIID is thus able to hold at least values 0 through~$N$.
 A write to a \z{target} register sets the $k$ implemented bits of EIID
 equal to the least-significant $k$~bits of the \mbox{32-bit} value
 written.
-
-%--------------------
-\subsubsection*{Effect of changing delivery mode}
-
-If field DM of register \z{domaincfg} is changed, the \z{target}
-registers for all active interrupt sources within the domain become
-{\unspecified} valid values.
 
 %-----------------------------------------------------------------------
 \section{Reset}

@@ -297,7 +297,7 @@ in full, and software interrupts remain at least partly supported,
 although neither appears in Figures \ref{fig:intrsWithoutIMSICs}
 and~\ref{fig:intrsWithIMSICs}.
 For the specifics on software interrupts, refer to
-Chapter~\ref{ch:IPIs}, ``Interprocessor interrupts (IPIs).''
+Chapter~\ref{ch:IPIs}, ``Interprocessor Interrupts (IPIs).''
 
 The Advanced Interrupt Architecture adds considerable support
 for \emph{local interrupts} at a hart, whereby a hart essentially
@@ -441,7 +441,7 @@ single hart which can then signal the other harts by IPIs.
 
 \begin{commentary}
 We contend that the need to communicate an I/O interrupt to multiple
-harts is sufficiently rare that standard hardware support for multicast
+harts is sufficiently rare that standardizing hardware support for multicast
 cannot be justified in this case.
 \end{commentary}
 
@@ -479,8 +479,8 @@ receive the multicast interrupt all take an external interrupt trap
 simultaneously and compete to be the first to claim the interrupt at
 the PLIC.
 The intention is to provide a form of \mbox{1-of-$N$} interrupt
-delivery;
-however, for all the harts that fail to win the claim, the interrupt
+delivery.
+However, for all the harts that fail to win the claim, the interrupt
 trap becomes wasted effort.
 
 For the reasons already given, the Advanced PLIC supports sending each
@@ -512,10 +512,10 @@ interprocessor interrupts apart from writing to IMSICs.
 
 As revealed in subsequent chapters, the exact set
 of CSRs and behavior added by the AIA, and hence
-implied by Smaia or Ssaia, depends on some other factors:
-the base ISA's XLEN (RV32 or RV64), whether \mbox{S-mode}
+implied by Smaia or Ssaia, depends on
+the base ISA's XLEN (RV32 or RV64), on whether \mbox{S-mode}
 and the hypervisor extension are implemented,
-and whether the hart has an IMSIC.
+and on whether the hart has an IMSIC.
 But individual AIA extension names are not
 provided for each possible valid subset.
 Rather, the different combinations are inferable

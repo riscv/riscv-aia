@@ -455,10 +455,10 @@ aliases of bits in \z{hie}.
 As usual, bits that are not writable in \z{vsie}/\z{vsieh} must be
 read-only zeros.
 
-If a bit of \z{hideleg}/\z{hidelegh} is zero and the corresponding bit 
-in \z{hvien}/\z{hvienh} is changed from zero to one, then the value 
+If a bit of \z{hideleg}/\z{hidelegh} is zero and the corresponding bit
+in \z{hvien}/\z{hvienh} is changed from zero to one, then the value
 of the matching bit in \z{vsie}/\z{vsieh} becomes {\unspecified}.
-Likewise, if a bit of \z{hvien}/\z{hvienh} is one and the corresponding 
+Likewise, if a bit of \z{hvien}/\z{hvienh} is one and the corresponding
 bit in \z{hideleg}/\z{hidelegh} is changed from one to zero, the value
 of the matching bit in \z{vsie}/\z{vsieh} again becomes {\unspecified}.
 
@@ -586,9 +586,9 @@ a supervisor external interrupt (code~9) with priority number
 if \z{hvictl}.VTI =~0:
 \begin{tightList}
 \item[+]
-all pending-and-enabled major interrupts indicated by
+the highest-priority pending-and-enabled major interrupt indicated by
 \z{vsip}/\z{vsiph} and \z{vsie}/\z{vsieh} other than a supervisor
-external interrupt (code 9), with priority numbers assigned by
+external interrupt (code 9), using the priority numbers assigned by
 \z{hviprio1}/\z{hviprio1h} and \z{hviprio2}/\z{hviprio2h};
 \end{tightList}
 

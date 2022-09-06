@@ -26,11 +26,11 @@ usually making use of additional data stored by the sender in ordinary
 memory.
 \end{commentary}
 
-The same kind of mechanism (but with a different set of addresses) may
+The same kind of mechanism (but with a different set of memory addresses) may
 or may not exist for signaling supervisor-level software interrupts
 (major code~1) at remote harts as well.
-If not directly supported in this way, then a supervisor-level software
-interrupt is typically sent to another hart through an environment call
+If not directly supported in this way, a supervisor-level software
+interrupt is typically sent to another hart instead through an environment call
 from supervisor mode to machine mode.
 An operating system running in \mbox{S-mode} thus invokes a specific
 SBI function for delivering a software interrupt to another hart,
@@ -45,19 +45,19 @@ same as a regular message-signaled interrupt (MSI)\@.
 In that case, an incoming IPI appears at the destination hart as an
 \emph{external interrupt} routed through the IMSIC, rather than as a
 software interrupt as before.
-However, so long as the same software (e.g.\@ an operating system or
+However, so long as the same software (e.g.\ an operating system or
 machine monitor) is in control at both endpoints of an IPI, source
 and destination, there should be no reason for a destination hart
 to misinterpret the purpose of an incoming external interrupt that
 represents an IPI.
 
 If harts do not have IMSICs, then the method specified by the {\RISCV}
-Privileged Architecture is assumed to be used for IPIs, with software
-interrupts signaled at destination harts.
+Privileged Architecture is assumed to be used for IPIs, signaling software
+interrupts at destination harts.
 On the other hand, when harts have IMSICs, the machinery for triggering
 software interrupts at remote harts is redundant with the capabilities
 of the IMSICs, so it is downgraded from a requirement to an option,
-useful perhaps only to maximize software compatibility across a range
+useful perhaps only to provide software compatibility across a range
 of {\RISCV} systems, with and without IMSICs.
 If a machine implements IMSICs and not the earlier software-interrupt
 mechanism, then the bits of CSRs \z{mip} and \z{mie} for machine-level
@@ -73,7 +73,7 @@ On such a trap, software can send a higher-level IPI via IMSIC to the
 destination hart, where the higher-level software then can set the
 SSIP bit in \z{sip} at the intended privilege level, S or~VS.
 
-Similarly, SBI functions for sending IPIs can easily continue to
+Similarly, SBI environment calls for sending IPIs can easily continue to
 be supported without clients being at all aware of a change in the
 underlying hardware for delivering IPIs between harts.
 \end{commentary}

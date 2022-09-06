@@ -14,12 +14,6 @@ For each privilege level at which a {\RISCV} hart can take interrupt
 traps, the Advanced Interrupt Architecture adds CSRs for interrupt
 control and handling.
 
-\begin{commentary}
-The addresses for all CSRs in this document have been carefully
-selected not to conflict with existing allocations, or with other
-likely extensions, so far as is known.
-\end{commentary}
-
 %-----------------------------------------------------------------------
 \section{Machine-level CSRs}
 
@@ -67,7 +61,7 @@ Number & Privilege & Name      & Description \\
 For RV32, the \emph{high-half} CSRs listed in the table extend
 registers \z{mideleg}, \z{mie}, \z{mvien}, \z{mvip}, and \z{mip} to
 support a total of 64 interrupt causes.
-Each low-half register (e.g. \z{mideleg}) covers interrupt numbers
+Each low-half register (e.g.\ \z{mideleg}) covers interrupt numbers
 0--31, one bit per interrupt number, while its high-half partner
 (\z{midelegh}) covers interrupt numbers 32--63, again one bit per
 interrupt number.

@@ -38,7 +38,8 @@ processes MSIs directed to virtual machines.
 Most other functions and details of an \mbox{IOMMU} are beyond the scope of
 this standard, and must be specified elsewhere.
 
-If a single physical I/O device can be subdivided for multiple masters,
+If a single physical I/O device can be subdivided for
+control by multiple separate device drivers,
 each sub-device is referred to here as one device.
 
 %-----------------------------------------------------------------------
@@ -54,9 +55,9 @@ software can configure at the \mbox{IOMMU} a \emph{device context}, which
 associates with the device a specific virtual address space and any
 other per-device parameters the \mbox{IOMMU} may support.
 By giving devices each their own separate device context at an \mbox{IOMMU},
-each device can be individually configured for a different software
-master, usually a guest OS or the main (host) OS.
-On every memory access made from a device, hardware indicates to
+each device can be individually configured for a separate
+operating system, which may be a guest OS or the main (host) OS.
+On every memory access initiated by a device, hardware indicates to
 the \mbox{IOMMU} the originating device by some form of unique device
 identifier, which the \mbox{IOMMU} uses to locate the appropriate device
 context within data structures supplied by software.
@@ -422,7 +423,7 @@ doublewords) and by copying the IMSIC interrupt file's \z{eie} array to
 the MRIF's interrupt-enable bits (the odd doublewords).
 
 \item
-At the IMSIC interrupt file, save to memory the existing values of
+Save to memory the existing values of the IMSIC interrupt file's
 registers \z{eidelivery} and \z{eithreshold}, and set \z{eidelivery}
 =~0.
 
@@ -430,7 +431,7 @@ registers \z{eidelivery} and \z{eithreshold}, and set \z{eidelivery}
 Modify all relevant translation tables at \mbox{IOMMU}s so that MSIs for
 this virtual interrupt file are now stored in the MRIF.
 If necessary, synchronize with all \mbox{IOMMU}s to ensure that no straggler
-MSIs will arrive at the old IMSIC interrupt file after this step.
+MSIs will arrive at the IMSIC interrupt file after this step.
 
 \item
 Logically OR the contents of the IMSIC interrupt file's \z{eip} array
@@ -482,7 +483,7 @@ Also, copy the interrupt-enable bits from the MRIF to the IMSIC
 interrupt file's \z{eie} array.
 
 \item
-At the IMSIC interrupt file, load registers \z{eithreshold} and
+Load the IMSIC interrupt file's registers \z{eithreshold} and
 \z{eidelivery} with the values that were earlier saved.
 
 \end{enumerate}
@@ -502,7 +503,7 @@ Furthermore, in addition to locations for storing \z{eidelivery} and
 interrupt file's implemented \z{eip} array, apart from the MRIFs.
 While a virtual interrupt file is in memory, its interrupt-pending bits
 will be split across all the MRIFs and the saved \z{eip} array.
-The interrupt-enable bits will exist only in the MRIFs.
+The interrupt-enable bits may exist only in the MRIFs.
 
 To move a virtual hart's interrupt file from an IMSIC into memory, with
 one MRIF per \mbox{IOMMU}:
@@ -514,7 +515,7 @@ doublewords) and by copying the IMSIC interrupt file's \z{eie} array to
 the MRIFs' interrupt-enable bits (the odd doublewords).
 
 \item
-At the IMSIC interrupt file, save to memory the existing values of
+Save to memory the existing values of the IMSIC interrupt file's
 registers \z{eidelivery} and \z{eithreshold}, and set \z{eidelivery}
 =~0.
 
@@ -523,7 +524,7 @@ At each \mbox{IOMMU}, modify all relevant translation tables so that MSIs
 for this virtual interrupt file are now stored in the individual MRIF
 matched to the \mbox{IOMMU}.
 If necessary, synchronize with all \mbox{IOMMU}s to ensure that no straggler
-MSIs will arrive at the old IMSIC interrupt file after this step.
+MSIs will arrive at the IMSIC interrupt file after this step.
 
 \item
 Dump the IMSIC interrupt file's \z{eip} array to its separate location
@@ -574,7 +575,7 @@ Also, copy the interrupt-enable bits from one of the MRIFs to the IMSIC
 interrupt file's \z{eie} array.
 
 \item
-At the IMSIC interrupt file, load registers \z{eithreshold} and
+Load the IMSIC interrupt file's registers \z{eithreshold} and
 \z{eidelivery} with the values that were earlier saved.
 
 \end{enumerate}
@@ -649,10 +650,7 @@ physical address as
 \begin{displayLinesTable}
 interrupt file number = extract($A$\,\z{>>}\,12, address mask) \\
 \end{displayLinesTable}
-The extract function here is the same generic bit extract performed
-by {\RISCV} instruction BEXT, defined by the ``Bitmanip'' extension
-(B~extension).
-The bit extract function extract($x$,~$y$) discards all bits from
+Here, extract($x$,~$y$) is a ``bit extract'' that discards all bits from
 $x$ whose matching bits in the same positions in the mask~$y$ are
 zeros, and packs the remaining bits from $x$ contiguously at the
 least-significant end of the result, keeping the same bit order as $x$
@@ -699,12 +697,12 @@ Figure~\ref{fig:IOMMU-guestIntrFiles}), or a memory-resident interrupt
 file in which to store incoming MSIs for the virtual interrupt file
 (as in Figure~\ref{fig:IOMMU-MRIF}).
 
-The number of entries in an MSI page table is always a power of two,
-specifically $\mbox{2}^{k}$ where $k$ is the number of bits that are
+The number of entries in an MSI page table is
+$\mbox{2}^{k}$ where $k$ is the number of bits that are
 ones in the MSI address mask used to extract the interrupt file number
 from the destination guest physical address.
 If an MSI page table has 256 or fewer entries, the start of the table
-is always aligned to a \mbox{4-KiB} page address in real physical
+is aligned to a \mbox{4-KiB} page address in real physical
 memory.
 If an MSI page table has ${\mbox{2}^{k} > \mbox{256}}$
 entries, the table must be naturally aligned to a

@@ -39,9 +39,12 @@ Assuming a hart implements supervisor mode, its IMSIC has at least two
 interrupt files, one for machine level and the other for supervisor
 level.
 When a hart also implements the hypervisor extension, its IMSIC may
-have additional interrupt files for virtual harts.
-The number of interrupt files an IMSIC has for virtual harts is exactly
-\emph{GEILEN}, the number of supported guest external interrupts.
+have additional interrupt files for virtual harts,
+called \emph{guest interrupt files}.
+The number of guest interrupt files an IMSIC has for virtual harts is exactly
+\emph{GEILEN}, the number of supported guest external interrupts,
+as defined for the hypervisor extension
+by the {\RISCV} Privileged Architecture.
 
 Each individual interrupt file consists mainly of two arrays of bits
 of the same size, one array for recording MSIs that have arrived but
@@ -62,9 +65,6 @@ multiple of 64, and may be a minimum of 63 and a maximum of 2047.
 \begin{commentary}
 Platform standards may increase the minimum number of interrupt
 identities that must be implemented by each interrupt file.
-Platform standards for UNIX-like operating systems are likely
-to require a minimum of either 127 or 255 distinct identities at
-supervisor level.
 \end{commentary}
 
 When an interrupt file supports $N$ distinct interrupt identities,
@@ -94,13 +94,13 @@ interrupts, and from each other.
 Likewise, the interrupt files of different harts may be different
 sizes.
 
-A platform might provide a means for software to configure the sizes
-of interrupt files in some way, such as by allowing a smaller size at
-machine level to be traded for a larger size at supervisor level, or
-vice versa.
+A platform might provide a means for software to configure the
+number of interrupt files in an IMSIC and/or their sizes, such as
+by allowing a smaller interrupt file at machine level to be traded
+for a larger one at supervisor level, or vice versa, for example.
 Any such configurability is outside the scope of this specification.
 It is recommended, however, that only machine level be given the power
-to change the sizes of interrupt files.
+to change the number and sizes of interrupt files in an IMSIC.
 
 %-----------------------------------------------------------------------
 \section{MSI encoding}
@@ -189,7 +189,7 @@ If priority order were reversed, the highest-priority interrupt would
 have different identity numbers on different machines, depending on how
 many identities are implemented by interrupt files.
 The ability for software to assign fixed identity numbers to the
-highest-priority interrupts was considered worth any discomfort that
+highest-priority interrupts is considered worth any discomfort that
 may be felt from interrupt priorities being the reverse of the natural
 number order.
 \end{commentary}
@@ -205,12 +205,12 @@ as specified in Section~\ref{sec:IMSIC-reg-eidelivery}.
 
 If an IMSIC contains a supervisor-level interrupt file and software at
 the attached hart enables \mbox{S-mode} that was previously disabled
-(e.g. by changing bit~S of CSR \z{misa} from zero to one), all state
+(e.g.\ by changing bit~S of CSR \z{misa} from zero to one), all state
 of the supervisor-level interrupt file is valid and consistent but
 otherwise {\unspecified}.
 Likewise, if an IMSIC contains guest interrupt files and software at
 the attached hart enables the hypervisor extension that was previously
-disabled (e.g. by changing bit~H of \z{misa} from zero to one), all
+disabled (e.g.\ by changing bit~H of \z{misa} from zero to one), all
 state of the IMSIC's guest interrupt files is valid and consistent but
 otherwise {\unspecified}.
 
@@ -447,22 +447,14 @@ When an IMSIC has guest interrupt files, the VS CSRs interact with a
 single guest interrupt file, selected by the VGEIN field of CSR
 \z{hstatus}.
 
-For machine level, the relevant CSRs are:\nopagebreak
-\begin{displayLinesTable}
-\z{miselect} \qquad \z{mireg} \qquad \z{mtopei} \\
-\end{displayLinesTable}
-
+For machine level, the relevant CSRs are
+\z{miselect}, \z{mireg}, and \z{mtopei}.
 When supervisor mode is implemented, the set of supervisor-level CSRs
 matches those of machine level:
-\begin{displayLinesTable}
-\z{siselect} \qquad \z{sireg} \qquad \z{stopei} \\
-\end{displayLinesTable}
-
-And when the hypervisor extension is implemented, there is a
-corresponding set of VS CSRs:
-\begin{displayLinesTable}
-\z{vsiselect} \qquad \z{vsireg} \qquad \z{vstopei} \\
-\end{displayLinesTable}
+\z{siselect}, \z{sireg}, and \z{stopei}.
+And when the hypervisor extension is implemented,
+there are three corresponding VS CSRs:
+\z{vsiselect}, \z{vsireg}, and \z{vstopei}.
 
 As explained in Chapter~\ref{ch:CSRs}, registers \z{miselect} and
 \z{mireg} provide indirect access to additional machine-level
@@ -749,7 +741,7 @@ return from trap \\
 The combined read and write of \z{mtopei} or \z{stopei} in the second
 step can be done by a single CSRRW machine instruction,
 \begin{displayLinesTable}
-\z{csrrw }\textit{rd}\z{,} \z{mtopei} or \z{stopei,} \z{x0} \\
+\z{csrrw }\textit{rd}\z{,} \z{mtopei}/\z{stopei,} \z{x0} \\
 \end{displayLinesTable}
 where \textit{rd} is the destination register for value~\z{i}.
 
