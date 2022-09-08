@@ -331,3 +331,75 @@ hypervisor and VS CSRs), usually raise not an illegal instruction
 exception but instead a virtual instruction exception.
 For details, see the {\RISCV} Privileged Architecture.
 
+%-----------------------------------------------------------------------
+\section{Access control by the state-enable CSRs}
+
+If extension Smstateen is implemented together with the
+Advanced Interrupt Architecture (AIA), three bits of state-enable
+register \z{mstateen0} control access to AIA-added state
+from privilege modes less privileged than \mbox{M-mode}:
+\begin{displayLinesTable}[l@{\quad}l]
+bit 60 & CSRs \z{siselect}, \z{sireg}, \z{vsiselect}, and \z{vsireg} \\
+bit 59 & all other state added by the AIA
+          and not controlled by bits 60 and 58 \\
+bit 58 & all IMSIC state, including CSRs \z{stopei} and \z{vstopei} \\
+\end{displayLinesTable}
+
+If one of these bits is zero in \z{mstateen0}, an attempt to access
+the corresponding state from a privilege mode less privileged
+than \mbox{M-mode} results in an illegal instruction trap.
+As always, the state-enable CSRs do not affect the accessibility
+of any state when in \mbox{M-mode}, only in less privileged modes.
+For more explanation, see the documentation for extension Smstateen.
+
+Bit~59 controls access to AIA CSRs \z{siph}, \z{sieh}, \z{stopi},
+\z{hidelegh}, \z{hvien}/\z{hvienh}, \z{hviph}, \z{hvictl},
+\z{hviprio1}/\z{hviprio1h}, \z{hviprio2}/\z{hviprio2h}, \z{vsiph},
+\z{vsieh}, and \z{vstopi}, as well as to the supervisor-level interrupt
+priorities accessed through \z{siselect} + \z{sireg}
+(the \z{iprio} array of Section~\ref{sec:intrPrios-S}).
+
+Bit~58 is implemented in \z{mstateen0} only if the hart has an IMSIC.
+If the hypervisor extension is also implemented, this bit does
+not affect the behavior or accessibility of hypervisor CSRs
+\z{hgeip} and \z{hgeie}, or field VGEIN of \z{hstatus}.
+In particular, guest external interrupts from an IMSIC
+continue to be visible to \mbox{HS-mode} in \z{hgeip}
+even when bit~58 of \z{mstateen0} is zero.
+
+\begin{commentary}
+An earlier, pre-ratification draft of Smstateen said that when
+bit~58 of \z{mstateen0} is zero, registers \z{hgeip} and \z{hgeie}
+and field VGEIN of \z{hstatus} are all read-only zeros.
+That effect is no longer correct.
+\end{commentary}
+
+If the hypervisor extension is implemented, the same three bits are
+defined also in \z{hstateen0} but concern only the state potentially
+accessible to a virtual machine executing in privilege modes VS and VU:
+\begin{displayLinesTable}[l@{\quad}l]
+bit 60 & CSRs \z{siselect} and \z{sireg}
+          (really \z{vsiselect} and \z{vsireg}) \\
+bit 59 & CSRs \z{siph} and \z{sieh} (RV32 only) and \z{stopi}
+          (really \z{vsiph}, \z{vsieh}, and \z{vstopi}) \\
+bit 58 & all state of IMSIC guest interrupt files,
+          including CSR \z{stopei} (really \z{vstopei}) \\
+\end{displayLinesTable}
+
+If one of these bits is zero in \z{hstateen0}, and the same bit is one
+in \z{mstateen0}, then an attempt to access the corresponding state
+from \mbox{VS-mode} raises a virtual instruction exception.
+
+Bit~58 is implemented in \z{hstateen0} only if the hart has an IMSIC.
+Furthermore, even with an IMSIC, bit~58 may (or may not) be read-only
+zero in \z{hstateen0} if the IMSIC has no \emph{guest interrupt files}
+for guest external interrupts (Chapter~\ref{ch:IMSIC}).
+When this bit is zero, a virtual machine is prevented from
+accessing the hart's IMSIC the same as when \z{hstatus}.VGEIN =~0.
+
+Extension Ssstateen is defined as
+the supervisor-level view of Smstateen.
+Ssstateen therefore incorporates the bits defined above
+for \z{hstateen0} but not those for \z{mstateen0},
+since machine-level CSRs are not visible to supervisor level.
+
