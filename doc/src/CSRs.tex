@@ -321,3 +321,13 @@ RV32) augment \z{hvip} for injecting interrupts into VS level.
 The use of these registers is covered in Chapter~\ref{ch:VSLevel} on
 interrupts for virtual machines.
 
+%-----------------------------------------------------------------------
+\section{Virtual instruction exceptions}
+
+Following the default rules for the hypervisor extension, attempts
+from \mbox{VS-mode} to directly access a hypervisor or VS CSR, or
+from \mbox{VU-mode} to access any supervisor-level CSR (including
+hypervisor and VS CSRs), usually raise not an illegal instruction
+exception but instead a virtual instruction exception.
+For details, see the {\RISCV} Privileged Architecture.
+
