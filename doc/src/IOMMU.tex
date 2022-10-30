@@ -844,8 +844,13 @@ Any page address must be accepted for NPPN.
 Memory accesses by I/O devices to addresses within a page
 covered by an MRIF-mode PTE are handled by the IOMMU
 instead of being passed through to the memory system.
-For a read access, the IOMMU returns zero as the read value.
-A write access is either interpreted as an MSI, resulting
+If a memory access, read or write, is not for 32~bits of data,
+or if the access address is not aligned to a 4-byte boundary
+(including accesses that straddle the page boundary),
+the access should be aborted as unsupported.
+For a naturally aligned 32-bit read, the IOMMU should preferably
+return zero as the read value but may alternatively abort the access.
+A naturally aligned 32-bit write is either interpreted as an MSI, resulting
 in an update of the destination MRIF, or is discarded.
 
 When the IMSIC interrupt files in the system implement memory-mapped
@@ -860,11 +865,9 @@ The data of an incoming MSI is assumed to be in little-endian byte
 order if bit~2 of the destination address is zero, and in big-endian
 byte order if bit~2 of the destination address is one.
 
-If an incoming write access is for a data size other
-than 32~bits or the address is not \mbox{32-bit}-aligned,
-then the write is accepted by the IOMMU but discarded.
-Otherwise, if the write is to guest physical address~$A$ and its
-\mbox{32-bit} data is~$D$ when interpreted in the byte order indicated
+If a naturally aligned 32-bit write is to guest physical address~$A$
+within a page covered by an MRIF-mode PTE, and if the write
+data is~$D$ when interpreted in the byte order indicated
 by bit~2 of $A$, then the write is processed as follows:
 If either $A$\z{[}11:3\z{]} or $D$\z{[}31:11\z{]} is not zero, or if
 bit~2 of $A$ is one and big-endian MSIs are not supported, then the
