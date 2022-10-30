@@ -375,6 +375,26 @@ configured for other interrupts are those corresponding to external
 interrupt identities 1--255, not those of identities 256 or higher.
 \end{commentary}
 
+\begin{commentary}
+Implementing the priority configurability of this section requires
+that a {\RISCV} hart's external interrupt controller communicate
+to the hart not only the existence of a pending-and-enabled
+external interrupt but also the interrupt's priority number.
+Typically this implies that the width of the connection for signaling
+an external interrupt to the hart is not just a single wire as usual
+but now $\mbox{IPRIOLEN} + 1$ wires.
+
+It is expected that many systems will forego
+priority configurability of major interrupts and simply
+have the\/ \z{iprio} array be all read-only zeros.
+Systems that need this priority configurability can try
+to arrange for each hart's external interrupt controller
+to be relatively close to the hart, by, for example, limiting
+the system to at most a few small cores connected to an APLIC,
+or alternatively by giving every hart its own IMSIC.
+
+\end{commentary}
+
 If supported, setting the priority number for supervisor-level external
 interrupts (bits 15:8 of \z{iprio2}) to a nonzero value~$p$ has the
 effect of giving the entire category of supervisor external interrupts
@@ -637,7 +657,8 @@ in \z{hideleg}/\z{hidelegh} is zero.
 \subsection{Configuring priorities of major interrupts at supervisor level}
 \label{sec:intrPrios-S}
 
-Supervisor-level priorities for major interrupts 0--63 are configurable
+Supervisor-level priorities for major interrupts 0--63
+are optionally configurable
 in an array of supervisor-level \z{iprio}$k$ registers accessed through
 \z{siselect} and \z{sireg}.
 This array has the same structure when SXLEN = 32 or 64 as does the
@@ -682,6 +703,16 @@ zeros.
 \begin{commentary}
 As always, platform standards may require that priorities be
 configurable for certain interrupt causes.
+\end{commentary}
+
+\begin{commentary}
+It is expected that many higher-end systems will not support
+the ability to configure the priorities of major interrupts
+at supervisor level as described in this section.
+Linux in particular is not designed to
+take advantage of such facilities if provided.
+The\/ \z{iprio} array must be accessible
+but may simply be all read-only zeros.
 \end{commentary}
 
 The supervisor-level \z{iprio} array accessed via \z{siselect} and
