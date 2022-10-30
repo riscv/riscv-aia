@@ -730,17 +730,17 @@ PTE is implementation-defined.
 
 If V~=~1 and the custom-use bit C~=~0, then bits~2:1 of the first
 doubleword contain field~M (Mode).
-If M~=~3, the MSI PTE specifies \emph{pass-through mode} for
+If M~=~3, the MSI PTE specifies \emph{translate-R/W mode} for
 accesses to the page, and if M~=~1, it specifies \emph{MRIF mode}.
 Values of 0 and 2 for M are reserved.
 The interpretation of an MSI PTE for each of the two defined modes is
 detailed further in the next two subsections.
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-\subsection{MSI PTE, pass-through mode}
+\subsection{MSI PTE, translate-R/W mode}
 
 When an MSI PTE has fields V~=~1, C~=~0, and M~=~3
-(pass-through mode), the PTE's complete format is:\nopagebreak
+(translate-R/W mode), the PTE's complete format is:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l@{\quad}l]
 First doubleword:  & bit 63     & C, = 0 \\
                    & bits 53:10 & PPN \\
@@ -765,7 +765,7 @@ machine.
 The original memory access from the device is then passed onward to the
 memory system with the new address.
 
-An MSI PTE in pass-through mode allows a hypervisor to route an
+An MSI PTE in translate-R/W mode allows a hypervisor to route an
 MSI write intended for a virtual interrupt file to go instead to a guest
 interrupt file of a real IMSIC in the machine.
 
@@ -774,7 +774,7 @@ An \mbox{IOMMU} that also employs standard {\RISCV} page tables for regular
 address translation can maximize the overlap between the handling of
 MSI PTEs and regular {\RISCV} leaf PTEs as follows:
 
-For RV64, the first doubleword of an MSI PTE in pass-through mode
+For RV64, the first doubleword of an MSI PTE in translate-R/W mode
 has the same encoding as a regular {\RISCV} leaf PTE for Sv39, Sv48,
 Sv39x4, or Sv48x4 page-based address translation, with PTE fields D, A,
 G, U, and X all zeros and W~= R~=~1.
@@ -893,7 +893,7 @@ the write of step~2 becomes visible to any agent.
 
 \begin{commentary}
 While \mbox{IOMMU}s are expected typically to cache MSI PTEs that are
-configured in pass-through mode (M~=~3), they might not cache PTEs
+configured in translate-R/W mode (M~=~3), they might not cache PTEs
 configured in MRIF mode (M~=~1).
 Two reasons together justify not caching MSI PTEs in MRIF mode:
 First, the information and actions required to store an MSI to an MRIF
