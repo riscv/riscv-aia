@@ -187,6 +187,16 @@ If a hart implements any custom interrupts, their
 positions in the default priority order must be documented for the
 hart.
 
+\begin{commentary}
+While many of the standard registers such as\/ \z{mip}/\z{miph}
+and\/ \z{mie}/\z{mieh} have space for major interrupts
+only in the range 0--63, custom interrupts with numbers
+64 and above are conceivable with added custom support.
+CSRs\/ \z{mtopi} (Section~\ref{sec:mtopi})
+and\/ \z{stopi} (Section~\ref{sec:stopi}) allow for
+major interrupt numbers potentially as large as 4095.
+\end{commentary}
+
 When a hart supports the arbitrary configuration of interrupt
 priorities by software (described in later sections), the default
 priority order still remains relevant for breaking ties when two
@@ -392,7 +402,6 @@ to arrange for each hart's external interrupt controller
 to be relatively close to the hart, by, for example, limiting
 the system to at most a few small cores connected to an APLIC,
 or alternatively by giving every hart its own IMSIC.
-
 \end{commentary}
 
 If supported, setting the priority number for supervisor-level external
