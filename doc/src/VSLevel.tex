@@ -556,9 +556,8 @@ VS level, found from among these candidates (prefixed by +~signs):
 \begin{itemize}
 
 \item
-if \z{hstatus}.VGEIN is the valid number of a guest interrupt file,
-bit~9 is one in both \z{vsip} and \z{vsie}, and \z{vstopei}
-is not zero:
+if bit~9 is one in both \z{vsip} and \z{vsie}, \z{hstatus}.VGEIN is the
+valid number of a guest interrupt file, and \z{vstopei} is not zero:
 \begin{tightList}
 \item[+]
 a supervisor external interrupt (code~9) with the priority number
@@ -566,20 +565,20 @@ indicated by \z{vstopei};
 \end{tightList}
 
 \item
-if \z{hstatus}.VGEIN is the valid number of a guest interrupt file,
-bit~9 is one in both \z{vsip} and \z{vsie}, and \z{vstopei} is zero:
-\begin{tightList}
-\item[+]
-a supervisor external interrupt (code~9) with priority number 256;
-\end{tightList}
-
-\item
-if \z{hstatus}.VGEIN =~0, and \z{hvictl} fields IID =~9 and
-$\mbox{IPRIO} \neq \mbox{0}$:
+if bit~9 is one in both \z{vsip} and \z{vsie}, \z{hstatus}.VGEIN =~0,
+and \z{hvictl} fields IID =~9 and $\mbox{IPRIO} \neq \mbox{0}$:
 \begin{tightList}
 \item[+]
 a supervisor external interrupt (code~9) with priority number
 \z{hvictl}.IPRIO;
+\end{tightList}
+
+\item
+if bit~9 is one in both \z{vsip} and \z{vsie},
+and neither of the first two cases applies:
+\begin{tightList}
+\item[+]
+a supervisor external interrupt (code~9) with priority number 256;
 \end{tightList}
 
 \item
@@ -612,9 +611,8 @@ mutually exclusive of one another.
 \end{commentary}
 
 \begin{commentary}
-When both \z{hstatus}.VGEIN =~0 and \z{hvictl}.VTI =~1, the
-absence of an interrupt for VS level can be indicated only by setting
-\z{hvictl} fields IID =~9 and IPRIO~=~0.
+When\/ \z{hvictl}.VTI =~1, the absence of an interrupt for VS level
+can be indicated only by setting\/ \z{hvictl}.IID =~9.
 Software might want to use the pair IID =~9, IPRIO~=~0 generally to
 represent\/ \emph{no interrupt} in \z{hvictl}.
 \end{commentary}
