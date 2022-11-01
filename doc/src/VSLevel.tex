@@ -499,6 +499,7 @@ The format of \z{hvictl} is:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
 bit 30     & VTI \\
 bits 27:16 & IID (\WARL) \\
+bit 9      & DPR \\
 bit 8      & IPRIOM \\
 bits 7:0   & IPRIO \\
 \end{displayLinesTable}
@@ -540,6 +541,17 @@ therefore the interrupt identity reported in \z{vscause} when an
 interrupt traps to \mbox{VS-mode}.
 IID is a {\WARL} unsigned integer field with at least 6 implemented
 bits, while IPRIO is always the full 8~bits.
+
+For a virtual interrupt specified for VS level by \z{hvictl},
+if VTI =~1 and $\mbox{IID} \neq \mbox{9}$,
+field DPR (Default Priority Rank) determines the interrupt's
+presumed default priority order relative to a (virtual)
+supervisor external interrupt (SEI), major identity~9, as follows:
+\begin{displayLinesTable}
+0 = interrupt has higher default priority than an SEI \\
+1 = interrupt has lower default priority than an SEI \\
+\end{displayLinesTable}
+When \z{hvictl}.IID =~9, DPR is ignored.
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \subsection{Virtual supervisor top interrupt CSR (\zSafe{vstopi})}
@@ -595,7 +607,7 @@ external interrupt (code 9), using the priority numbers assigned by
 if \z{hvictl} fields VTI =~1 and $\mbox{IID} \neq \mbox{9}$:
 \begin{tightList}
 \item[+]
-the major interrupt specified by \z{hvictl} fields IID and IPRIO.
+the major interrupt specified by \z{hvictl} fields IID, DPR, and IPRIO.
 \end{tightList}
 
 \end{itemize}
@@ -625,8 +637,11 @@ The usual priority order for supervisor level applies, as specified by
 Table~\ref{tab:intrPrios-S} on page~\pageref{tab:intrPrios-S}, except
 that priority numbers are taken from the candidate list above, not from
 the supervisor-level \z{iprio} array.
-As always, ties in nominal priority are broken by the default priority
-order from Section~\ref{sec:majorIntrs}.
+Ties in nominal priority are broken as usual by
+the default priority order from Section~\ref{sec:majorIntrs},
+unless \z{hvictl} fields VTI =~1 and $\mbox{IID} \neq \mbox{9}$
+(last item in the candidate list above), in which case
+default priority order is determined solely by \z{hvictl}.DPR.
 If bit IPRIOM (IPRIO Mode) of \z{hvictl} is zero,
 IPRIO in \z{vstopi} is~1;
 else, if the priority number for the highest-priority candidate is within the
