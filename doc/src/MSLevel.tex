@@ -886,3 +886,39 @@ return from trap \\
 (This example can be further optimized, but with an increase in
 complexity.)
 
+%-----------------------------------------------------------------------
+\section{WFI (Wait for Interrupt) instruction}
+
+The {\RISCV} Privileged Architecture specifies that
+instruction WFI (Wait for Interrupt) may suspend execution
+at a hart until an interrupt is pending for the hart.
+The Advanced Interrupt Architecture (AIA) redefines
+when execution must resume following a WFI.
+
+According to the {\RISCV} Privileged Architecture, instruction
+execution must resume from a WFI whenever any interrupt
+is both pending and enabled in CSRs \z{mip} and \z{mie},
+ignoring any delegation indicated by \z{mideleg}.
+With the AIA, this succinct rule is no longer appropriate,
+due to the mechanisms the AIA adds for virtual interrupts.
+Instead, execution must resume from a WFI whenever
+an interrupt is pending at any privilege level
+(regardless of whether the interrupt privilege level is
+higher or lower than the hart's current privilege mode).
+
+An interrupt is pending at machine level
+if register \z{mtopi} is not zero.
+If \mbox{S-mode} is implemented, an interrupt is
+pending at supervisor level if \z{stopi} is not zero.
+And if the hypervisor extension is implemented, an interrupt is pending
+at VS level if \z{vstopi} (Section~\ref{sec:vstopi}) is not zero.
+
+\begin{commentary}
+The AIA's rule for WFI gives the same behavior as the Privileged
+Architecture's rule when\/ \z{mvien} =~0 and, if the hypervisor
+extension is implemented, also \z{hvien} =~0 and\/ \z{hvictl}.VTI =~0,
+thus disabling all virtual interrupts not visible in\/ \z{mip}.
+(The AIA's hypervisor registers are covered in the next chapter,
+``Interrupts for Virtual Machines (VS Level)''.)
+\end{commentary}
+
