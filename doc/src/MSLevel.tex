@@ -475,10 +475,13 @@ and enabled for machine level, if major interrupt~0 can trap to
 external interrupt.
 \end{commentary}
 
+The value of \z{mtopi} is not affected by
+the global interrupt enable MIE in CSR \z{mstatus}.
+
 The {\RISCV} Privileged Architecture ensures that, when the value
 of \z{mtopi} is not zero, a trap is taken to \mbox{M-mode} for the
 interrupt indicated by field IID if either the current privilege
-mode is~M and the MIE bit in CSR \z{mstatus} is set, or the current
+mode is~M and \z{mstatus}.MIE is one, or the current
 privilege mode has less privilege than \mbox{M-mode}.
 The trap itself does not cause the value of \z{mtopi} to change.
 
@@ -848,10 +851,13 @@ and enabled for supervisor level, if major interrupt~0 can trap to
 external interrupt.
 \end{commentary}
 
+The value of \z{stopi} is not affected by
+the global interrupt enable SIE in CSR \z{sstatus}.
+
 The {\RISCV} Privileged Architecture ensures that, when the value
 of \z{stopi} is not zero, a trap is taken to \mbox{S-mode} for the
 interrupt indicated by field IID if either the current privilege
-mode is~S and the SIE bit in CSR \z{sstatus} is set, or the current
+mode is~S and \z{sstatus}.SIE is one, or the current
 privilege mode has less privilege than \mbox{S-mode}.
 The trap itself does not cause the value of \z{stopi} to change.
 

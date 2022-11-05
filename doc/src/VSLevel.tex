@@ -543,6 +543,7 @@ bits, while IPRIO is always the full 8~bits.
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \subsection{Virtual supervisor top interrupt CSR (\zSafe{vstopi})}
+\label{sec:vstopi}
 
 Read-only CSR \z{vstopi} is VSXLEN bits wide and has the same format as
 \z{stopi}:\nopagebreak
@@ -637,9 +638,16 @@ for \z{stopi} in Section~\ref{sec:stopi}.
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \subsection{Interrupt traps to \mbox{VS-mode}}
 
-Whenever the value of CSR \z{vstopi} is not zero, if either the current
+The Advanced Interrupt Architecture modifies the standard
+{\RISCV} Privileged Architecture such that an interrupt
+is pending at VS level if and only if \z{vstopi} is not zero.
+CSRs \z{vsiph}/\z{vsip} and \z{vsieh}/\z{vsie} do not by themselves
+determine whether a VS-level interrupt is pending, though
+they may do so indirectly through their effect on \z{vstopi}.
+
+Whenever \z{vstopi} is not zero, if either the current
 privilege mode is \mbox{VS-mode} and the SIE bit in CSR \z{vsstatus}
-is set, or the current privilege mode is \mbox{VU-mode}, a trap is
+is one, or the current privilege mode is \mbox{VU-mode}, a trap is
 taken to \mbox{VS-mode} for the interrupt indicated by field IID of
 \z{vstopi}.
 
