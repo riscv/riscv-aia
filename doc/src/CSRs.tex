@@ -336,7 +336,7 @@ For details, see the {\RISCV} Privileged Architecture.
 
 If extension Smstateen is implemented together with the
 Advanced Interrupt Architecture (AIA), three bits of state-enable
-register \z{mstateen0} control access to AIA-added state
+register \z{mstateen0}/\z{mstateen0h} control access to AIA-added state
 from privilege modes less privileged than \mbox{M-mode}:
 \begin{displayLinesTable}[l@{\quad}l]
 bit 60 & CSRs \z{siselect}, \z{sireg}, \z{vsiselect}, and \z{vsireg} \\
@@ -345,7 +345,8 @@ bit 59 & all other state added by the AIA
 bit 58 & all IMSIC state, including CSRs \z{stopei} and \z{vstopei} \\
 \end{displayLinesTable}
 
-If one of these bits is zero in \z{mstateen0}, an attempt to access
+If one of these bits is zero in
+\z{mstateen0}/\z{mstateen0h}, an attempt to access
 the corresponding state from a privilege mode less privileged
 than \mbox{M-mode} results in an illegal instruction trap.
 As always, the state-enable CSRs do not affect the accessibility
@@ -359,13 +360,14 @@ Bit~59 controls access to AIA CSRs \z{siph}, \z{sieh}, \z{stopi},
 priorities accessed through \z{siselect} + \z{sireg}
 (the \z{iprio} array of Section~\ref{sec:intrPrios-S}).
 
-Bit~58 is implemented in \z{mstateen0} only if the hart has an IMSIC.
+Bit~58 is implemented in \z{mstateen0}/\z{mstateen0h}
+only if the hart has an IMSIC.
 If the hypervisor extension is also implemented, this bit does
 not affect the behavior or accessibility of hypervisor CSRs
 \z{hgeip} and \z{hgeie}, or field VGEIN of \z{hstatus}.
 In particular, guest external interrupts from an IMSIC
 continue to be visible to \mbox{HS-mode} in \z{hgeip}
-even when bit~58 of \z{mstateen0} is zero.
+even when bit~58 of \z{mstateen0}/\z{mstateen0h} is zero.
 
 \begin{commentary}
 An earlier, pre-ratification draft of Smstateen said that when
@@ -375,7 +377,8 @@ That effect is no longer correct.
 \end{commentary}
 
 If the hypervisor extension is implemented, the same three bits are
-defined also in \z{hstateen0} but concern only the state potentially
+defined also in hypservisor CSR \z{hstateen0}/\z{hstateen0h}
+but concern only the state potentially
 accessible to a virtual machine executing in privilege modes VS and VU:
 \begin{displayLinesTable}[l@{\quad}l]
 bit 60 & CSRs \z{siselect} and \z{sireg}
@@ -386,20 +389,30 @@ bit 58 & all state of IMSIC guest interrupt files,
           including CSR \z{stopei} (really \z{vstopei}) \\
 \end{displayLinesTable}
 
-If one of these bits is zero in \z{hstateen0}, and the same bit is one
-in \z{mstateen0}, then an attempt to access the corresponding state
-from \mbox{VS-mode} raises a virtual instruction exception.
+If one of these bits is zero in \z{hstateen0}/\z{hstateen0h},
+and the same bit is one in \z{mstateen0}/ \z{mstateen0h},
+then an attempt to access the corresponding state
+from VS or \mbox{VU-mode} raises a virtual instruction exception.
+(But note that, for high-half CSRs \z{siph} and
+\z{sieh}, this applies only when XLEN =~32.
+When $\mbox{XLEN} > \mbox{32}$, an attempt to access
+\z{siph} or \z{sieh} raises an illegal instruction
+exception as usual, not a virtual instruction exception.)
 
-Bit~58 is implemented in \z{hstateen0} only if the hart has an IMSIC.
+Bit~58 is implemented in \z{hstateen0}/\z{hstateen0h}
+only if the hart has an IMSIC.
 Furthermore, even with an IMSIC, bit~58 may (or may not) be read-only
-zero in \z{hstateen0} if the IMSIC has no \emph{guest interrupt files}
+zero in \z{hstateen0}/\z{hstateen0h} if
+the IMSIC has no \emph{guest interrupt files}
 for guest external interrupts (Chapter~\ref{ch:IMSIC}).
-When this bit is zero, a virtual machine is prevented from
+When this bit is zero (whether read-only zero or set to zero),
+a virtual machine is prevented from
 accessing the hart's IMSIC the same as when \z{hstatus}.VGEIN =~0.
 
 Extension Ssstateen is defined as
 the supervisor-level view of Smstateen.
 Ssstateen therefore incorporates the bits defined above
-for \z{hstateen0} but not those for \z{mstateen0},
+for \z{hstateen0}/\z{hstateen0h} but not
+those for \z{mstateen0}/ \z{mstateen0h},
 since machine-level CSRs are not visible to supervisor level.
 
