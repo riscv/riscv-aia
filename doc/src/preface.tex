@@ -19,14 +19,14 @@ and also indicates which chapters specify extensions to the
 Chapter                                                  & ISA? & Status \\
 \hline
 \hline
-1.\ Introduction                                         & ---  & Stable \\
-2.\ Control and Status Registers (CSRs) Added to Harts   & Yes  & Stable \\
-3.\ Incoming MSI Controller (IMSIC)                      & Yes  & Stable \\
-4.\ Advanced Platform-Level Interrupt Controller (APLIC) & No   & Stable \\
+1.\ Introduction                                         & ---  & Frozen \\
+2.\ Control and Status Registers (CSRs) Added to Harts   & Yes  & Frozen \\
+3.\ Incoming MSI Controller (IMSIC)                      & Yes  & Frozen \\
+4.\ Advanced Platform-Level Interrupt Controller (APLIC) & No   & Frozen \\
 5.\ Duo-PLIC                                             & No   & Draft \\
-6.\ Interrupts for Machine and Supervisor Levels         & Yes  & Stable \\
-7.\ Interrupts for Virtual Machines (VS Level)           & Yes  & Stable \\
-8.\ Interprocessor Interrupts (IPIs)                     & No   & Stable \\
+6.\ Interrupts for Machine and Supervisor Levels         & Yes  & Frozen \\
+7.\ Interrupts for Virtual Machines (VS Level)           & Yes  & Frozen \\
+8.\ Interprocessor Interrupts (IPIs)                     & No   & Frozen \\
 9.\ IOMMU Support for MSIs to Virtual Machines           & No   & Draft \\
 \hline
 \end{tabular}
@@ -35,9 +35,8 @@ Chapter                                                  & ISA? & Status \\
 
 An implementation adhering to the current document might not conform
 to an eventual ratified Advanced Interrupt Architecture for {\RISCV}.
-The chapters marked in the table as \emph{Stable} are not expected
-to change significantly before being put up for ratification,
-but changes of all kinds are still possible nonetheless.
+The chapters marked in the table as \emph{Frozen} are not expected
+to change significantly before being put up for ratification.
 The chapters marked \emph{Draft} are very much
 at risk of changing before ratification.
 
