@@ -776,8 +776,8 @@ MSI PTEs and regular {\RISCV} leaf PTEs as follows:
 
 For RV64, the first doubleword of an MSI PTE in basic translate mode
 has the same encoding as a regular {\RISCV} leaf PTE for Sv39, Sv48,
-Sv39x4, or Sv48x4 page-based address translation, with PTE fields D, A,
-G, U, and X all zeros and W~= R~=~1.
+Sv57, Sv39x4, Sv48x4, or Sv57x4 page-based address translation,
+with PTE fields D, A, G, U, and X all zeros and W~= R~=~1.
 Hence, the MSI PTE's first doubleword appears the same as a regular
 PTE that grants read and write permission (R~= W~=~1) but not execute
 permissions (X~=~0).
