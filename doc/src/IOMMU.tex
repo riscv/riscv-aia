@@ -83,7 +83,8 @@ fields, as needed:
 
 \item
 an \emph{MSI address mask} and \emph{address pattern}, used together to
-recognize certain memory writes from the device as being MSIs; and
+identify pages in the guest physical address space
+that are the destinations of MSIs; and
 
 \item
 the real physical address of an \emph{MSI page table} for controlling
@@ -95,7 +96,7 @@ The MSI address mask and address pattern are each unsigned integers
 with the same width as guest physical page numbers, i.e., 12~bits
 narrower than the maximum supported width of a guest physical address.
 Their use is explained in Section~\ref{sec:IOMMU-identIncomingMSIs},
-``Identification of incoming MSIs for a virtual machine.''
+``Identification of page addresses of a VM's interrupt files.''
 
 A device context's MSI page table is separate from the usual
 address-translation data structures used to translate other memory
@@ -601,7 +602,7 @@ does not police exactly how they are used by software.
 \end{commentary}
 
 %-----------------------------------------------------------------------
-\section{Identification of incoming MSIs for a virtual machine}
+\section{Identification of page addresses of a VM's interrupt files}
 \label{sec:IOMMU-identIncomingMSIs}
 
 When an I/O device is configured directly by a guest operating system,
@@ -633,8 +634,8 @@ An incoming \mbox{32-bit} write made by a device is recognized as an
 MSI write to a virtual interrupt file if the destination guest physical
 page matches the supplied address pattern in all bit positions that are
 zeros in the supplied address mask.
-In detail, a write to guest physical address~$A$ is recognized as an
-MSI to a virtual interrupt file if
+In detail, a memory access to guest physical address~$A$ is
+an access to a virtual interrupt file's memory-mapped page if
 $$
 \bigl(\mbox{($A$\,\z{>>}\,12) \z{\&} $\sim$address mask}\bigr)
   = (\mbox{address pattern \z{\&} $\sim$address mask})
@@ -644,7 +645,7 @@ an ampersand (\z{\&}) represents bitwise logical AND, and
 ``$\sim$address mask'' is the bitwise logical complement of the address
 mask.
 
-When a write is identified as an MSI from a device, an
+When a memory access is found to be to a virtual interrupt file, an
 \emph{interrupt file number} is extracted from the original guest
 physical address as
 \begin{displayLinesTable}
@@ -663,33 +664,28 @@ $y$ = & 1 & 0 & 1 & 0 & 0 & 1 & 1 & 0 \\
 \end{displayLinesTable}
 then the value of extract($x$,~$y$) has bits 0~0~0~0~a~c~f~g.
 
+\clearpage
+
 %-----------------------------------------------------------------------
 \section{MSI page tables}
 
-Whenever an \mbox{IOMMU} recognizes an incoming write from a device as
-an MSI by the method specified in the previous section, the MSI is
+When an \mbox{IOMMU} determines that a memory access is to a virtual
+interrupt file as specified in the previous section, the access is
 translated or converted by consulting the MSI page table configured for
 the device, instead of using the regular translation data structures
 that apply to all other memory accesses from the same device.
-
-Only naturally aligned \mbox{32-bit} writes from a device are possible
-MSIs.
-For other forms of memory accesses by a device (such as reads, writes
-of other sizes, or misaligned writes), the regular translation data
-structures are always applied, even if the address matches that of a
-proper MSI.
 
 An MSI page table is a flat array of MSI page table entries (MSI PTEs),
 each 16~bytes.
 MSI page tables have no multi-level hierarchy like regular {\RISCV}
 page tables do.
 Rather, every MSI PTE is a leaf entry specifying the translation or
-conversion of writes made to a particular \mbox{4-KiB} guest physical
+conversion of accesses made to a particular \mbox{4-KiB} guest physical
 page that a virtual interrupt file occupies (or may occupy) in the
 relevant virtual machine.
 To select an individual MSI PTE from an MSI page table, the PTE array
 is indexed by the interrupt file number extracted from the destination
-guest physical address of the incoming MSI write by the formula of the
+guest physical address of the incoming memory access by the formula of the
 previous section.
 Each MSI PTE may specify either the address of a real guest interrupt
 file that substitutes for the targeted virtual interrupt file (as in
@@ -732,22 +728,23 @@ designated for custom use.
 If an MSI PTE has V~=~1 and C~=~1, interpretation of the rest of the
 PTE is implementation-defined.
 
-If V~=~1 and the custom-use bit C~=~0, then bit~2 of the first
-doubleword is field~W (Write-through).
-If W~=~1, the MSI PTE specifies \emph{write-through mode} for incoming
-MSIs, and if W~=~0, it specifies \emph{MRIF mode}.
-The interpretation of an MSI PTE for each of these two modes is
+If V~=~1 and the custom-use bit C~=~0, then bits~2:1 of the first
+doubleword contain field~M (Mode).
+If M~=~3, the MSI PTE specifies \emph{basic translate mode} for
+accesses to the page, and if M~=~1, it specifies \emph{MRIF mode}.
+Values of 0 and 2 for M are reserved.
+The interpretation of an MSI PTE for each of the two defined modes is
 detailed further in the next two subsections.
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-\subsection{MSI PTE, write-through mode}
+\subsection{MSI PTE, basic translate mode}
 
-When an MSI PTE has fields V~=~1, C~=~0, and W~=~1
-(write-through mode), the PTE's complete format is:\nopagebreak
+When an MSI PTE has fields V~=~1, C~=~0, and M~=~3
+(basic translate mode), the PTE's complete format is:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l@{\quad}l]
 First doubleword:  & bit 63     & C, = 0 \\
                    & bits 53:10 & PPN \\
-                   & bit 2      & W, = 1 \\
+                   & bits 2:1   & M, = 3 \\
                    & bit 0      & V, = 1 \\
 \noalign{\medskip}
 Second doubleword: & ignored \\
@@ -757,18 +754,19 @@ zeros by software.
 The second doubleword is ignored by an \mbox{IOMMU} so is free for software
 to use.
 
-An incoming MSI write is translated by replacing the write's original
+A memory access within the page covered by the MSI PTE
+is translated by replacing the access's original
 address bits 12 and above (the guest physical page number) with field
 PPN (Physical Page Number) from the PTE, while retaining the original
 address bits 11:0 (the page offset).
 This translated address is either zero-extended or clipped at the upper
 end as needed to make it the width of a real physical address for the
 machine.
-The original memory write from the device is then passed onward to the
+The original memory access from the device is then passed onward to the
 memory system with the new address.
 
-An MSI PTE in write-through mode allows a hypervisor to route an
-MSI intended for a virtual interrupt file to go instead to a guest
+An MSI PTE in basic translate mode allows a hypervisor to route an
+MSI write intended for a virtual interrupt file to go instead to a guest
 interrupt file of a real IMSIC in the machine.
 
 \begin{commentary}
@@ -776,13 +774,13 @@ An \mbox{IOMMU} that also employs standard {\RISCV} page tables for regular
 address translation can maximize the overlap between the handling of
 MSI PTEs and regular {\RISCV} leaf PTEs as follows:
 
-For RV64, the first doubleword of an MSI PTE in write-through mode
+For RV64, the first doubleword of an MSI PTE in basic translate mode
 has the same encoding as a regular {\RISCV} leaf PTE for Sv39, Sv48,
 Sv39x4, or Sv48x4 page-based address translation, with PTE fields D, A,
-G, U, X, and R all zeros and W~=~1.
+G, U, and X all zeros and W~= R~=~1.
 Hence, the MSI PTE's first doubleword appears the same as a regular
-PTE that grants write permission (W~=~1) but not read or execute
-permissions (X~= R =~0).
+PTE that grants read and write permission (R~= W~=~1) but not execute
+permissions (X~=~0).
 This same-encoded regular PTE would translate an MSI write the same as
 the actual MSI PTE, except that what would be the PTE's accessed (A),
 dirty (D), and user (U) bits are all zeros.
@@ -807,12 +805,12 @@ must be treated differently.
 \label{sec:IOMMU-MSIPTE-MRIF}
 
 If memory-resident interrupt files are supported and an MSI PTE has
-fields V~=~1, C~=~0, and W~=~0 (MRIF mode), the PTE's complete format
+fields V~=~1, C~=~0, and M~=~1 (MRIF mode), the PTE's complete format
 is:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l@{\quad}l]
 First doubleword:  & bit 63     & C, = 0 \\
                    & bits 53:7  & MRIF Address[55:9] \\
-                   & bit 2      & W, = 0 \\
+                   & bits 2:1   & M, = 1 \\
                    & bit 0      & V, = 1 \\
 \noalign{\medskip}
 Second doubleword: & bit 60     & NID[10] \\
@@ -843,6 +841,18 @@ an \mbox{IOMMU} must not attempt to restrict it to only such addresses.
 Any page address must be accepted for NPPN.
 \end{commentary}
 
+Memory accesses by I/O devices to addresses within a page
+covered by an MRIF-mode PTE are handled by the IOMMU
+instead of being passed through to the memory system.
+If a memory access, read or write, is not for 32~bits of data,
+or if the access address is not aligned to a 4-byte boundary
+(including accesses that straddle the page boundary),
+the access should be aborted as unsupported.
+For a naturally aligned 32-bit read, the IOMMU should preferably
+return zero as the read value but may alternatively abort the access.
+A naturally aligned 32-bit write is either interpreted as an MSI, resulting
+in an update of the destination MRIF, or is discarded.
+
 When the IMSIC interrupt files in the system implement memory-mapped
 register \z{seteipnum\_be} for receiving MSIs in big-endian byte order
 (Section~\ref{sec:IMSIC-memRegion}), then an \mbox{IOMMU} must be able to
@@ -855,13 +865,15 @@ The data of an incoming MSI is assumed to be in little-endian byte
 order if bit~2 of the destination address is zero, and in big-endian
 byte order if bit~2 of the destination address is one.
 
-If the incoming MSI write is to guest physical address~$A$ and its
-\mbox{32-bit} data is~$D$ when interpreted in the byte order indicated
-by bit~2 of $A$, then the MSI is processed by the \mbox{IOMMU} as follows:
+If a naturally aligned 32-bit write is to guest physical address~$A$
+within a page covered by an MRIF-mode PTE, and if the write
+data is~$D$ when interpreted in the byte order indicated
+by bit~2 of $A$, then the write is processed as follows:
 If either $A$\z{[}11:3\z{]} or $D$\z{[}31:11\z{]} is not zero, or if
 bit~2 of $A$ is one and big-endian MSIs are not supported, then the
 incoming write is accepted but discarded.
-Else, the original incoming write is replaced by this sequence:
+Else, the original incoming write is recognized
+as an MSI and is replaced by this sequence:
 \begin{enumerate}
 
 \item
@@ -881,8 +893,8 @@ the write of step~2 becomes visible to any agent.
 
 \begin{commentary}
 While \mbox{IOMMU}s are expected typically to cache MSI PTEs that are
-configured in write-through mode (W~=~1), they might not cache PTEs
-configured in MRIF mode (W~=~0).
+configured in basic translate mode (M~=~3), they might not cache PTEs
+configured in MRIF mode (M~=~1).
 Two reasons together justify not caching MSI PTEs in MRIF mode:
 First, the information and actions required to store an MSI to an MRIF
 are far different than normal address translation; and
