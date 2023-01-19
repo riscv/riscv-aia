@@ -80,3 +80,22 @@ be supported without clients being at all aware of a change in the
 underlying hardware for delivering IPIs between harts.
 \end{commentary}
 
+\begin{commentary}
+When software sends IPIs by writing MSIs to the IMSICs of other
+harts, programmers should consider also the need to execute a FENCE
+instruction before each store instruction that writes such an MSI.
+In the absence of FENCEs, many systems guarantee to preserve the
+order of a hart's loads and stores only to/from individual devices,
+not among multiple devices, and not at all for accesses to main memory.
+With such a system, it must be remembered that each IMSIC
+is likely to be considered a separate device among the many.
+For example, if hart~A wants to notify hart~B that it has
+completed a task involving accesses to some I/O device,
+hart~A may need to execute a FENCE before sending an MSI to
+B's IMSIC, to ensure that all of A's accesses to the device
+have actually completed before the MSI could arrive at B.
+Similarly, if hart~A stores anything to memory that
+should be visible at hart~B, a FENCE is likely needed
+before a subsequent store sending an MSI to B's IMSIC.
+\end{commentary}
+
