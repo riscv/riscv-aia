@@ -815,7 +815,7 @@ The value of \z{stopi} is zero unless:
 and enabled in \z{sie}/\z{sieh}, or, if the hypervisor extension is
 implemented, both pending in \z{hip} and enabled in \z{hie}; and
 (b)~the interrupt is not delegated to a lower privilege level
-(by \z{hideleg}, if the hypervisor extension is implemented),
+(by \z{hideleg}, if the hypervisor extension is implemented).
 When there is a pending-and-enabled major interrupt for supervisor
 level, field IID is the major identity number of the highest-priority
 interrupt, and field IPRIO indicates its priority.
