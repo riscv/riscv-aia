@@ -56,3 +56,16 @@ Chapter~\ref{ch:IOMMU} about an IOMMU's support for MSIs
 only in conjunction with the full {\RISCV} IOMMU specification.
 \end{itemize}
 
+\section*{Changes for RC2 (Ratification Candidate 2)}
+
+The only normative changes to this document
+between versions RC1 and RC2 were to clarify that
+field IID of CSR \z{hvictl} must support all
+unsigned integer values of the number of bits implemented
+for that field, and that writes to \z{hvictl}
+always set IID in the most straightforward way.
+
+A comment was added to Chapter~\ref{ch:IPIs} warning about
+the possible need for FENCE instructions when IPIs are
+sent to other harts by writing MSIs to those harts' IMSICs.
+
