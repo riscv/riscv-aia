@@ -543,6 +543,9 @@ therefore the interrupt identity reported in \z{vscause} when an
 interrupt traps to \mbox{VS-mode}.
 IID is a {\WARL} unsigned integer field with at least 6 implemented
 bits, while IPRIO is always the full 8~bits.
+If $k$ bits are implemented for IID, then all values 0 through
+$\mbox{2}^{k}-\mbox{1}$ are supported, and a write to \z{hvictl}
+sets IID equal to bits ($\mbox{15}+k$):16 of the value written.
 
 For a virtual interrupt specified for VS level by \z{hvictl},
 if VTI =~1 and $\mbox{IID} \neq \mbox{9}$,
