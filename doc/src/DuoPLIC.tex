@@ -13,23 +13,7 @@ will never become a ratified standard.%
 \bigskip
 
 The Advanced PLIC of the previous chapter is not backward compatible
-with the original {\RISCV} PLIC.%
-\footnote{%
-A proposed standard for the original PLIC is the document
-\textit{{\RISCV} Platform-Level Interrupt Controller Specification},
-available as of mid-2021 here:
-\z{https://github.com/{\allowbreak}riscv/{\allowbreak}riscv-plic-spec}.
-However, both free implementations of the PLIC and those of some major
-{\RISCV} vendors such as SiFive have been observed to differ in small
-but significant ways from this document and from each other.
-Some important details of the original PLIC were better documented in
-older versions of
-\textit{The {\RISCV} Instruction Set Manual, Volume~II: Privileged
-Architecture}, in a chapter titled
-``Platform-Level Interrupt Controller (PLIC).''
-That chapter has since been removed from more recent versions of
-\textit{The {\RISCV} Instruction Set Manual}.%
-}
+with the original {\RISCV} PLIC.
 To ease the transition of software from the original PLIC to the
 APLIC, a {\RISCV} system may have a \emph{\mbox{Duo-PLIC\/}}
 that software can configure to act as either form of PLIC.
