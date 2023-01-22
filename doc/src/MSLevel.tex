@@ -521,7 +521,8 @@ Architecture adds a facility for software filtering
 of interrupts and for virtual interrupts, making use of new
 CSRs \z{mvien}/\z{mvienh} (Machine Virtual Interrupt Enables) and
 \z{mvip}/\z{mviph} (Machine Virtual Interrupt-Pending bits).
-\emph{Interrupt filtering} permits a local or custom interrupt
+\emph{Interrupt filtering} permits a supervisor-level
+interrupt (SEI or SSI) or local or custom interrupt
 to trap to \mbox{M-mode} and then be selectively delegated by
 software to supervisor level, even while the corresponding bit in
 \z{mideleg}/\z{midelegh} remains zero.
@@ -561,8 +562,9 @@ summarized in Table~\ref{tab:intrFilteringForS}.
 The effects of \z{mideleg} and \z{mvien} on \z{sip} and \z{sie} (except
 for the hypervisor extension's VS-level interrupts, which appear in
 \z{hip} and \z{hie} instead of \z{sip} and \z{sie}).
-A bit in \z{mvien} can be set to~1 only for major interrupts 13--63.
-When interrupts 0--12 are delegated by \z{mideleg}, the
+A bit in \z{mvien} can be set to~1 only
+for major interrupts 1, 9, and 13--63.
+For interrupts 0--12,
 aliases in \z{sip} may be read-only, as specified by the
 {\RISCV} Privileged Architecture.%
 }
@@ -604,25 +606,79 @@ All other bits for interrupts 13--63 must be writable in
 \z{mvip}/\z{mviph}.
 
 \begin{commentary}
-Platform standards may require that interrupt filtering be supported
-for certain interrupt causes.
+Platform standards or other extensions may require that
+bits of\/ \z{mvien} for certain interrupt causes
+be writable, or be read-only zero or one.
 \end{commentary}
 
-Bits 12:0 in \z{mvien} are reserved and must be read-only zeros.
-Bits 1 and~5 of \z{mvip} are aliases of the same bits in \z{mip}
-(SSIP and STIP) when those bits are writable in \z{mip}.
-When STIP is not writable in \z{mip} (such as when optional
-CSR \z{stimecmp} is implemented), the
-same bit in \z{mvip} is read-only zero.
-Bit~9 of \z{mvip} is an alias of the software-writable bit~9 of \z{mip}
-(SEIP).
-The other bits of \z{mvip} in the range 12:0 are reserved and must be
-read-only zeros.
+The bits of \z{mvien} for supervisor software interrupts (code~1)
+and supervisor external interrupts (code~9)
+are each either writable or read-only zero;
+they cannot be read-only ones.
+The other bits of \z{mvien} for interrupts 0--12
+are reserved and must be read-only zeros.
+
+It is strongly recommended that bit~9 of \z{mvien} be writable.
+Furthermore, if bit~1 (SSIP) of \z{mip} can be set
+automatically by an interrupt controller and
+not just by explicit writes to \z{mip} or \z{sip},
+it is strongly recommended that bit~1 of \z{mvien} also be writable.
+
+When bit~1 of \z{mvien} is zero, bit~1 of \z{mvip}
+is an alias of the same bit (SSIP) of \z{mip}.
+But when bit~1 of \z{mvien} is one, bit~1 of \z{mvip}
+is a separate writable bit independent of \z{mip}.SSIP.
+When the value of bit~1 of \z{mvien} is changed from zero to one,
+the value of bit~1 of \z{mvip} becomes {\unspecified}.
+
+Bit~5 of \z{mvip} is an alias of the same bit (STIP)
+in \z{mip} when that bit is writable in \z{mip}.
+When STIP is not writable in \z{mip} (such as when
+\z{menvcfg}.STCE =~1), bit~5 of \z{mvip} is read-only zero.
+
+When bit~9 of \z{mvien} is zero, bit~9 of \z{mvip} is
+an alias of the software-writable bit~9 of \z{mip} (SEIP).
+But when bit~9 of \z{mvien} is one, bit~9 of \z{mvip}
+is a writable bit independent of \z{mip}.SEIP\@.
+Unlike for bit~1, changing the value of bit~9 of \z{mvien}
+does not affect the value of bit~9 of \z{mvip}.
 
 \begin{commentary}
-Bit~9 of\/ \z{mvip} makes the software-writable SEIP bit of\/ \z{mip}
+When bit~9 of\/ \z{mvien} is zero, bit~9 of\/ \z{mvip}
+makes the software-writable SEIP bit of\/ \z{mip}
 directly accessible by itself.
 \end{commentary}
+
+Except for bits 1, 5, and~9 as specified above, the bits of \z{mvip}
+in the range 12:0 are reserved and must be read-only zeros.
+
+The value of bit~9 of \z{mvien} has some additional consequences
+for supervisor external interrupts:
+\begin{itemize}
+
+\item
+When bit~9 of \z{mvien} is zero, the software-writable SEIP bit
+(bit~9 of \z{mvip}) interacts with reads and writes of \z{mip}
+in the way specified by the {\RISCV} Privileged Architecture.
+In particular, for most purposes, the value of bit~9 of \z{mvip}
+is logically ORed into the readable value of \z{mip}.SEIP\@.
+But when bit~9 of \z{mvien} is one, bit SEIP in \z{mip} is
+read-only and does not include the value of bit~9 of \z{mvip}.
+Rather, the value of \z{mip}.SEIP is simply
+the supervisor external interrupt signal from
+the hart's external interrupt controller (APLIC or IMSIC).
+
+\item
+If the hart has an IMSIC, then when bit~9 of \z{mvien} is one,
+attempts from S-mode to explicitly access the supervisor-level
+interrupt file raise an illegal instruction exception.
+The exception is raised for attempts to access CSR \z{stopei},
+or to access \z{sireg} when \z{siselect} has
+a value in the range \z{0x70}--\z{0xFF}.
+Accesses to guest interrupt files
+(through \z{vstopei} or \z{vsiselect} + \z{vsireg}) are not affected.
+
+\end{itemize}
 
 When the hypervisor extension is implemented, if a bit is
 zero in the same position in both \z{mideleg}/\z{midelegh}
@@ -639,8 +695,11 @@ constrains bits 12:0 of \z{hideleg}.
 
 When supervisor mode is implemented, the minimal required
 implementation of \z{mvien}/\z{mvienh} and \z{mvip}/\z{mviph} has all
-bits being read-only zeros except for \z{mvip} bits 1, 5, and~9, which
-are aliases of existing writable bits in \z{mip}.
+bits being read-only zeros except for \z{mvip}
+bits 1 and~9, and sometimes bit~5, each of which is
+an alias of an existing writable bit in \z{mip}.
+(Although, as noted, it is strongly recommended
+that bit 9 of \z{mvien} also be writable.)
 When supervisor mode is not implemented, registers \z{mvien}/\z{mvienh}
 and \z{mvip}/\z{mviph} do not exist.
 
