@@ -23,11 +23,10 @@ Chapter                                                  & ISA? & Status \\
 2.\ Control and Status Registers (CSRs) Added to Harts   & Yes  & Frozen \\
 3.\ Incoming MSI Controller (IMSIC)                      & Yes  & Frozen \\
 4.\ Advanced Platform-Level Interrupt Controller (APLIC) & No   & Frozen \\
-5.\ Duo-PLIC                                             & No   & Draft \\
-6.\ Interrupts for Machine and Supervisor Levels         & Yes  & Frozen \\
-7.\ Interrupts for Virtual Machines (VS Level)           & Yes  & Frozen \\
-8.\ Interprocessor Interrupts (IPIs)                     & No   & Frozen \\
-9.\ IOMMU Support for MSIs to Virtual Machines           & No   & Draft \\
+5.\ Interrupts for Machine and Supervisor Levels         & Yes  & Frozen \\
+6.\ Interrupts for Virtual Machines (VS Level)           & Yes  & Frozen \\
+7.\ Interprocessor Interrupts (IPIs)                     & No   & Frozen \\
+8.\ IOMMU Support for MSIs to Virtual Machines           & No   & Frozen \\
 \hline
 \end{tabular}
 \end{table}
@@ -35,32 +34,19 @@ Chapter                                                  & ISA? & Status \\
 
 An implementation adhering to the current document might not conform
 to an eventual ratified Advanced Interrupt Architecture for {\RISCV}.
-The chapters marked in the table as \emph{Frozen} are not expected
+However, all chapters are \emph{frozen}, meaning they are not expected
 to change significantly before being put up for ratification.
-The chapters marked \emph{Draft} are very much
-at risk of changing before ratification.
-
-Concerning the two chapters that remain in draft state:
-\begin{itemize}
-
-\item
-The authors are not aware that any implementation of
-a Duo-PLIC yet exists, even one just for simulation.
-So long as that remains true, the Duo-PLIC specification of
-Chapter~\ref{ch:DuoPLIC} will not advance beyond draft status.
-
-\item
-A separate standard is being developed for IOMMUs in {\RISCV} systems.
-Chapter~\ref{ch:IOMMU} about an IOMMU's support for MSIs
-(message-signaled interrupts) is expected to be finalized
-only in conjunction with the full {\RISCV} IOMMU specification.
-\end{itemize}
 
 \section*{Changes for RC3 (Ratification Candidate 3)}
 
+Removed the still-draft Duo-PLIC chapter to a separate document.
+
 In Section~\ref{sec:virtIntrs-S} added the options
-for bits 1 and 9 be writable in CSR \z{mvien},
+for bits 1 and 9 to be writable in CSR \z{mvien},
 and specified the effects of setting each of these bits.
+
+Upgraded Chapter~\ref{ch:IOMMU} (``IOMMU Support'')
+to the \emph{frozen} state.
 
 \section*{Changes for RC2}
 
