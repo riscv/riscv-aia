@@ -21,7 +21,7 @@
 srcdir  = ../src
 
 docs_with_bib =
-docs_without_bib = riscv-interrupts
+docs_without_bib = riscv-interrupts riscv-duoplic
 
 srcs = $(wildcard $(srcdir)/*.tex)
 figs = $(wildcard $(srcdir)/*.png)
