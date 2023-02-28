@@ -5,10 +5,8 @@
 \chaptermark{APLIC}
 
 \textbf{%
-This chapter is \emph{frozen}, meaning
-a functional change is extremely unlikely.
-Change will occur only because of some truly critical issue
-being identified during public review.%
+This chapter is \emph{frozen} and has already passed public review,
+making a functional change at this stage extremely unlikely.%
 }
 \bigskip
 
@@ -36,15 +34,21 @@ Full conformance to the Advanced Interrupt Architecture requires the
 APLIC.
 However, a workable system can be built substituting the older PLIC
 instead, assuming only wired interrupts to harts, not MSIs.
-Chapter~\ref{ch:DuoPLIC} describes a \emph{\mbox{Duo-PLIC\/}} that is
-software-configurable to act as either an original {\RISCV} PLIC or an
-APLIC.
 
 \begin{commentary}
 We intend eventually to provide a free example parameterized
 implementation of an APLIC, written in portable SystemVerilog,
 that we expect will be suitable for many {\RISCV} systems without
 modification.
+\end{commentary}
+
+\begin{commentary}
+A draft specification exists for a\/ \emph{\mbox{Duo-PLIC}}
+that is software-configurable to act as either
+an original {\RISCV} PLIC or an APLIC\@.
+However, at this time, it appears unlikely that
+the {\RISCV} International Association will ever
+ratify the Duo-PLIC specification as a standard.
 \end{commentary}
 
 In a machine without IMSICs, every {\RISCV} hart accepts interrupts

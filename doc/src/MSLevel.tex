@@ -4,10 +4,8 @@
 \label{ch:MSLevel}
 
 \textbf{%
-This chapter is \emph{frozen}, meaning
-a functional change is extremely unlikely.
-Change will occur only because of some truly critical issue
-being identified during public review.%
+This chapter is \emph{frozen} and has already passed public review,
+making a functional change at this stage extremely unlikely.%
 }
 \bigskip
 
@@ -419,7 +417,7 @@ interrupts are required to be delegated to supervisor level when the
 hypervisor extension is implemented, the machine-level priority numbers
 for these interrupts are always ignored and should be read-only zeros.)
 
-If the system has an original PLIC or \mbox{Duo-PLIC} for backward
+If the system has an original PLIC for backward
 compatibility with older software, reset should initialize the
 machine-level \z{iprio} array to all zeros.
 
@@ -851,7 +849,7 @@ the effect of giving the entire category of VS external interrupts
 nominally the same priority as a supervisor external interrupt with
 priority number~$p$, when VS external interrupts trap to \mbox{S-mode}.
 
-If the system has an original PLIC or \mbox{Duo-PLIC} for backward
+If the system has an original PLIC for backward
 compatibility with older software, reset should initialize the
 supervisor-level \z{iprio} array to all zeros.
 
