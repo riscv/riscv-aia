@@ -3,7 +3,7 @@
 \chapter{Preface}
 
 This document describes an Advanced Interrupt Architecture
-being proposed for {\RISCV} systems.
+for {\RISCV} systems.
 
 No part of this document has yet been ratified
 by the {\RISCV} International Association.
@@ -40,6 +40,9 @@ to change significantly before being put up for ratification.
 \section*{Changes for RC3 (Ratification Candidate 3)}
 
 Removed the still-draft Duo-PLIC chapter to a separate document.
+
+Allocated major interrupts 35 and 43 for signaling RAS events
+(Section~\ref{sec:majorIntrs}).
 
 In Section~\ref{sec:virtIntrs-S} added the options
 for bits 1 and 9 to be writable in CSR \z{mvien},

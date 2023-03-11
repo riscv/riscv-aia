@@ -41,11 +41,13 @@ interrupts by a PLIC, APLIC, or IMSIC.
 \label{sec:majorIntrs}
 
 Table~\ref{tab:majorIntrs} lists all the major interrupts
-currently defined for {\RISCV} harts.
-At this time, the only standard major interrupts are those
-specified by the {\RISCV} Privileged Architecture.
+currently defined for {\RISCV} harts
+that conform to this Advanced Interrupt Architecture (AIA).
+Besides the major interrupts specified by the {\RISCV} Privileged
+Architecture, the AIA adds interrupt numbers 35 and 43
+as local interrupts for low- and high-priority \emph{RAS events}.
 
-\begin{table*}[h!]
+\begin{table*}[t]
 \begin{center}
 \begin{tabular}{|c|l|l|}
 \hline
@@ -53,23 +55,25 @@ Default        &                         & \\
 priority order & Major interrupt numbers & \multicolumn{1}{c|}{Description} \\
 \hline
 \hline
-Highest & 11, 3, 7   & Machine interrupts:  external, software, timer \\
+Highest & 43         & Local interrupt: high-priority RAS event \\
+        \cline{2-3}
+        & 11, 3, 7   & Machine interrupts:  external, software, timer \\
         & \ 9, 1, 5  & Supervisor interrupts:  external, software, timer \\
         & 12         & Supervisor guest external interrupt \\
         & 10, 2, 6   & VS interrupts:  external, software, timer \\
-Lowest  & 13         & Counter overflow interrupt \\
+        & 13         & Local interrupt: counter overflow \\
+        \cline{2-3}
+Lowest  & 35         & Local interrupt: low-priority RAS event \\
 \hline
 \end{tabular}
 \end{center}
 \caption{%
-The standard major interrupt codes, listed in default priority order.
-Currently, all standard codes are defined by
-the {\RISCV} Privileged Architecture.%
+The standard major interrupt codes, listed in default priority order.%
 }
 \label{tab:majorIntrs}
 \end{table*}
 
-\begin{table*}[h!]
+\begin{table*}[t]
 \begin{center}
 \begin{tabular}{|c|l|}
 \hline
@@ -102,18 +106,46 @@ Major interrupt numbers   & \hspace{10mm}Category \\
 \end{table*}
 
 Of the major interrupts controlled by the Privileged Architecture
-(numbers 0--15), this Advanced Interrupt Architecture (AIA) categorizes the
+(numbers 0--15), the AIA categorizes the
 counter overflow interrupt (code~13) as a \emph{local interrupt}.
 It is assumed furthermore that any future definitions for
 reserved interrupt numbers 14 and 15 will also be local interrupts.
-The AIA additionally reserves
-major interrupt numbers 16--23 and 32--47 for
+Besides the two RAS interrupts, the AIA additionally reserves
+major interrupt numbers in the ranges 16--23 and 32--47 for
 standard local interrupts that other {\RISCV} extensions may define.
 The remaining major interrupts allocated to the Privileged
 Architecture, numbers 0--12, are categorized as not local interrupts.
 Taken altogether, Table~\ref{tab:majorIntrCategories}
 summarizes the AIA's categorization
 of all major interrupt identities.
+
+\emph{RAS} is an abbreviation for
+\emph{Reliability, Availability, and Serviceability}.
+Typically a RAS event corresponds to the detection
+of corrupted data (e.g.\ as a result of a soft or hard error)
+and/or the use of such data.
+The high-priority RAS event local interrupt may, for example,
+signal an occurrence of an urgent uncorrected error
+that needs action from a RAS error handler to
+contain the error and, if possible, to recover from it.
+The low-priority RAS event local interrupt may, for example,
+be triggered by non-urgent deferred or corrected errors.
+
+The AIA does not itself require that detected RAS events trigger
+one of the two local interrupts defined for this purpose.
+Systems are free to report any or all RAS events
+another way, such as by external interrupts routed
+through an APLIC or IMSIC, or by custom interrupts.
+In all likelihood, the method for reporting a particular RAS event
+will depend on where in the system the event is detected.
+The AIA defines local interrupt numbers for RAS events so systems
+have a standard way to report such events when detected locally at
+a hart, without depending solely on external or custom interrupts.
+
+\begin{commentary}
+As always, platform standards may further constrain how
+a system reports events, whether RAS events or other.
+\end{commentary}
 
 \begin{commentary}
 For the standard local interrupts not defined by the
@@ -158,9 +190,6 @@ listed in order of decreasing default priority:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
 23 & Bus or system error \\
 45 & Per-core high-power or over-temperature event \\
-43 & High-priority RAS event \\
-\noalign{\smallskip}
-35 & Low-priority RAS event \\
 17 & Debug/trace interrupt \\
 \end{displayLinesTable}
 \noindent
@@ -168,8 +197,6 @@ These local interrupts are expected to be
 specified by other {\RISCV} extensions.
 Be aware, this list is not final and may change
 as the relevant extensions are developed and ratified.
-\emph{RAS} is an abbreviation for \emph{Reliability, Availability, and
-Serviceability}.
 \end{commentary}
 
 \begin{commentary}
