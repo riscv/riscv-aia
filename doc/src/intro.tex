@@ -357,8 +357,15 @@ Major identity & Minor identity & \\
 \hline
 \hline
 16--23         & --       & \em Reserved for standard local interrupts \\
+\hline
 24--31         & --       & \em Designated for custom use \\
-32--47         & --       & \em Reserved for standard local interrupts \\
+\hline
+32--34         & --       & \em Reserved for standard local interrupts \\
+35             & --       & Low-priority RAS event interrupt \\
+36--42         & --       & \em Reserved for standard local interrupts \\
+43             & --       & High-priority RAS event interrupt \\
+44--47         & --       & \em Reserved for standard local interrupts \\
+\hline
 $\geq \mbox{48}$ & --     & \em Designated for custom use \\
 \hline
 \end{tabular}
