@@ -19,9 +19,9 @@ supervisor-level interrupts.
 As introduced in Chapter~\ref{ch:CSRs}, several hypervisor and VS CSRs
 are added:  \z{hvien}, \z{hvictl}, \z{hviprio1}, \z{hviprio2},
 \z{vsiselect}, \z{vsireg}, \z{vstopei}, and \z{vstopi}.
-For RV32, the following ``high-half'' CSR partners are also added:
+(And for RV32, the following high-half CSRs are also added:
 \z{hidelegh}, \z{hvienh}, \z{hviph}, \z{hviprio1h}, \z{hviprio2h},
-\z{vsiph}, and \z{vsieh}.
+\z{vsiph}, and \z{vsieh}.)
 As always, when executing in \mbox{VS-mode} or \mbox{VU-mode}, the
 VS CSRs substitute for the corresponding supervisor CSRs.
 
@@ -262,8 +262,7 @@ emulate the VS-level \z{iprio} array when accesses to \z{sireg} from
 Instead of a physical VS-level \z{iprio} array, a separate hardware
 mechanism is provided for configuring the priorities of a subset
 of interrupts for VS level, using hypervisor CSRs \z{hviprio1} and
-\z{hviprio2}, plus, for RV32, their high-half partners, \z{hviprio1h}
-and \z{hviprio2h}.
+\z{hviprio2}.
 The subset of major interrupt numbers whose priority may be configured
 in hardware are these:
 \begin{displayLinesTable}[c@{\quad}l]
@@ -282,43 +281,9 @@ supported in hardware by custom CSRs, expanding upon
 \z{hviprio1} and \z{hviprio2} for standard interrupts.
 \end{commentary}
 
-For RV32, registers \z{hviprio1}, \z{hviprio1h}, \z{hviprio2}, and
-\z{hviprio2h} have these formats:
+Registers \z{hviprio1} and \z{hviprio2} have these formats:
 
-RV32 \z{hviprio1}:\nopagebreak
-\begin{displayLinesTable}[l@{\quad}l]
-bits 7:0   & \em Reserved for priority number for interrupt 0; reads as zero \\
-bits 15:8  & Priority number for interrupt 1, supervisor software interrupt \\
-bits 23:16 & \em Reserved for priority number for interrupt 4; reads as zero \\
-bits 31:24 & Priority number for interrupt 5, supervisor timer interrupt \\
-\end{displayLinesTable}
-RV32 \z{hviprio1h}:\nopagebreak
-\begin{displayLinesTable}[l@{\quad}l]
-bits 7:0   & \em Reserved for priority number for interrupt 8; reads as zero \\
-bits 15:8  & Priority number for interrupt 13, counter overflow interrupt \\
-bits 23:16 & Priority number for interrupt 14 \\
-bits 31:24 & Priority number for interrupt 15 \\
-\end{displayLinesTable}
-RV32 \z{hviprio2}:\nopagebreak
-\begin{displayLinesTable}[l@{\quad}l]
-bits 7:0   & Priority number for interrupt 16 \\
-bits 15:8  & Priority number for interrupt 17 \\
-bits 23:16 & Priority number for interrupt 18 \\
-bits 31:24 & Priority number for interrupt 19 \\
-\end{displayLinesTable}
-RV32 \z{hviprio2h}:\nopagebreak
-\begin{displayLinesTable}[l@{\quad}l]
-bits 7:0   & Priority number for interrupt 20 \\
-bits 15:8  & Priority number for interrupt 21 \\
-bits 23:16 & Priority number for interrupt 22 \\
-bits 31:24 & Priority number for interrupt 23 \\
-\end{displayLinesTable}
-
-For RV64, registers \z{hviprio1} and \z{hviprio2} are the \mbox{64-bit}
-concatenations of the same RV32 registers with their respective
-high-half partners:
-
-RV64 \z{hviprio1}:\nopagebreak
+\z{hviprio1}:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
 bits 7:0   & \em Reserved for priority number for interrupt 0; reads as zero \\
 bits 15:8  & Priority number for interrupt 1, supervisor software interrupt \\
@@ -329,7 +294,7 @@ bits 47:40 & Priority number for interrupt 13, counter overflow interrupt \\
 bits 55:48 & Priority number for interrupt 14 \\
 bits 63:56 & Priority number for interrupt 15 \\
 \end{displayLinesTable}
-RV64 \z{hviprio2}:\nopagebreak
+\z{hviprio2}:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
 bits 7:0   & Priority number for interrupt 16 \\
 bits 15:8  & Priority number for interrupt 17 \\
@@ -341,23 +306,23 @@ bits 55:48 & Priority number for interrupt 22 \\
 bits 63:56 & Priority number for interrupt 23 \\
 \end{displayLinesTable}
 
-Each priority number in \z{hviprio1}/\z{hviprio1h} and
-\z{hviprio2}/\z{hviprio2h} is a {\WARL} unsigned integer field that
+Each priority number in \z{hviprio1} and
+\z{hviprio2} is a {\WARL} unsigned integer field that
 is either read-only zero or implements a minimum of IPRIOLEN bits or
 6~bits,
 whichever is larger, and preferably all 8~bits.
 Implementations may freely choose which priority number fields are
 read-only zeros, but all other fields must implement the same number of
 integer bits.
-A minimal implementation of these CSRs has them all be read-only zeros.
+A minimal implementation of these CSRs has them both be read-only zeros.
 
-A hypervisor can choose to employ registers \z{hviprio1}/\z{hviprio1h}
-and \z{hviprio2}/\z{hviprio2h} when emulating the (virtual)
+A hypervisor can choose to employ registers \z{hviprio1}
+and \z{hviprio2} when emulating the (virtual)
 supervisor-level \z{iprio} array accessed indirectly through
 \z{siselect} and \z{sireg} (really \z{vsiselect} and \z{vsireg}) for a
 virtual hart.
 For interrupts not in the subset supported by
-\z{hviprio1}/\z{hviprio1h} and \z{hviprio2}/\z{hviprio2h}, the priority
+\z{hviprio1} and \z{hviprio2}, the priority
 number bytes in the emulated \z{iprio} array can be read-only zeros.
 
 \begin{commentary}
@@ -378,8 +343,8 @@ order defined in Section~\ref{sec:majorIntrs}.
 \end{commentary}
 
 If a hypervisor really must emulate configurability of priority for
-interrupts beyond the subset supported by \z{hviprio1}/\z{hviprio1h}
-and \z{hviprio2}/\z{hviprio2h}, it can do so with extra effort
+interrupts beyond the subset supported by \z{hviprio1}
+and \z{hviprio2}, it can do so with extra effort
 by setting bit VTI of CSR \z{hvictl}, described in the next
 subsection.
 
@@ -388,16 +353,15 @@ subsection.
 
 Assuming a virtual hart does not need configurable priority for
 major interrupts beyond the subset supported in hardware by
-\z{hviprio1}/\z{hviprio1h} and \z{hviprio2}/\z{hviprio2h}, a hypervisor
+\z{hviprio1} and \z{hviprio2}, a hypervisor
 can assert interrupts to the virtual hart using CSRs \z{hvien}
 (Hypervisor Virtual-Interrupt-Enable) and \z{hvip} (Hypervisor
-Virtual-Interrupt-Pending bits), plus their high-half partners for RV32,
-\z{hvienh} and \z{hviph}.
+Virtual-Interrupt-Pending bits).
 These CSRs affect interrupts for VS level much the same way that
-\z{mvien}/\z{mvienh} and \z{mvip}/\z{mviph} do for supervisor level, as
+\z{mvien} and \z{mvip} do for supervisor level, as
 explained in Section~\ref{sec:virtIntrs-S}.
 
-Each bit of registers \z{hvien}/\z{hvienh} and \z{hvip}/\z{hviph}
+Each bit of registers \z{hvien} and \z{hvip}
 corresponds with an interrupt number in the range 0--63.
 Bits 12:0 of \z{hvien} are reserved and must be read-only zeros,
 while bits 12:0 of \z{hvip} are defined by the {\RISCV} Privileged
@@ -408,18 +372,18 @@ interrupts (VSTIP), and VS-level software interrupts (VSSIP),
 respectively.
 
 The following applies only to the CSR bits for interrupt numbers 13--63:
-When a bit in \z{hideleg}/\z{hidelegh} is one, then the same bit
-position in \z{vsip}/\z{vsiph} is an alias for the corresponding bit in
-\z{sip}/\z{siph}.
-Else, when a bit in \z{hideleg}/\z{hidelegh} is zero and the
-matching bit in \z{hvien}/\z{hvienh} is one, the same bit position
-in \z{vsip}/\z{vsiph} is an alias for the corresponding bit in
-\z{hvip}/\z{hviph}.
-A bit in \z{vsip}/\z{vsiph} is read-only zero when the corresponding
-bits in \z{hideleg}/\z{hidelegh} and \z{hvien}/\z{hvienh} are both
+When a bit in \z{hideleg} is one, then the same bit
+position in \z{vsip} is an alias for the corresponding bit in
+\z{sip}.
+Else, when a bit in \z{hideleg} is zero and the
+matching bit in \z{hvien} is one, the same bit position
+in \z{vsip} is an alias for the corresponding bit in
+\z{hvip}.
+A bit in \z{vsip} is read-only zero when the corresponding
+bits in \z{hideleg} and \z{hvien} are both
 zero.
-The combined effects of \z{hideleg}/\z{hidelegh} and
-\z{hvien}/\z{hvienh} on \z{vsip}/\z{vsiph} and \z{vsie}/\z{vsieh} are
+The combined effects of \z{hideleg} and
+\z{hvien} on \z{vsip} and \z{vsie} are
 summarized in Table~\ref{tab:intrFilteringForVS}.
 
 \begin{table*}[h!]
@@ -443,33 +407,33 @@ major interrupts 13--63.%
 \label{tab:intrFilteringForVS}
 \end{table*}
 
-For interrupt numbers 13--63, a bit in \z{vsie}/\z{vsieh} is
+For interrupt numbers 13--63, a bit in \z{vsie} is
 writable if and only if the corresponding bit is set in either
-\z{hideleg}/\z{hidelegh} or \z{hvien}/\z{hvienh}.
-When an interrupt is delegated by \z{hideleg}/\z{hidelegh}, the
-writable bit in \z{vsie}/\z{vsieh} is an alias of the corresponding bit
-in \z{sie}/\z{sieh};
+\z{hideleg} or \z{hvien}.
+When an interrupt is delegated by \z{hideleg}, the
+writable bit in \z{vsie} is an alias of the corresponding bit
+in \z{sie};
 else it is an independent writable bit.
 The Privileged Architecture specifies when bits 12:0 of \z{vsie} are
 aliases of bits in \z{hie}.
-As usual, bits that are not writable in \z{vsie}/\z{vsieh} must be
+As usual, bits that are not writable in \z{vsie} must be
 read-only zeros.
 
-If a bit of \z{hideleg}/\z{hidelegh} is zero and the corresponding bit
-in \z{hvien}/\z{hvienh} is changed from zero to one, then the value
-of the matching bit in \z{vsie}/\z{vsieh} becomes {\unspecified}.
-Likewise, if a bit of \z{hvien}/\z{hvienh} is one and the corresponding
-bit in \z{hideleg}/\z{hidelegh} is changed from one to zero, the value
-of the matching bit in \z{vsie}/\z{vsieh} again becomes {\unspecified}.
+If a bit of \z{hideleg} is zero and the corresponding bit
+in \z{hvien} is changed from zero to one, then the value
+of the matching bit in \z{vsie} becomes {\unspecified}.
+Likewise, if a bit of \z{hvien} is one and the corresponding
+bit in \z{hideleg} is changed from one to zero, the value
+of the matching bit in \z{vsie} again becomes {\unspecified}.
 
 For interrupt numbers 13--63, implementations may freely choose which
-bits of \z{hvien}/\z{hvienh} are writable and which bits are read-only
+bits of \z{hvien} are writable and which bits are read-only
 zero or one.
-If such a bit in \z{hvien}/\z{hvienh} is read-only zero (preventing the
+If such a bit in \z{hvien} is read-only zero (preventing the
 virtual interrupt from being enabled), the same bit should be read-only
-zero in \z{hvip}/\z{hviph}.
+zero in \z{hvip}.
 All other bits for interrupts 13--63 must be writable in
-\z{hvip}/\z{hviph}.
+\z{hvip}.
 
 CSR \z{hvictl} (Hypervisor Virtual Interrupt Control) provides
 further flexibility for injecting interrupts into VS level in
@@ -480,12 +444,12 @@ A hypervisor must use \z{hvictl} for any of the following:
 
 \item
 asserting for VS level a major interrupt not supported by
-\z{hvien}/\z{hvienh} and \z{hvip}/\z{hviph};
+\z{hvien} and \z{hvip};
 
 \item
 implementing configurability of priorities at VS level for major
-interrupts beyond those supported by \z{hviprio1}/\z{hviprio1h} and
-\z{hviprio2}/\z{hviprio2}; or
+interrupts beyond those supported by \z{hviprio1} and
+\z{hviprio2}; or
 
 \item
 emulating an external interrupt controller for a virtual hart without
@@ -506,30 +470,30 @@ bits 7:0   & IPRIO \\
 All other bits of \z{hvictl} are reserved and read as zeros.
 
 When bit VTI (Virtual Trap Interrupt control) =~1, attempts from
-\mbox{VS-mode} to explicitly access CSRs \z{sip}, \z{sie}, or, for RV32
-only, \z{siph} or \z{sieh}, cause a virtual instruction exception.
+\mbox{VS-mode} to explicitly access CSRs \z{sip} and \z{sie} (or, for RV32
+only, \z{siph} and \z{sieh}) cause a virtual instruction exception.
 Furthermore, for any given CSR, if there is some circumstance in which
-a write to the register may cause a bit of \z{vsip}/\z{vsiph} to change
+a write to the register may cause a bit of \z{vsip} to change
 from one to zero, excluding bit~9 for external interrupts (SEIP),
 then when VTI =~1, a virtual instruction exception is raised
 also for any attempt by the guest to write this register.
 Both the value being written to the CSR and the value of
-\z{vsip}/\z{vsiph} (before or after) are ignored for determining
+\z{vsip} (before or after) are ignored for determining
 whether to raise the exception.
 (Hence a write would not actually need to change a bit of
-\z{vsip}/\z{vsiph} from one to zero for the exception to be raised.)
+\z{vsip} from one to zero for the exception to be raised.)
 In particular, if register \z{vstimecmp} is implemented
 (from extension Sstc), then attempts from \mbox{VS-mode}
-to write to \z{stimecmp} or (RV32 only) \z{stimecmph}
+to write to \z{stimecmp} (or, for RV32 only, \z{stimecmph})
 cause a virtual instruction exception when VTI~=~1.
 
 \begin{commentary}
 For the standard local interrupts
 (major identities 13--23 and 32--47), and for
 software interrupts (SSI), the corresponding interrupt-pending
-bits in \z{vsip}/\z{vsiph} are defined as ``sticky,''
+bits in \z{vsip} are defined as ``sticky,''
 meaning a guest can clear them only by writing directly
-to \z{sip}/\z{siph} (really \z{vsip}/\z{vsiph}).
+to \z{sip} (really \z{vsip}).
 Among the standard-defined interrupts, that leaves only
 timer interrupts (STI), which can potentially be cleared
 in \z{vsip} by writing a new value to \z{vstimecmp}.
@@ -602,9 +566,9 @@ if \z{hvictl}.VTI =~0:
 \begin{tightList}
 \item[+]
 the highest-priority pending-and-enabled major interrupt indicated by
-\z{vsip}/\z{vsiph} and \z{vsie}/\z{vsieh} other than a supervisor
+\z{vsip} and \z{vsie} other than a supervisor
 external interrupt (code 9), using the priority numbers assigned by
-\z{hviprio1}/\z{hviprio1h} and \z{hviprio2}/\z{hviprio2h};
+\z{hviprio1} and \z{hviprio2};
 \end{tightList}
 
 \item
@@ -659,7 +623,7 @@ for \z{stopi} in Section~\ref{sec:stopi}.
 The Advanced Interrupt Architecture modifies the standard
 {\RISCV} Privileged Architecture such that an interrupt
 is pending at VS level if and only if \z{vstopi} is not zero.
-CSRs \z{vsiph}/\z{vsip} and \z{vsieh}/\z{vsie} do not by themselves
+CSRs \z{vsip} and \z{vsie} do not by themselves
 determine whether a VS-level interrupt is pending, though
 they may do so indirectly through their effect on \z{vstopi}.
 

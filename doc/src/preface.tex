@@ -37,7 +37,23 @@ to an eventual ratified Advanced Interrupt Architecture for {\RISCV}.
 However, all chapters are \emph{frozen}, meaning they are not expected
 to change significantly before being put up for ratification.
 
-\section*{Changes for RC3 (Ratification Candidate 3)}
+\section*{Changes for RC4 (Ratification Candidate 4)}
+
+For alignment with other forthcoming {\RISCV} ISA extensions,
+the widths of the indirect-access CSRs, \z{miselect}, \z{mireg},
+\z{siselect}, \z{sireg}, \z{vsiselect}, and \z{vsireg}, were
+changed to all be the current XLEN rather than being tied to
+their respective privilege levels (previously MXLEN for
+\z{miselect} and \z{mireg}, SXLEN for \z{siselect} and \z{sireg},
+and VSXLEN for \z{vsiselect} and \z{vsireg}).
+
+Changed the description (but not the actual function)
+of \emph{high-half} CSRs and their partner CSRs
+to match the latest {\RISCV} Privileged ISA specification.
+(An example of a high-half CSR is \z{miph},
+and its partner here is \z{mip}.)
+
+\section*{Changes for RC3}
 
 Removed the still-draft Duo-PLIC chapter to a separate document.
 

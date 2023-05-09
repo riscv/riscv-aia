@@ -512,10 +512,8 @@ This section describes the registers of an interrupt file that
 are accessed indirectly through a \z{*iselect} CSR (\z{miselect},
 \z{siselect}, or \z{vsiselect}) and its partner \z{*ireg} CSR
 (\z{mireg}, \z{sireg}, or \z{vsireg}).
-
-For each interrupt file, the width of all indirectly accessed registers
-is the width of the \z{*ireg} CSR used to access those registers,
-either MXLEN, SXLEN, or VSXLEN.
+The width of these indirect accesses is always the current XLEN,
+32~bits for RV32 code, or 64~bits for RV64 code.
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \subsection{External interrupt delivery enable register (\zSafe{eidelivery})}
@@ -580,14 +578,13 @@ contribute to signaling interrupts from the interrupt file.
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \subsection{External interrupt-pending registers (\zSafe{eip0}--\zSafe{eip63})}
 
-When the interrupt file's registers are 32~bits (as determined by
-the XLEN for the corresponding privilege level), register \z{eip}$k$
+When the current XLEN = 32, register \z{eip}$k$
 contains the pending bits for interrupts with identity numbers
 $k\times\mbox{32}$ through ${k\times\mbox{32} + \mbox{31}}$.
 For an implemented interrupt identity $i$ within that range, the
 pending bit for interrupt~$i$ is bit $(i\bmod\mbox{32})$ of \z{eip}$k$.
 
-When the interrupt file's registers are 64~bits, the odd-numbered
+When the current XLEN = 64, the odd-numbered
 registers \z{eip1}, \z{eip3}, \dots \z{eip63} do not exist.
 In that case, if the \z{*iselect} CSR is an odd value in the range
 \z{0x81}--\z{0xBF}, an attempt to access the matching \z{*ireg} CSR
@@ -606,14 +603,13 @@ read-only zeros.
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \subsection{External interrupt-enable registers (\zSafe{eie0}--\zSafe{eie63})}
 
-When the interrupt file's registers are 32~bits (as determined by
-the XLEN for the corresponding privilege level), register \z{eie}$k$
+When the current XLEN = 32, register \z{eie}$k$
 contains the enable bits for interrupts with identity numbers
 $k\times\mbox{32}$ through ${k\times\mbox{32} + \mbox{31}}$.
 For an implemented interrupt identity $i$ within that range, the enable
 bit for interrupt~$i$ is bit $(i\bmod\mbox{32})$ of \z{eie}$k$.
 
-When the interrupt file's registers are 64~bits, the odd-numbered
+When the current XLEN = 64, the odd-numbered
 registers \z{eie1}, \z{eie3}, \dots \z{eie63} do not exist.
 In that case, if the \z{*iselect} CSR is an odd value in the range
 \z{0xC1}--\z{0xFF}, an attempt to access the matching \z{*ireg} CSR
