@@ -265,7 +265,7 @@ by software.
 The machine-level priorities for major interrupts 0--63 may be
 configured by a set of registers accessed through the \z{miselect} and
 \z{mireg} CSRs introduced in Chapter~\ref{ch:CSRs}.
-When MXLEN =~32, sixteen of these registers are defined, listed below
+When XLEN =~32, sixteen of these registers are defined, listed below
 with their \z{miselect} addresses:
 \begin{displayLinesTable}[c@{\quad}l]
 \z{0x30} & \z{iprio0} \\
@@ -285,7 +285,7 @@ bits 23:16 & Priority number for interrupt $k\times\mbox{4}+\mbox{2}$ \\
 bits 31:24 & Priority number for interrupt $k\times\mbox{4}+\mbox{3}$ \\
 \end{displayLinesTable}
 
-When MXLEN =~64, only the even-numbered registers exist:\nopagebreak
+When XLEN =~64, only the even-numbered registers exist:\nopagebreak
 \begin{displayLinesTable}[c@{\quad}l]
 \z{0x30} & \z{iprio0} \\
 \z{0x32} & \z{iprio2} \\
@@ -307,7 +307,7 @@ bits 55:48 & Priority number for interrupt $k\times\mbox{4}+\mbox{6}$ \\
 bits 63:56 & Priority number for interrupt $k\times\mbox{4}+\mbox{7}$ \\
 \end{displayLinesTable}
 
-When MXLEN =~64 and \z{miselect} is an odd value in the range
+When XLEN =~64 and \z{miselect} is an odd value in the range
 \z{0x31}--\z{0x3F}, attempting to access \z{mireg} raises an illegal
 instruction exception.
 
@@ -759,9 +759,9 @@ Supervisor-level priorities for major interrupts 0--63
 are optionally configurable
 in an array of supervisor-level \z{iprio}$k$ registers accessed through
 \z{siselect} and \z{sireg}.
-This array has the same structure when SXLEN = 32 or 64 as does the
-machine-level \z{iprio} array when MXLEN = 32 or 64, respectively.
-To summarize, when SXLEN =~32, there are sixteen \mbox{32-bit}
+This array has the same structure when XLEN = 32 or 64 as does the
+machine-level \z{iprio} array.
+To summarize, when XLEN =~32, there are sixteen \mbox{32-bit}
 registers with these \z{siselect} addresses:
 \begin{displayLinesTable}[c@{\quad}l]
 \z{0x30} & \z{iprio0} \\
@@ -771,7 +771,7 @@ registers with these \z{siselect} addresses:
 \end{displayLinesTable}
 Each register controls the priorities of four interrupts, one
 \mbox{8-bit} byte per interrupt.
-When SXLEN =~64, only the even-numbered registers exist:
+When XLEN =~64, only the even-numbered registers exist:
 \begin{displayLinesTable}[c@{\quad}l]
 \z{0x30} & \z{iprio0} \\
 \z{0x32} & \z{iprio2} \\
@@ -779,7 +779,7 @@ When SXLEN =~64, only the even-numbered registers exist:
 \z{0x3E} & \z{iprio14} \\
 \end{displayLinesTable}
 Each register controls the priorities of eight interrupts.
-If SXLEN = 64 and \z{siselect} is an odd value in the range
+If XLEN = 64 and \z{siselect} is an odd value in the range
 \z{0x31}--\z{0x3F}, attempting to access \z{sireg} raises an illegal
 instruction exception.
 

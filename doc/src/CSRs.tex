@@ -32,8 +32,8 @@ Number & Privilege & Width & Name & Description \\
 \hline
 \multicolumn{5}{|c|}{Machine-Level Window to Indirectly Accessed Registers} \\
 \hline
-\z{0x350} & MRW & MXLEN & \z{miselect} & Machine indirect register select \\
-\z{0x351} & MRW & MXLEN & \z{mireg}    & Machine indirect register alias \\
+\z{0x350} & MRW & XLEN  & \z{miselect} & Machine indirect register select \\
+\z{0x351} & MRW & XLEN  & \z{mireg}    & Machine indirect register alias \\
 \hline
 \multicolumn{5}{|c|}{Machine-Level Interrupts} \\
 \hline
@@ -98,9 +98,9 @@ assigned in subranges as follows:
 allocated to values above \z{0xFF}.
 
 Values of \z{miselect} with the most-significant bit set
-(bit $\mbox{MXLEN - 1} = \mbox{1}$) are designated for custom use,
+(bit $\mbox{XLEN - 1} = \mbox{1}$) are designated for custom use,
 presumably for accessing custom registers through \z{mireg}.
-If MXLEN is changed, the most-significant bit of \z{miselect} moves to
+If XLEN changes, the most-significant bit of \z{miselect} moves to
 the new position, retaining its value from before.
 An implementation is not required to support any custom values for
 \z{miselect}.
@@ -149,8 +149,8 @@ Number & Privilege & Width & Name      & Description \\
 \multicolumn{5}{|c|}{%
   Supervisor-Level Window to Indirectly Accessed Registers} \\
 \hline
-\z{0x150} & SRW & SXLEN & \z{siselect} & Supervisor indirect register select \\
-\z{0x151} & SRW & SXLEN & \z{sireg}    & Supervisor indirect register alias \\
+\z{0x150} & SRW & XLEN  & \z{siselect} & Supervisor indirect register select \\
+\z{0x151} & SRW & XLEN  & \z{sireg}    & Supervisor indirect register alias \\
 \hline
 \multicolumn{5}{|c|}{Supervisor-Level Interrupts} \\
 \hline
@@ -199,8 +199,8 @@ machine.
 \end{commentary}
 
 Like \z{miselect}, values of \z{siselect} with the most-significant bit
-set (bit $\mbox{SXLEN - 1} = \mbox{1}$) are designated for custom use.
-If SXLEN is changed, the most-significant bit of \z{siselect} moves to
+set (bit $\mbox{XLEN - 1} = \mbox{1}$) are designated for custom use.
+If XLEN changes, the most-significant bit of \z{siselect} moves to
 the new position, retaining its value from before.
 An implementation is not required to support any custom values for
 \z{siselect}.
@@ -212,6 +212,12 @@ when there is no IMSIC, attempts to access \z{sireg}
 should preferably raise an illegal
 instruction exception (unless executing in a virtual machine, covered
 in the next section).
+
+Note that the widths of \z{siselect} and \z{sireg}
+are always the current XLEN rather than SXLEN\@.
+Hence, for example, if MXLEN = 64 and SXLEN = 32, then these registers
+are 64~bits when the current privilege mode is M (running RV64 code)
+but 32~bits when the privilege mode is S (RV32 code).
 
 CSR \z{stopei} is described with the IMSIC in Chapter~\ref{ch:IMSIC}.
 
@@ -251,9 +257,9 @@ Number & Privilege & Width & Name & Description \\
 \hline
 \multicolumn{5}{|c|}{VS-Level Window to Indirectly Accessed Registers} \\
 \hline
-\z{0x250} & HRW & VSXLEN & \z{vsiselect}
+\z{0x250} & HRW & XLEN   & \z{vsiselect}
                                & Virtual supervisor indirect register select \\
-\z{0x251} & HRW & VSXLEN & \z{vsireg}
+\z{0x251} & HRW & XLEN   & \z{vsireg}
                                & Virtual supervisor indirect register alias \\
 \hline
 \multicolumn{5}{|c|}{VS-Level Interrupts} \\
@@ -297,10 +303,16 @@ or \mbox{VU-mode}).
 CSR \z{vsiselect} is required to support at least a \mbox{9-bit} range
 of 0 to \z{0x1FF}, whether or not an IMSIC is implemented.
 As with \z{siselect}, values of \z{vsiselect} with the most-significant
-bit set (bit $\mbox{VSXLEN - 1} = \mbox{1}$) are designated for custom
+bit set (bit $\mbox{XLEN - 1} = \mbox{1}$) are designated for custom
 use.
-If VSXLEN is changed, the most-significant bit of \z{vsiselect} moves
+If XLEN changes, the most-significant bit of \z{vsiselect} moves
 to the new position, retaining its value from before.
+
+Like \z{siselect} and \z{sireg}, the widths of \z{vsiselect}
+and \z{vsireg} are always the current XLEN rather than VSXLEN\@.
+Hence, for example, if HSXLEN = 64 and VSXLEN = 32, then these
+registers are 64~bits when accessed by a hypervisor in HS-mode
+(running RV64 code) but 32~bits for a guest OS in VS-mode (RV32 code).
 
 The space of registers selectable by \z{vsiselect} is more limited than
 for machine and supervisor levels:
