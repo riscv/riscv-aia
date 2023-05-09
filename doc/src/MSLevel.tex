@@ -215,8 +215,8 @@ positions in the default priority order must be documented for the
 hart.
 
 \begin{commentary}
-While many of the standard registers such as\/ \z{mip}/\z{miph}
-and\/ \z{mie}/\z{mieh} have space for major interrupts
+While many of the standard registers such as\/ \z{mip}
+and\/ \z{mie} have space for major interrupts
 only in the range 0--63, custom interrupts with numbers
 64 and above are conceivable with added custom support.
 CSRs\/ \z{mtopi} (Section~\ref{sec:mtopi})
@@ -234,12 +234,12 @@ interrupt sources are assigned the same priority number.
 
 For whichever standard local interrupts are
 implemented, the corresponding bits in CSRs
-\z{mip}/\z{miph} and \z{mie}/\z{mieh} must be writable, and the
-corresponding bits in \z{mideleg}/\z{midelegh} (if those CSRs exist
+\z{mip} and \z{mie} must be writable, and the
+corresponding bits in \z{mideleg} (if that CSR exists
 because supervisor mode is implemented) must each either be writable or
 be hardwired to zero.
 An occurrence of a local interrupt event causes the interrupt-pending bit
-in \z{mip}/\z{miph} to be set to one.
+in \z{mip} to be set to one.
 This bit then remains set until cleared by software.
 
 As established by the {\RISCV} Privileged Architecture, an interrupt
@@ -247,10 +247,10 @@ traps to \mbox{M-mode} whenever all of the following are true:
 (a)~either the current privilege mode is \mbox{M-mode} and
 machine-level interrupts are enabled by the MIE bit of \z{mstatus}, or
 the current privilege mode has less privilege than \mbox{M-mode};
-(b)~matching bits in \z{mip}/\z{miph} and \z{mie}/\z{mieh} are both
+(b)~matching bits in \z{mip} and \z{mie} are both
 one; and
 (c)~if \z{mideleg} exists, the corresponding bit in
-\z{mideleg}/\z{midelegh} is zero.
+\z{mideleg} is zero.
 
 When multiple interrupt causes are ready to trigger simultaneously, the
 interrupt taken first is determined by priority order, which may be the
@@ -333,7 +333,7 @@ interrupt identities implemented.
 Each byte of a valid \z{iprio}$k$ register is either a read-only zero
 or a {\WARL} unsigned integer field implementing exactly IPRIOLEN bits.
 For a given interrupt number, if the corresponding bit in
-\z{mie}/\z{mieh} is read-only zero, then the interrupt's priority
+\z{mie} is read-only zero, then the interrupt's priority
 number in the \z{iprio} array must be read-only zero as well.
 The priority number for a machine-level external interrupt (bits 31:24
 of register \z{iprio2}) must also be read-only zero.
@@ -463,7 +463,7 @@ bits 7:0   & IPRIO \\
 All other bits of \z{mtopi} are reserved and read as zeros.
 
 The value of \z{mtopi} is zero unless there is an interrupt pending in
-\z{mip}/\z{miph} and enabled in \z{mie}/\z{mieh} that is not delegated
+\z{mip} and enabled in \z{mie} that is not delegated
 to a lower privilege level.
 When there is a pending-and-enabled major interrupt for machine
 level, field IID (Interrupt Identity) is the major identity number of
@@ -544,29 +544,29 @@ complexity.)
 When supervisor mode is implemented, the Advanced Interrupt
 Architecture adds a facility for software filtering
 of interrupts and for virtual interrupts, making use of new
-CSRs \z{mvien}/\z{mvienh} (Machine Virtual Interrupt Enables) and
-\z{mvip}/\z{mviph} (Machine Virtual Interrupt-Pending bits).
+CSRs \z{mvien} (Machine Virtual Interrupt Enables) and
+\z{mvip} (Machine Virtual Interrupt-Pending bits).
 \emph{Interrupt filtering} permits a supervisor-level
 interrupt (SEI or SSI) or local or custom interrupt
 to trap to \mbox{M-mode} and then be selectively delegated by
 software to supervisor level, even while the corresponding bit in
-\z{mideleg}/\z{midelegh} remains zero.
+\z{mideleg} remains zero.
 The same hardware may also, under the right circumstances, allow
 machine level to assert \emph{virtual interrupts} to supervisor level
 that have no connection to any real interrupt events.
 
-Just as with CSRs \z{mip}/\z{miph}, \z{mie}/\z{mieh}, and
-\z{mideleg}/\z{midelegh}, each bit of registers \z{mvien}/\z{mvienh}
-and \z{mvip}/\z{mviph} corresponds with an interrupt number in the
+Just as with CSRs \z{mip}, \z{mie}, and
+\z{mideleg}, each bit of registers \z{mvien}
+and \z{mvip} corresponds with an interrupt number in the
 range 0--63.
-When a bit in \z{mideleg}/\z{midelegh} is zero and the matching
-bit in \z{mvien}/\z{mvienh} is one, then the same bit position
-in \z{sip}/\z{siph} is an alias for the corresponding bit in
-\z{mvip}/\z{mviph}.
-A bit in \z{sip}/\z{siph} is read-only zero when the corresponding bits
-in \z{mideleg}/\z{midelegh} and \z{mvien}/\z{mvienh} are both zero.
-The combined effects of \z{mideleg}/\z{midelegh} and
-\z{mvien}/\z{mvienh} on \z{sip}/\z{siph} and \z{sie}/\z{sieh} are
+When a bit in \z{mideleg} is zero and the matching
+bit in \z{mvien} is one, then the same bit position
+in \z{sip} is an alias for the corresponding bit in
+\z{mvip}.
+A bit in \z{sip} is read-only zero when the corresponding bits
+in \z{mideleg} and \z{mvien} are both zero.
+The combined effects of \z{mideleg} and
+\z{mvien} on \z{sip} and \z{sie} are
 summarized in Table~\ref{tab:intrFilteringForS}.
 
 \begin{table*}[h!]
@@ -605,30 +605,30 @@ This is different than how the usual interrupt-enable bits (such as
 in \z{mie}) mask pending interrupts.
 \end{commentary}
 
-A bit in \z{sie}/\z{sieh} is writable if and only if the corresponding
-bit is set in either \z{mideleg}/\z{midelegh} or \z{mvien}/\z{mvienh}.
-When an interrupt is delegated by \z{mideleg}/\z{midelegh}, the
-writable bit in \z{sie}/\z{sieh} is an alias of the corresponding bit
-in \z{mie}/\z{mieh};
+A bit in \z{sie} is writable if and only if the corresponding
+bit is set in either \z{mideleg} or \z{mvien}.
+When an interrupt is delegated by \z{mideleg}, the
+writable bit in \z{sie} is an alias of the corresponding bit
+in \z{mie};
 else it is an independent writable bit.
-As usual, bits that are not writable in \z{sie}/\z{sieh} must be
+As usual, bits that are not writable in \z{sie} must be
 read-only zeros.
 
-If a bit of \z{mideleg}/\z{midelegh} is zero and the corresponding bit
-in \z{mvien}/\z{mvienh} is changed from zero to one, then the value
-of the matching bit in \z{sie}/\z{sieh} becomes {\unspecified}.
-Likewise, if a bit of \z{mvien}/\z{mvienh} is one and the corresponding
-bit in \z{mideleg}/\z{midelegh} is changed from one to zero, the value
-of the matching bit in \z{sie}/\z{sieh} again becomes {\unspecified}.
+If a bit of \z{mideleg} is zero and the corresponding bit
+in \z{mvien} is changed from zero to one, then the value
+of the matching bit in \z{sie} becomes {\unspecified}.
+Likewise, if a bit of \z{mvien} is one and the corresponding
+bit in \z{mideleg} is changed from one to zero, the value
+of the matching bit in \z{sie} again becomes {\unspecified}.
 
 For interrupt numbers 13--63, implementations may freely choose which
-bits of \z{mvien}/\z{mvienh} are writable and which bits are read-only
+bits of \z{mvien} are writable and which bits are read-only
 zero or one.
-If such a bit in \z{mvien}/\z{mvienh} is read-only zero (preventing the
+If such a bit in \z{mvien} is read-only zero (preventing the
 virtual interrupt from being enabled), the same bit should be read-only
-zero in \z{mvip}/\z{mviph}.
+zero in \z{mvip}.
 All other bits for interrupts 13--63 must be writable in
-\z{mvip}/\z{mviph}.
+\z{mvip}.
 
 \begin{commentary}
 Platform standards or other extensions may require that
@@ -706,27 +706,27 @@ Accesses to guest interrupt files
 \end{itemize}
 
 When the hypervisor extension is implemented, if a bit is
-zero in the same position in both \z{mideleg}/\z{midelegh}
-and \z{mvien}/\z{mvienh}, then that bit is read-only zero in
-\z{hideleg}/\z{hidelegh} (in addition to being read-only zero
-in \z{sip}/\z{siph}, \z{sie}/\z{sieh}, \z{hip}, and \z{hie}).
+zero in the same position in both \z{mideleg}
+and \z{mvien}, then that bit is read-only zero in
+\z{hideleg} (in addition to being read-only zero
+in \z{sip}, \z{sie}, \z{hip}, and \z{hie}).
 But if a bit for one of interrupts 13--63 is a one in
-either \z{mideleg}/\z{midelegh} or \z{mvien}/\z{mvienh},
-then the same bit in \z{hideleg}/\z{hidelegh} may be writable
+either \z{mideleg} or \z{mvien},
+then the same bit in \z{hideleg} may be writable
 or may be read-only zero, depending on the implementation.
-No bits in \z{hideleg}/\z{hidelegh} are ever read-only ones.
+No bits in \z{hideleg} are ever read-only ones.
 The {\RISCV} Privileged Architecture further
 constrains bits 12:0 of \z{hideleg}.
 
 When supervisor mode is implemented, the minimal required
-implementation of \z{mvien}/\z{mvienh} and \z{mvip}/\z{mviph} has all
+implementation of \z{mvien} and \z{mvip} has all
 bits being read-only zeros except for \z{mvip}
 bits 1 and~9, and sometimes bit~5, each of which is
 an alias of an existing writable bit in \z{mip}.
 (Although, as noted, it is strongly recommended
 that bit 9 of \z{mvien} also be writable.)
-When supervisor mode is not implemented, registers \z{mvien}/\z{mvienh}
-and \z{mvip}/\z{mviph} do not exist.
+When supervisor mode is not implemented, registers \z{mvien}
+and \z{mvip} do not exist.
 
 
 %-----------------------------------------------------------------------
@@ -734,7 +734,7 @@ and \z{mvip}/\z{mviph} do not exist.
 \label{sec:intrs-S}
 
 If a standard local interrupt
-becomes pending (=~1) in \z{sip}/\z{siph}, the bit in \z{sip}/\z{siph}
+becomes pending (=~1) in \z{sip}, the bit in \z{sip}
 is writable and will remain set until cleared by software.
 
 Just as for machine level, the taking of interrupt traps at supervisor
@@ -745,11 +745,11 @@ of the following are true:
 (a)~either the current privilege mode is \mbox{S-mode} and
 supervisor-level interrupts are enabled by the SIE bit of \z{sstatus},
 or the current privilege mode has less privilege than \mbox{S-mode};
-(b)~matching bits in \z{sip}/\z{siph} and \z{sie}/\z{sieh} are both
+(b)~matching bits in \z{sip} and \z{sie} are both
 one, or, if the hypervisor extension is implemented, matching bits in
 \z{hip} and \z{hie} are both one; and
 (c)~if the hypervisor extension is implemented, the corresponding bit
-in \z{hideleg}/\z{hidelegh} is zero.
+in \z{hideleg} is zero.
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \subsection{Configuring priorities of major interrupts at supervisor level}
@@ -789,7 +789,7 @@ Each byte of a valid \z{iprio}$k$ register is either a read-only zero
 or a {\WARL} unsigned integer field implementing exactly IPRIOLEN bits.
 
 For a given interrupt number, if the corresponding bit in
-\z{sie}/\z{sieh} is read-only zero, then the interrupt's priority
+\z{sie} is read-only zero, then the interrupt's priority
 number in the supervisor-level \z{iprio} array must be read-only zero
 as well.
 The priority number for a supervisor-level external interrupt
@@ -895,8 +895,8 @@ bits 7:0   & IPRIO \\
 All other bits of \z{stopi} are reserved and read as zeros.
 
 The value of \z{stopi} is zero unless:
-(a)~there is an interrupt that is both pending in \z{sip}/\z{siph}
-and enabled in \z{sie}/\z{sieh}, or, if the hypervisor extension is
+(a)~there is an interrupt that is both pending in \z{sip}
+and enabled in \z{sie}, or, if the hypervisor extension is
 implemented, both pending in \z{hip} and enabled in \z{hie}; and
 (b)~the interrupt is not delegated to a lower privilege level
 (by \z{hideleg}, if the hypervisor extension is implemented).
