@@ -136,13 +136,14 @@ one of the two local interrupts defined for this purpose.
 Systems are free to report any or all RAS events
 another way, such as by external interrupts routed
 through an APLIC or IMSIC, or by custom interrupts.
+
+\begin{commentary}
 In all likelihood, the method for reporting a particular RAS event
 will depend on where in the system the event is detected.
 The AIA defines local interrupt numbers for RAS events so systems
 have a standard way to report such events when detected locally at
 a hart, without depending solely on external or custom interrupts.
 
-\begin{commentary}
 As always, platform standards may further constrain how
 a system reports events, whether RAS events or other.
 \end{commentary}
