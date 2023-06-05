@@ -871,24 +871,23 @@ by bit~2 of $A$, then the write is processed as follows:
 If either $A$\z{[}11:3\z{]} or $D$\z{[}31:11\z{]} is not zero, or if
 bit~2 of $A$ is one and big-endian MSIs are not supported, then the
 incoming write is accepted but discarded.
-Else, the original incoming write is recognized
-as an MSI and is replaced by this sequence:
+Else, the original incoming write is recognized as an MSI and is
+replaced by one of the following memory accesses, setting the
+interrupt-pending bit that corresponds to the interrupt identity $D$
+in the destination MRIF to one:
 \begin{enumerate}
 
 \item
-In the destination MRIF, set the interrupt-pending bit for interrupt
-identity $D$ to one, using either an AMOOR operation for atomic update,
-or a non-atomic read-modify-write sequence.
+An atomic AMOOR operation, if the atomic updates are supported, or
 
 \item
-Zero-extend the \mbox{11-bit} NID value to 32~bits, and do a
-\mbox{32-bit} write of this value in little-endian byte order to the
-address NPPN\,\z{<<}\,12 (i.e., physical page number NPPN, page offset
-zero).
+A non-atomic read-modify-write sequence, if non-atomic updates are supported
 
 \end{enumerate}
-The write of step~1 must be visible to all agents in the system before
-the write of step~2 becomes visible to any agent.
+Once the MRIF update operation is visible to all agents in the system,
+the \mbox{11-bit} NID value is zero-extended to 32~bits, and this value
+is written to the address NPPN\,\z{<<}\,12 (i.e., physical page number NPPN,
+page offset zero) in little-endian byte order.
 
 \begin{commentary}
 While \mbox{IOMMU}s are expected typically to cache MSI PTEs that are
