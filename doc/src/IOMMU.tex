@@ -32,10 +32,20 @@ treat MSIs directed to virtual machines specially, in part to
 simplify software, and in part to allow optional support for
 \emph{memory-resident interrupt files}.
 
-This chapter is concerned only with how an \mbox{IOMMU} recognizes and
-processes MSIs directed to virtual machines.
-Most other functions and details of an \mbox{IOMMU} are beyond the scope of
-this standard, and must be specified elsewhere.
+This chapter uses the term \mbox{IOMMU} in a generic sense that encompasses
+all translation and transaction processing services required to virtualize
+device accesses and is concerned only with how an \mbox{IOMMU} recognizes
+and processes MSIs directed to virtual machines. Most other functions and
+details of an \mbox{IOMMU} are beyond the scope of this standard, and must
+be specified elsewhere.
+
+\begin{commentary}
+The {\RISCV} \mbox{IOMMU} Architecture Specification provides a detailed
+description of the \mbox{IOMMU} architecture, dividing translation and
+transaction processing functionality into blocks such as \mbox{IOMMU},
+\mbox{IO Bridge}, etc. and describing how those blocks are integrated
+into a system.
+\end{commentary}
 
 If a single physical I/O device can be subdivided for
 control by multiple separate device drivers,
