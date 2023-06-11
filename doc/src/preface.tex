@@ -39,6 +39,13 @@ to change significantly before being put up for ratification.
 
 \section*{Changes for RC5 (Ratification Candidate 5)}
 
+Better aligned the rules for indirectly accessed registers with the
+hypervisor extension and with forthcoming extension Smcsrind/Sscsrind.
+In particular, when \z{vsiselect} has a reserved value, attempts
+to access \z{sireg} from a virtual machine (VS or \mbox{VU-mode})
+should preferably raise an illegal instruction exception
+instead of a virtual instruction exception.
+
 Added clarification about MSI write replaced by MRIF update and
 notice MSI sent after the update.
 
