@@ -335,6 +335,18 @@ for machine and supervisor levels:
 \z{0x100}--\z{0x1FF} & reserved \\
 \end{displayLinesTable}
 
+For alias CSRs \z{sireg} and \z{vsireg}, the hypervisor extension's
+usual rules for when to raise a virtual instruction exception (based
+on whether an instruction is \emph{HS-qualified}) are not applicable.
+
+The rules for \z{sireg} and \z{vsireg} in this section assume
+\z{vsiselect} is accessible from \mbox{HS-mode} as usual.
+See Section~\ref{sec:CSRs-stateen} for when
+\z{vsiselect} may not be accessible from \mbox{HS-mode}.
+
+All attempts to access \z{vsireg} from \mbox{VS-mode}
+or \mbox{VU-mode} raise a virtual instruction exception.
+
 When \z{vsiselect} has a reserved value (including values above
 \z{0x1FF} not designated for custom use), attempts from \mbox{M-mode}
 or \mbox{HS-mode} to access \z{vsireg}, or from \mbox{VS-mode}
@@ -389,14 +401,21 @@ raise a virtual instruction exception.
 \section{Virtual instruction exceptions}
 
 Following the default rules for the hypervisor extension, attempts
-from \mbox{VS-mode} to directly access a hypervisor or VS CSR, or
-from \mbox{VU-mode} to access any supervisor-level CSR (including
-hypervisor and VS CSRs), usually raise not an illegal instruction
+from \mbox{VS-mode} to directly access a hypervisor or VS CSR
+other than \z{vsireg}, or from \mbox{VU-mode} to access any
+supervisor-level CSR (including hypervisor and VS CSRs) other than
+\z{sireg} or \z{vsireg}, usually raise not an illegal instruction
 exception but instead a virtual instruction exception.
 For details, see the {\RISCV} Privileged Architecture.
 
+For \z{sireg} and \z{vsireg}, see both the previous section,
+\ref{ch:CSRs-hypervisor}, and the next, \ref{sec:CSRs-stateen},
+for when a virtual instruction exception is required
+instead of an illegal instruction exception.
+
 %-----------------------------------------------------------------------
 \section{Access control by the state-enable CSRs}
+\label{sec:CSRs-stateen}
 
 If extension Smstateen is implemented together with the
 Advanced Interrupt Architecture (AIA), three bits of state-enable
