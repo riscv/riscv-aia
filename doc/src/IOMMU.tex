@@ -32,7 +32,8 @@ treat MSIs directed to virtual machines specially, in part to
 simplify software, and in part to allow optional support for
 \emph{memory-resident interrupt files}.
 
-This chapter uses the term \mbox{IOMMU} in a generic sense that encompasses
+This chapter uses the term \emph{\mbox{IOMMU}}
+in a generic sense that encompasses
 all translation and transaction processing services required to virtualize
 device accesses and is concerned only with how an \mbox{IOMMU} recognizes
 and processes MSIs directed to virtual machines. Most other functions and
@@ -43,7 +44,7 @@ be specified elsewhere.
 The {\RISCV} \mbox{IOMMU} Architecture Specification provides a detailed
 description of the \mbox{IOMMU} architecture, dividing translation and
 transaction processing functionality into blocks such as \mbox{IOMMU},
-\mbox{IO Bridge}, etc. and describing how those blocks are integrated
+\mbox{IO Bridge}, etc.\ and describing how those blocks are integrated
 into a system.
 \end{commentary}
 
@@ -885,15 +886,12 @@ Else, the original incoming write is recognized as an MSI and is
 replaced by one of the following memory accesses, setting the
 interrupt-pending bit that corresponds to the interrupt identity $D$
 in the destination MRIF to one:
-\begin{enumerate}
-
+\begin{tightList}
 \item
-An atomic AMOOR operation, if the atomic updates are supported, or
-
+an atomic AMOOR operation, if atomic updates are supported; or
 \item
-A non-atomic read-modify-write sequence, if non-atomic updates are supported
-
-\end{enumerate}
+a non-atomic read-modify-write sequence, if atomic updates are not supported.
+\end{tightList}
 Once the MRIF update operation is visible to all agents in the system,
 the \mbox{11-bit} NID value is zero-extended to 32~bits, and this value
 is written to the address NPPN\,\z{<<}\,12 (i.e., physical page number NPPN,
