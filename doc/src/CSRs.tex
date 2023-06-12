@@ -130,7 +130,7 @@ support interrupt
 filtering and virtual interrupts for supervisor level.
 These facilities are explained in Section~\ref{sec:virtIntrs-S}.
 
-If extension Smcsrind if also implemented, then when \z{miselect}
+If extension Smcsrind is also implemented, then when \z{miselect}
 has a value in the range \z{0x30}--\z{0x3F} or \z{0x70}--\z{0xFF},
 attempts to access alias CSRs \z{mireg2} through \z{mireg6}
 raise an illegal instruction exception.
@@ -230,7 +230,7 @@ Register \z{stopi} reports the highest-priority interrupt that
 is pending and enabled for supervisor level, as specified in
 Section~\ref{sec:stopi}.
 
-If extension Sscsrind if also implemented, then when \z{siselect}
+If extension Sscsrind is also implemented, then when \z{siselect}
 has a value in the range \z{0x30}--\z{0x3F} or \z{0x70}--\z{0xFF},
 attempts to access alias CSRs \z{sireg2} through \z{sireg6}
 raise an illegal instruction exception (unless executing
@@ -389,7 +389,7 @@ augment \z{hvip} for injecting interrupts into VS level.
 The use of these registers is covered in Chapter~\ref{ch:VSLevel} on
 interrupts for virtual machines.
 
-If extension Sscsrind if also implemented, then when \z{vsiselect} has
+If extension Sscsrind is also implemented, then when \z{vsiselect} has
 a value in the range \z{0x30}--\z{0x3F} or \z{0x70}--\z{0xFF},
 attempts from privilege modes other than VS or VU to access alias CSRs
 \z{vsireg2} through \z{vsireg6} raise an illegal instruction exception,
