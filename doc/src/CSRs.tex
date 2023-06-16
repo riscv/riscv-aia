@@ -86,7 +86,7 @@ least any \mbox{6-bit} value in the range 0 to \z{0x3F}.
 When an IMSIC is implemented, \z{miselect} must be able to hold any
 \mbox{8-bit} value in the range 0 to \z{0xFF}.
 Values for \z{miselect} in the range 0 to \z{0xFF} are currently
-assigned in subranges as follows:
+assigned in subranges as follows:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
 \z{0x00}--\z{0x2F} & reserved \\
 \z{0x30}--\z{0x3F} & major interrupt priorities \\
@@ -183,7 +183,7 @@ The space of registers accessible through the \z{siselect}/\z{sireg}
 window is separate from but parallels that of machine level, being for
 supervisor-level interrupts instead of machine-level interrupts.
 The allocated values for \z{siselect} in the range 0 to \z{0xFF} are
-once again these:
+once again these:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
 \z{0x00}--\z{0x2F} & reserved \\
 \z{0x30}--\z{0x3F} & major interrupt priorities \\
@@ -305,7 +305,13 @@ SXLEN for hypervisor-extended \mbox{S-mode}).%
 \label{tab:CSRs-hypervisor}
 \end{table*}
 
-The new VS CSRs in the table (\z{vsiselect}, \z{vsireg},
+The new hypervisor CSRs in the table (\z{hvien},
+\z{hvictl}, \z{hviprio1}, and \z{hviprio2}) augment
+\z{hvip} for injecting interrupts into VS level.
+The use of these registers is covered in Chapter~\ref{ch:VSLevel} on
+interrupts for virtual machines.
+
+The new VS CSRs (\z{vsiselect}, \z{vsireg},
 \z{vstopei}, and \z{vstopi})
 all match supervisor CSRs, and substitute for those
 supervisor CSRs when executing in a virtual machine (in \mbox{VS-mode}
@@ -326,7 +332,7 @@ registers are 64~bits when accessed by a hypervisor in HS-mode
 (running RV64 code) but 32~bits for a guest OS in VS-mode (RV32 code).
 
 The space of registers selectable by \z{vsiselect} is more limited than
-for machine and supervisor levels:
+for machine and supervisor levels:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
 \z{0x000}--\z{0x02F} & reserved \\
 \z{0x030}--\z{0x03F} & inaccessible \\
@@ -338,25 +344,25 @@ for machine and supervisor levels:
 For alias CSRs \z{sireg} and \z{vsireg}, the hypervisor extension's
 usual rules for when to raise a virtual instruction exception (based
 on whether an instruction is \emph{HS-qualified}) are not applicable.
+The rules given in this section for \z{sireg} and \z{vsireg}
+apply instead, unless overridden by the requirements of
+Section~\ref{sec:CSRs-stateen}, which take precedence over
+this section when extension Smstateen is also implemented.
 
-The rules for \z{sireg} and \z{vsireg} in this section assume
-\z{vsiselect} is accessible from \mbox{HS-mode} as usual.
-See Section~\ref{sec:CSRs-stateen} for when
-\z{vsiselect} may not be accessible from \mbox{HS-mode}.
-
-All attempts to access \z{vsireg} from \mbox{VS-mode}
-or \mbox{VU-mode} raise a virtual instruction exception.
+A virtual instruction exception is raised for attempts from
+\mbox{VS-mode} or \mbox{VU-mode} to directly access \z{vsireg},
+or attempts from \mbox{VU-mode} to access \z{sireg}.
 
 When \z{vsiselect} has a reserved value (including values above
 \z{0x1FF} not designated for custom use), attempts from \mbox{M-mode}
 or \mbox{HS-mode} to access \z{vsireg}, or from \mbox{VS-mode}
-or \mbox{VU-mode} to access \z{sireg} (really \z{vsireg}),
+to access \z{sireg} (really \z{vsireg}),
 should preferably raise an illegal instruction exception.
 
 When \z{vsiselect} has the number of an \emph{inaccessible} register,
 attempts from \mbox{M-mode} or \mbox{HS-mode} to access \z{vsireg}
 raise an illegal instruction exception, and attempts from
-\mbox{VS-mode} or \mbox{VU-mode} to access \z{sireg}
+\mbox{VS-mode} to access \z{sireg}
 (really \z{vsireg}) raise a virtual instruction exception.
 
 \begin{commentary}
@@ -368,7 +374,7 @@ including registers that may be standardized in the future at locations
 \z{0x100}--\z{0x1FF}.
 \end{commentary}
 
-The locations of registers for external interrupts (numbers
+The indirectly accessed registers for external interrupts (numbers
 \z{0x70}--\z{0xFF}) are accessible only when field VGEIN of \z{hstatus}
 is the number of an implemented guest external interrupt, not zero.
 If VGEIN is not the number of an implemented guest external interrupt
@@ -383,18 +389,11 @@ raise an illegal instruction exception,
 and attempts from \mbox{VS-mode} to access \z{stopei} raise a
 virtual instruction exception.
 
-The new hypervisor CSRs in Table~\ref{tab:CSRs-hypervisor}
-(\z{hvien}, \z{hvictl}, \z{hviprio1}, and \z{hviprio2})
-augment \z{hvip} for injecting interrupts into VS level.
-The use of these registers is covered in Chapter~\ref{ch:VSLevel} on
-interrupts for virtual machines.
-
 If extension Sscsrind is also implemented, then when \z{vsiselect} has
 a value in the range \z{0x30}--\z{0x3F} or \z{0x70}--\z{0xFF},
-attempts from privilege modes other than VS or VU to access alias CSRs
+attempts from \mbox{M-mode} or \mbox{HS-mode} to access alias CSRs
 \z{vsireg2} through \z{vsireg6} raise an illegal instruction exception,
-and attempts from VS or \mbox{VU-mode} to access \z{sireg2}
-through \z{sireg6} or \z{vsireg2} through \z{vsireg6}
+and attempts from \mbox{VS-mode} to access \z{sireg2} through \z{sireg6}
 raise a virtual instruction exception.
 
 %-----------------------------------------------------------------------
@@ -408,6 +407,12 @@ supervisor-level CSR (including hypervisor and VS CSRs) other than
 exception but instead a virtual instruction exception.
 For details, see the {\RISCV} Privileged Architecture.
 
+Instructions that read/write CSR \z{stopei} or \z{vstopei} are
+considered to be \emph{HS-qualified} unless all of following are true:
+the hart has an \mbox{IMSIC}, extension Smstateen is
+implemented, and bit~58 of \z{mstateen0} is zero.
+(See the next section, \ref{sec:CSRs-stateen}, about \z{mstateen0}.)
+
 For \z{sireg} and \z{vsireg}, see both the previous section,
 \ref{ch:CSRs-hypervisor}, and the next, \ref{sec:CSRs-stateen},
 for when a virtual instruction exception is required
@@ -420,7 +425,7 @@ instead of an illegal instruction exception.
 If extension Smstateen is implemented together with the
 Advanced Interrupt Architecture (AIA), three bits of state-enable
 register \z{mstateen0} control access to AIA-added state
-from privilege modes less privileged than \mbox{M-mode}:
+from privilege modes less privileged than \mbox{M-mode}:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
 bit 60 & CSRs \z{siselect}, \z{sireg}, \z{vsiselect}, and \z{vsireg} \\
 bit 59 & all other state added by the AIA
@@ -459,10 +464,39 @@ and field VGEIN of \z{hstatus} are all read-only zeros.
 That effect is no longer correct.
 \end{commentary}
 
+If the hart does not have an \mbox{IMSIC}, bit~58 of \z{mstateen0}
+is read-only zero, but Smstateen has no effect on
+attempts to access the nonexistent \mbox{IMSIC} state.
+
+\begin{commentary}
+This means in particular that, when the hart does not have an
+\mbox{IMSIC}, the following raise a virtual instruction exception
+as described in Section~\ref{ch:CSRs-hypervisor}, not an illegal
+instruction exception, despite that bit~58 of\/ \z{mstateen0} is zero:
+\begin{tightList}
+\item
+attempts from \mbox{VS-mode} to access\/ \z{sireg}
+(really\/ \z{vsireg}) while\/ \z{vsiselect} has
+a value in the range\/ \z{0x70}--\z{0xFF}; and
+\item
+attempts from \mbox{VS-mode} to access\/
+\z{stopei} (really\/ \z{vstopei}).
+\end{tightList}
+\end{commentary}
+
+If bit~60 of \z{mstateen0} is one, then regardless of any other
+\z{mstateen} bits (including bits 58 and 59 of \z{mstateen0}),
+a virtual instruction exception is raised as described in
+Section~\ref{ch:CSRs-hypervisor} for all attempts from
+\mbox{VS-mode} or \mbox{VU-mode} to directly access \z{vsireg},
+and for all attempts from \mbox{VU-mode} to access \z{sireg}.
+This behavior is overridden only when bit~60 of \z{mstateen0} is zero.
+
 If the hypervisor extension is implemented, the same three bits are
-defined also in hypservisor CSR \z{hstateen0}
+defined also in hypervisor CSR \z{hstateen0}
 but concern only the state potentially
-accessible to a virtual machine executing in privilege modes VS and VU:
+accessible to a virtual machine executing
+in privilege modes VS and VU:\nopagebreak
 \begin{displayLinesTable}[l@{\quad}l]
 bit 60 & CSRs \z{siselect} and \z{sireg}
           (really \z{vsiselect} and \z{vsireg}) \\
@@ -475,20 +509,18 @@ bit 58 & all state of IMSIC guest interrupt files,
 If one of these bits is zero in \z{hstateen0},
 and the same bit is one in \z{mstateen0},
 then an attempt to access the corresponding state
-from VS or \mbox{VU-mode} raises a virtual instruction exception,
-unless one of the following cases applies
-to cause an illegal instruction exception instead:
-\begin{itemize}
+from VS or \mbox{VU-mode} raises a virtual instruction exception.
+(But note that, for high-half CSRs \z{siph} and
+\z{sieh}, this applies only when XLEN =~32.
+When $\mbox{XLEN} > \mbox{32}$, an attempt to access
+\z{siph} or \z{sieh} raises an illegal instruction
+exception as usual, not a virtual instruction exception.)
 
-\item
-An attempt to access \z{sireg} raises an illegal instruction exception
-if the same attempt would do so when bit~60 of \z{hstateen0} is one.
-
-\item
-When $\mbox{XLEN} > \mbox{32}$, attempts to access high-half CSRs
-\z{siph} and \z{sieh} always raise an illegal instruction exception.
-
-\end{itemize}
+If bit~60 is one in \z{mstateen0} but is zero in \z{hstateen0},
+then all attempts from VS or \mbox{VU-mode} to access
+\z{siselect} or \z{sireg} raise a virtual instruction
+exception, not an illegal instruction exception, regardless
+of the value of \z{vsiselect} or any other \z{mstateen} bits.
 
 Bit~58 is implemented in \z{hstateen0}
 only if the hart has an IMSIC.
