@@ -1,9 +1,6 @@
 [[ch:CSRs]]
 == Control and Status Registers (CSRs) Added to Harts
 
-*This chapter is _frozen_ and has already passed public review, making a
-functional change at this stage extremely unlikely.*
-
 For each privilege level at which a hart can take interrupt traps, the
 Advanced Interrupt Architecture adds CSRs for interrupt control and
 handling.

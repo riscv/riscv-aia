@@ -1,16 +1,106 @@
-//=  *The RISC-V Advanced Interrupt Architecture* +
-//Document Version 1.0-RC6
-//Editor: John Hauser +
-//`jh.riscv@jhauser.us` +
-// +
-//2023-07-04
+=  *The RISC-V Advanced Interrupt Architecture* +
+Version 1.0
+Editor: John Hauser +
+`jh.riscv@jhauser.us` +
+ +
+2023-08-17
 
+Contributors to all versions of this specification in alphabetical order
+(please contact the editor to suggest corrections): Krste Asanović, Paul
+Donahue, Greg Favor, John Hauser, James Kenney, David Kruckemyer, Shubu
+Mukherjee, Stefan O’Rear, Vernon Pang, Anup Patel, Josh Scheid, Ved
+Shanbhogue, and Andrew Waterman.
+
+This document is released under a Creative Commons Attribution 4.0
+International License.
+
+== Preface
+
+This document describes an Advanced Interrupt Architecture for RISC-V
+systems. This specification was ratified by the RISC-V International
+Association in June of 2023.
+
+The table below indicates which chapters of this document specify
+extensions to the RISC-V ISA (instruction set architecture) and which
+are non-ISA.
+
+[cols="<,^",options="header",]
+|===
+|Chapter |ISA?
+|1. Introduction |—
+|2. Control and Status Registers (CSRs) Added to Harts |Yes
+|3. Incoming MSI Controller (IMSIC) |Yes
+|4. Advanced Platform-Level Interrupt Controller (APLIC) |No
+|5. Interrupts for Machine and Supervisor Levels |Yes
+|6. Interrupts for Virtual Machines (VS Level) |Yes
+|7. Interprocessor Interrupts (IPIs) |No
+|8. IOMMU Support for MSIs to Virtual Machines |No
+|===
+
+=== Changes for the ratified version 1.0
+
+Resolved some inconsistencies in Chapter #ch:CSRs[3] about when to raise
+a virtual instruction exception versus an illegal instruction exception.
+
+=== Changes for RC6 (Ratification Candidate 6)
+
+Resolved some inconsistencies in Chapter #ch:CSRs[3] about when to raise
+a virtual instruction exception versus an illegal instruction exception.
+
+=== Changes for RC5
+
+Better aligned the rules for indirectly accessed registers with the
+hypervisor extension and with forthcoming extension Smcsrind/Sscsrind.
+In particular, when `‘=̀vsiselect` has a reserved value, attempts to
+access `‘=̀sireg` from a virtual machine (VS or VU-mode) should
+preferably raise an illegal instruction exception instead of a virtual
+instruction exception.
+
+Added clarification about the term _IOMMU_ used in Chapter #ch:IOMMU[9].
+
+Added clarification about MSI write replaced by MRIF update and notice
+MSI sent after the update.
+
+=== Changes for RC4
+
+For alignment with other forthcoming RISC-V ISA extensions, the widths
+of the indirect-access CSRs, `‘=̀miselect`, `‘=̀mireg`, `‘=̀siselect`,
+`‘=̀sireg`, `‘=̀vsiselect`, and `‘=̀vsireg`, were changed to all be the
+current XLEN rather than being tied to their respective privilege levels
+(previously MXLEN for `‘=̀miselect` and `‘=̀mireg`, SXLEN for `‘=̀siselect`
+and `‘=̀sireg`, and VSXLEN for `‘=̀vsiselect` and `‘=̀vsireg`).
+
+Changed the description (but not the actual function) of _high-half_
+CSRs and their partner CSRs to match the latest RISC-V Privileged ISA
+specification. (An example of a high-half CSR is `‘=̀miph`, and its
+partner here is `‘=̀mip`.)
+
+=== Changes for RC3
+
+Removed the still-draft Duo-PLIC chapter to a separate document.
+
+Allocated major interrupts 35 and 43 for signaling RAS events
+(Section #sec:majorIntrs[6.1]).
+
+In Section #sec:virtIntrs-S[6.3] added the options for bits 1 and 9 to
+be writable in CSR `‘=̀mvien`, and specified the effects of setting each
+of these bits.
+
+Upgraded Chapter #ch:IOMMU[9] (``IOMMU Support'') to the _frozen_ state.
+
+=== Changes for RC2
+
+Clarified that field IID of CSR `‘=̀hvictl` must support all unsigned
+integer values of the number of bits implemented for that field, and
+that writes to `‘=̀hvictl` always set IID in the most straightforward
+way.
+
+A comment was added to Chapter #ch:IPIs[8] warning about the possible
+need for FENCE instructions when IPIs are sent to other harts by writing
+MSIs to those harts’ IMSICs.
 
 [[ch:intro]]
 == Introduction
-
-*This chapter is _frozen_ and has already passed public review, making a
-functional change at this stage extremely unlikely.*
 
 This document specifies the Advanced Interrupt Architecture for RISC-V,
 consisting of: (a) an extension to the standard Privileged Architecture
@@ -441,9 +531,6 @@ development tools.
 
 [[ch:CSRs]]
 == Control and Status Registers (CSRs) Added to Harts
-
-*This chapter is _frozen_ and has already passed public review, making a
-functional change at this stage extremely unlikely.*
 
 For each privilege level at which a RISC-V hart can take interrupt
 traps, the Advanced Interrupt Architecture adds CSRs for interrupt
@@ -956,9 +1043,6 @@ level.
 
 [[ch:IMSIC]]
 == Incoming MSI Controller (IMSIC)
-
-*This chapter is _frozen_ and has already passed public review, making a
-functional change at this stage extremely unlikely.*
 
 An Incoming MSI Controller (IMSIC) is an optional RISC-V hardware
 component that is closely coupled with a hart, one IMSIC per hart. An
@@ -1695,9 +1779,6 @@ where _rd_ is the destination register for value `‘=̀i`.
 
 [[ch:AdvPLIC]]
 == Advanced Platform-Level Interrupt Controller (APLIC)
-
-*This chapter is _frozen_ and has already passed public review, making a
-functional change at this stage extremely unlikely.*
 
 In a RISC-V system, a Platform-Level Interrupt Controller (PLIC) handles
 external interrupts that are signaled through wires rather than by MSIs.
@@ -3263,9 +3344,6 @@ hart’s IMSIC.
 [[ch:MSLevel]]
 == Interrupts for Machine and Supervisor Levels
 
-*This chapter is _frozen_ and has already passed public review, making a
-functional change at this stage extremely unlikely.*
-
 The RISC-V Privileged Architecture defines several major identities in
 the range 0–15 for interrupts at a hart, including machine-level and
 supervisor-level external interrupts (numbers 11 and 9), machine- and
@@ -4142,9 +4220,6 @@ Virtual Machines (VS Level)''.)
 [[ch:VSLevel]]
 == Interrupts for Virtual Machines (VS Level)
 
-*This chapter is _frozen_ and has already passed public review, making a
-functional change at this stage extremely unlikely.*
-
 When the hypervisor extension is implemented, a hart’s set of possible
 privilege modes includes the _virtual supervisor_ (VS) and _virtual
 user_ (VU) modes for hosting virtual harts. The Advanced Interrupt
@@ -4689,9 +4764,6 @@ bits as needed to represent the largest value that field IID of
 [[ch:IPIs]]
 == Interprocessor Interrupts (IPIs)
 
-*This chapter is _frozen_ and has already passed public review, making a
-functional change at this stage extremely unlikely.*
-
 By default, unless a platform has a different mechanism for
 interprocessor interrupts (IPIs), the RISC-V Privileged Architecture
 specifies that a machine with multiple harts must provide for each hart
@@ -4783,9 +4855,6 @@ before a subsequent store sending an MSI to B’s IMSIC.
 
 [[ch:IOMMU]]
 == IOMMU Support for MSIs to Virtual Machines
-
-*This chapter is _frozen_ and has already passed public review, making a
-functional change at this stage extremely unlikely.*
 
 The existence of an IOMMU in a system makes it possible for a guest
 operating system, running in a virtual machine, to be given direct

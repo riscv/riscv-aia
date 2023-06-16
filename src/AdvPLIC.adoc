@@ -1,9 +1,6 @@
 [[ch:AdvPLIC]]
 == Advanced Platform-Level Interrupt Controller (APLIC)
 
-*This chapter is _frozen_ and has already passed public review, making a
-functional change at this stage extremely unlikely.*
-
 In a system, a Platform-Level Interrupt Controller (PLIC) handles
 external interrupts that are signaled through wires rather than by MSIs.
 When the harts in a system do not have IMSICs, the harts themselves do

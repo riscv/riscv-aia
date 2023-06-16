@@ -1,9 +1,6 @@
 [[ch:IPIs]]
 == Interprocessor Interrupts (IPIs)
 
-*This chapter is _frozen_ and has already passed public review, making a
-functional change at this stage extremely unlikely.*
-
 By default, unless a platform has a different mechanism for
 interprocessor interrupts (IPIs), the Privileged Architecture specifies
 that a machine with multiple harts must provide for each hart an

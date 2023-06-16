@@ -1,9 +1,6 @@
 [[ch:IOMMU]]
 == IOMMU Support for MSIs to Virtual Machines
 
-*This chapter is _frozen_ and has already passed public review, making a
-functional change at this stage extremely unlikely.*
-
 The existence of an IOMMU in a system makes it possible for a guest
 operating system, running in a virtual machine, to be given direct
 control of an I/O device with only minimal hypervisor intervention. A

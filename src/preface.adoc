@@ -1,29 +1,31 @@
 == Preface
 
 This document describes an Advanced Interrupt Architecture for systems.
+This specification was ratified by the International Association in June
+of 2023.
 
-No part of this document has yet been ratified by the International
-Association. The table below shows the current status of each chapter,
-and also indicates which chapters specify extensions to the ISA
-(instruction set architecture) and which are non-ISA.
+The table below indicates which chapters of this document specify
+extensions to the ISA (instruction set architecture) and which are
+non-ISA.
 
-[cols="<,^,^",options="header",]
+[cols="<,^",options="header",]
 |===
-|Chapter |ISA? |Status
-|1. Introduction |— |Frozen
-|2. Control and Status Registers (CSRs) Added to Harts |Yes |Frozen
-|3. Incoming MSI Controller (IMSIC) |Yes |Frozen
-|4. Advanced Platform-Level Interrupt Controller (APLIC) |No |Frozen
-|5. Interrupts for Machine and Supervisor Levels |Yes |Frozen
-|6. Interrupts for Virtual Machines (VS Level) |Yes |Frozen
-|7. Interprocessor Interrupts (IPIs) |No |Frozen
-|8. IOMMU Support for MSIs to Virtual Machines |No |Frozen
+|Chapter |ISA?
+|1. Introduction |—
+|2. Control and Status Registers (CSRs) Added to Harts |Yes
+|3. Incoming MSI Controller (IMSIC) |Yes
+|4. Advanced Platform-Level Interrupt Controller (APLIC) |No
+|5. Interrupts for Machine and Supervisor Levels |Yes
+|6. Interrupts for Virtual Machines (VS Level) |Yes
+|7. Interprocessor Interrupts (IPIs) |No
+|8. IOMMU Support for MSIs to Virtual Machines |No
 |===
 
-An implementation adhering to the current document might not conform to
-an eventual ratified Advanced Interrupt Architecture for . However, all
-chapters are _frozen_, meaning they are not expected to change
-significantly before being put up for ratification.
+=== Changes for the ratified version 1.0
+
+Resolved some inconsistencies in Chapter #ch:CSRs[[ch:CSRs]] about when
+to raise a virtual instruction exception versus an illegal instruction
+exception.
 
 === Changes for RC6 (Ratification Candidate 6)
 
@@ -73,10 +75,9 @@ _frozen_ state.
 
 === Changes for RC2
 
-The only normative changes to this document between versions RC1 and RC2
-were to clarify that field IID of CSR must support all unsigned integer
-values of the number of bits implemented for that field, and that writes
-to always set IID in the most straightforward way.
+Clarified that field IID of CSR must support all unsigned integer values
+of the number of bits implemented for that field, and that writes to
+always set IID in the most straightforward way.
 
 A comment was added to Chapter #ch:IPIs[[ch:IPIs]] warning about the
 possible need for FENCE instructions when IPIs are sent to other harts

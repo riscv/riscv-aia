@@ -1,9 +1,6 @@
 [[ch:IMSIC]]
 == Incoming MSI Controller (IMSIC)
 
-*This chapter is _frozen_ and has already passed public review, making a
-functional change at this stage extremely unlikely.*
-
 An Incoming MSI Controller (IMSIC) is an optional hardware component
 that is closely coupled with a hart, one IMSIC per hart. An IMSIC
 receives and records incoming message-signaled interrupts (MSIs) for a

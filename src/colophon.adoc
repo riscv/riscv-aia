@@ -1,85 +1,84 @@
 == Preface
 
-This document describes an Advanced Interrupt Architecture for RISC-V
-systems.
+This document describes an Advanced Interrupt Architecture for systems.
+This specification was ratified by the International Association in June
+of 2023.
 
-No part of this document has yet been ratified by the RISC-V
-International Association. The table below shows the current status of
-each chapter, and also indicates which chapters specify extensions to
-the RISC-V ISA (instruction set architecture) and which are non-ISA.
+The table below indicates which chapters of this document specify
+extensions to the ISA (instruction set architecture) and which are
+non-ISA.
 
-[cols="<,^,^",options="header",]
+[cols="<,^",options="header",]
 |===
-|Chapter |ISA? |Status
-|1. Introduction |— |Frozen
-|2. Control and Status Registers (CSRs) Added to Harts |Yes |Frozen
-|3. Incoming MSI Controller (IMSIC) |Yes |Frozen
-|4. Advanced Platform-Level Interrupt Controller (APLIC) |No |Frozen
-|5. Interrupts for Machine and Supervisor Levels |Yes |Frozen
-|6. Interrupts for Virtual Machines (VS Level) |Yes |Frozen
-|7. Interprocessor Interrupts (IPIs) |No |Frozen
-|8. IOMMU Support for MSIs to Virtual Machines |No |Frozen
+|Chapter |ISA?
+|1. Introduction |—
+|2. Control and Status Registers (CSRs) Added to Harts |Yes
+|3. Incoming MSI Controller (IMSIC) |Yes
+|4. Advanced Platform-Level Interrupt Controller (APLIC) |No
+|5. Interrupts for Machine and Supervisor Levels |Yes
+|6. Interrupts for Virtual Machines (VS Level) |Yes
+|7. Interprocessor Interrupts (IPIs) |No
+|8. IOMMU Support for MSIs to Virtual Machines |No
 |===
 
-An implementation adhering to the current document might not conform to
-an eventual ratified Advanced Interrupt Architecture for RISC-V.
-However, all chapters are _frozen_, meaning they are not expected to
-change significantly before being put up for ratification.
+=== Changes for the ratified version 1.0
+
+Resolved some inconsistencies in Chapter #ch:CSRs[[ch:CSRs]] about when
+to raise a virtual instruction exception versus an illegal instruction
+exception.
 
 === Changes for RC6 (Ratification Candidate 6)
 
-Resolved some inconsistencies in Chapter #ch:CSRs[3] about when to raise
-a virtual instruction exception versus an illegal instruction exception.
+Resolved some inconsistencies in Chapter #ch:CSRs[[ch:CSRs]] about when
+to raise a virtual instruction exception versus an illegal instruction
+exception.
 
 === Changes for RC5
 
 Better aligned the rules for indirectly accessed registers with the
 hypervisor extension and with forthcoming extension Smcsrind/Sscsrind.
-In particular, when `‘=̀vsiselect` has a reserved value, attempts to
-access `‘=̀sireg` from a virtual machine (VS or VU-mode) should
-preferably raise an illegal instruction exception instead of a virtual
-instruction exception.
+In particular, when has a reserved value, attempts to access from a
+virtual machine (VS or VU-mode) should preferably raise an illegal
+instruction exception instead of a virtual instruction exception.
 
-Added clarification about the term _IOMMU_ used in Chapter #ch:IOMMU[9].
+Added clarification about the term _IOMMU_ used in
+Chapter #ch:IOMMU[[ch:IOMMU]].
 
 Added clarification about MSI write replaced by MRIF update and notice
 MSI sent after the update.
 
 === Changes for RC4
 
-For alignment with other forthcoming RISC-V ISA extensions, the widths
-of the indirect-access CSRs, `‘=̀miselect`, `‘=̀mireg`, `‘=̀siselect`,
-`‘=̀sireg`, `‘=̀vsiselect`, and `‘=̀vsireg`, were changed to all be the
-current XLEN rather than being tied to their respective privilege levels
-(previously MXLEN for `‘=̀miselect` and `‘=̀mireg`, SXLEN for `‘=̀siselect`
-and `‘=̀sireg`, and VSXLEN for `‘=̀vsiselect` and `‘=̀vsireg`).
+For alignment with other forthcoming ISA extensions, the widths of the
+indirect-access CSRs, , , , , , and , were changed to all be the current
+XLEN rather than being tied to their respective privilege levels
+(previously MXLEN for and , SXLEN for and , and VSXLEN for and ).
 
 Changed the description (but not the actual function) of _high-half_
-CSRs and their partner CSRs to match the latest RISC-V Privileged ISA
-specification. (An example of a high-half CSR is `‘=̀miph`, and its
-partner here is `‘=̀mip`.)
+CSRs and their partner CSRs to match the latest Privileged ISA
+specification. (An example of a high-half CSR is , and its partner here
+is .)
 
 === Changes for RC3
 
 Removed the still-draft Duo-PLIC chapter to a separate document.
 
 Allocated major interrupts 35 and 43 for signaling RAS events
-(Section #sec:majorIntrs[6.1]).
+(Section #sec:majorIntrs[[sec:majorIntrs]]).
 
-In Section #sec:virtIntrs-S[6.3] added the options for bits 1 and 9 to
-be writable in CSR `‘=̀mvien`, and specified the effects of setting each
-of these bits.
+In Section #sec:virtIntrs-S[[sec:virtIntrs-S]] added the options for
+bits 1 and 9 to be writable in CSR , and specified the effects of
+setting each of these bits.
 
-Upgraded Chapter #ch:IOMMU[9] (``IOMMU Support'') to the _frozen_ state.
+Upgraded Chapter #ch:IOMMU[[ch:IOMMU]] (``IOMMU Support'') to the
+_frozen_ state.
 
 === Changes for RC2
 
-The only normative changes to this document between versions RC1 and RC2
-were to clarify that field IID of CSR `‘=̀hvictl` must support all
-unsigned integer values of the number of bits implemented for that
-field, and that writes to `‘=̀hvictl` always set IID in the most
-straightforward way.
+Clarified that field IID of CSR must support all unsigned integer values
+of the number of bits implemented for that field, and that writes to
+always set IID in the most straightforward way.
 
-A comment was added to Chapter #ch:IPIs[8] warning about the possible
-need for FENCE instructions when IPIs are sent to other harts by writing
-MSIs to those harts’ IMSICs.
+A comment was added to Chapter #ch:IPIs[[ch:IPIs]] warning about the
+possible need for FENCE instructions when IPIs are sent to other harts
+by writing MSIs to those harts’ IMSICs.

@@ -1,9 +1,6 @@
 [[ch:intro]]
 == Introduction
 
-*This chapter is _frozen_ and has already passed public review, making a
-functional change at this stage extremely unlikely.*
-
 This document specifies the Advanced Interrupt Architecture for ,
 consisting of: (a) an extension to the standard Privileged Architecture
 for harts specified in Volume II of The Instruction Set Manual; (b) two

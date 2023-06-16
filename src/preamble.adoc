@@ -32,7 +32,7 @@
 :listing-caption: Example
 :sectnums:
 :toc: left
-:toclevels: 4
+:toclevels: 3
 :source-highlighter: pygments
 ifdef::backend-pdf[]
 :source-highlighter: rouge

@@ -1,9 +1,6 @@
 [[ch:VSLevel]]
 == Interrupts for Virtual Machines (VS Level)
 
-*This chapter is _frozen_ and has already passed public review, making a
-functional change at this stage extremely unlikely.*
-
 When the hypervisor extension is implemented, a hart’s set of possible
 privilege modes includes the _virtual supervisor_ (VS) and _virtual
 user_ (VU) modes for hosting virtual harts. The Advanced Interrupt

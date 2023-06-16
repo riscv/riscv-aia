@@ -1,9 +1,6 @@
 [[ch:MSLevel]]
 == Interrupts for Machine and Supervisor Levels
 
-*This chapter is _frozen_ and has already passed public review, making a
-functional change at this stage extremely unlikely.*
-
 The Privileged Architecture defines several major identities in the
 range 0–15 for interrupts at a hart, including machine-level and
 supervisor-level external interrupts (numbers 11 and 9), machine- and
