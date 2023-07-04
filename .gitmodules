@@ -1,0 +1,3 @@
+[submodule "src/docs-resources"]
+	path = src/docs-resources
+	url = git@github.com:riscv/docs-resources.git
