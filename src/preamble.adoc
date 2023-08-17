@@ -62,7 +62,7 @@ include::colophon.adoc[]
 
 include::riscv-interrupts.adoc[]
 //riscv-interrupts.tex
-include::preface.adoc[]
+//include::preface.adoc[]
 //preface.tex
 include::intro.adoc[]
 //intro.tex

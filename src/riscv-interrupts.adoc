@@ -1,18 +1,9 @@
-=  *The RISC-V Advanced Interrupt Architecture* +
-Version 1.0
-Editor: John Hauser +
-`jh.riscv@jhauser.us` +
- +
-2023-08-17
-
-Contributors to all versions of this specification in alphabetical order
-(please contact the editor to suggest corrections): Krste Asanović, Paul
-Donahue, Greg Favor, John Hauser, James Kenney, David Kruckemyer, Shubu
-Mukherjee, Stefan O’Rear, Vernon Pang, Anup Patel, Josh Scheid, Ved
-Shanbhogue, and Andrew Waterman.
-
-This document is released under a Creative Commons Attribution 4.0
-International License.
+//=  *The RISC-V Advanced Interrupt Architecture* +
+//Version 1.0
+//Editor: John Hauser +
+//`jh.riscv@jhauser.us` +
+// +
+//2023-08-17
 
 == Preface
 
