@@ -9,9 +9,12 @@ Interrupt Controller (APLIC) and an Incoming Message-Signaled Interrupt
 Controller (IMSIC); and (c) requirements on other system components
 concerning interrupts.
 
+[NOTE]
+====
 Commentary on our design decisions, implementation options, and
 application is formatted as in this paragraph, and can be skipped if the
 reader is only interested in the specification itself.
+====
 
 === Goals
 
@@ -48,16 +51,16 @@ This initial version of the Advanced Interrupt Architecture is focused
 primarily on the needs of larger, high-performance systems. Support is
 not currently defined for the following interrupt-handling features that
 are useful for minimizing interrupt response times in so-called
-``real-time'' systems but are less appropriate for high-speed processor
+"real-time" systems but are less appropriate for high-speed processor
 cores:
 
-the option to give each interrupt source at a hart a separate trap entry
+* the option to give each interrupt source at a hart a separate trap entry
 address;
 
-automatic stacking of register values on interrupt trap entry, and
+* automatic stacking of register values on interrupt trap entry, and
 restoration on exit; and
 
-automatic preemption (nesting) of interrupts at a hart, based on
+* automatic preemption (nesting) of interrupts at a hart, based on
 priority.
 
 It is intended that such features optimizing for smaller and/or
@@ -76,42 +79,35 @@ active virtual harts and potentially thousands of additional idle
 (swapped-out) virtual harts, where each virtual hart has direct control
 of one or more physical devices.
 
-Table #tab:overallLimits[[tab:overallLimits]] summarizes the main limits
+<<overalllimits>> summarizes the main limits
 on the numbers of harts, both physical and virtual, and the numbers of
 distinct interrupt identities that may be supported with the Advanced
 Interrupt Architecture.
 
+[NOTE]
+====
+We assume that any single computer (or any single node in a cluster or
+distributed system) with many thousands of physical harts will probably
+need an interrupt infrastructure adapted to the machine’s specific
+organization, which we do not attempt to predict.
+====
+
+[[overalllimits]]
+.Absolute limits on the numbers of harts and interrupt identities in a system.  Individual implementations are likely to have smaller limits.
 [cols="<,^,<",options="header",]
 |===
 | |Maximum |Requirements
 |Physical harts |16,384 |
 
-|Active virtual harts having direct control of |31 for RV32, |hypervisor
-extension;
+|Active virtual harts having direct control of a device, per physical hart |31 for RV32, 63 for RV64 |RISC-V hypervisor extension; IMSICs with guest interrupt files; and an IOMMU
 
-| a device, per physical hart |63 for RV64 | IMSICs with guest interrupt
+|Idle (swapped-out) virtual harts having direct control of a device, per physical hart |potentially thousands |An IOMMU with support for memory-resident interrupt files
 
-| | | files; and an IOMMU
+| Wired interrupts at a single APLIC |1023 |
 
-|Idle (swapped-out) virtual harts having |potentially |An IOMMU with
-support
+|Distinct identities usable for MSIs at each hart (physical or virtual) |2047 |IMSICs
 
-| direct control of a device, per physical hart |thousands | for
-memory-resident
-
-| | | interrupt files
-
-|Wired interrupts at a single APLIC |1023 |
-
-|Distinct identities usable for MSIs at each |2047 |IMSICs
-
-| hart (physical or virtual) | |
 |===
-
-We assume that any single computer (or any single node in a cluster or
-distributed system) with many thousands of physical harts will probably
-need an interrupt infrastructure adapted to the machine’s specific
-organization, which we do not attempt to predict.
 
 === Overview of main components
 
