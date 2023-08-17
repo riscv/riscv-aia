@@ -1,0 +1,401 @@
+[[ch:CSRs]]
+== Control and Status Registers (CSRs) Added to Harts
+
+*This chapter is _frozen_ and has already passed public review, making a
+functional change at this stage extremely unlikely.*
+
+For each privilege level at which a hart can take interrupt traps, the
+Advanced Interrupt Architecture adds CSRs for interrupt control and
+handling.
+
+=== Machine-level CSRs
+
+Table #tab:CSRs-M[[tab:CSRs-M]] lists both the CSRs added for machine
+level and existing machine-level CSRs whose size is changed by the
+Advanced Interrupt Architecture. Existing CSRs , , and are widended to
+64 bits to support a total of 64 interrupt causes.
+
+[cols="^,^,^,<,<",options="header",]
+|===
+|Number |Privilege |Width |Name |Description
+|Machine-Level Window to Indirectly Accessed Registers | | | |
+| |MRW |XLEN | |Machine indirect register select
+| |MRW |XLEN | |Machine indirect register alias
+|Machine-Level Interrupts | | | |
+| |MRW |64 | |Machine interrupt-enable bits
+| |MRW |64 | |Machine interrupt-pending bits
+| |MRW |MXLEN | |Machine top external interrupt (only with an
+| | | | |IMSIC)
+| |MRO |MXLEN | |Machine top interrupt
+|Delegated and Virtual Interrupts for Supervisor Level | | | |
+| |MRW |64 | |Machine interrupt delegation
+| |MRW |64 | |Machine virtual interrupt enables
+| |MRW |64 | |Machine virtual interrupt-pending bits
+|Machine-Level High-Half CSRs (RV32 only) | | | |
+| |MRW |32 | |Upper 32 bits of of (only with S-mode)
+| |MRW |32 | |Upper 32 bits of
+| |MRW |32 | |Upper 32 bits of (only with S-mode)
+| |MRW |32 | |Upper 32 bits of (only with S-mode)
+| |MRW |32 | |Upper 32 bits of
+|===
+
+For RV32, the _high-half_ CSRs listed in the table allow access to the
+upper 32 bits of registers , , , , and . The Advanced Interrupt
+Architecture requires that these high-half CSRs exist for RV32, but the
+bits they access may all be merely read-only zeros.
+
+CSRs and provide a window for accessing multiple registers beyond the
+CSRs in Table #tab:CSRs-M[[tab:CSRs-M]]. The value of determines which
+register is currently accessible through alias CSR . is a register, and
+it must support a minimum range of values depending on the implemented
+features. When an IMSIC is not implemented, must be able to hold at
+least any 6-bit value in the range 0 to . When an IMSIC is implemented,
+must be able to hold any 8-bit value in the range 0 to . Values for in
+the range 0 to are currently assigned in subranges as follows:
+
+– & reserved +
+– & major interrupt priorities +
+– & reserved +
+– & external interrupts (only with an IMSIC) +
+
+may also support values outside the range –, though no standard
+registers are currently allocated to values above .
+
+Values of with the most-significant bit set (bit
+latexmath:[$\mbox{XLEN - 1} = \mbox{1}$]) are designated for custom use,
+presumably for accessing custom registers through . If XLEN changes, the
+most-significant bit of moves to the new position, retaining its value
+from before. An implementation is not required to support any custom
+values for .
+
+When is a number in a reserved range (currently –, –, or a number above
+not designated for custom use), attempts to access will typically raise
+an illegal instruction exception.
+
+Normally, the range for external interrupts, –, is populated only when
+an IMSIC is implemented; else, attempts to access when is in this range
+also cause an illegal instruction exception. The contents of the
+external-interrupts region are documented in
+Chapter #ch:IMSIC[[ch:IMSIC]] on the IMSIC.
+
+CSR also exists only when an IMSIC is implemented, so is documented in
+Chapter #ch:IMSIC[[ch:IMSIC]] along with the indirectly accessed IMSIC
+registers.
+
+CSR reports the highest-priority interrupt that is pending and enabled
+for machine level, as specified in Section #sec:mtopi[[sec:mtopi]].
+
+When S-mode is implemented, CSRs and support interrupt filtering and
+virtual interrupts for supervisor level. These facilities are explained
+in Section #sec:virtIntrs-S[[sec:virtIntrs-S]].
+
+If extension Smcsrind is also implemented, then when has a value in the
+range – or –, attempts to access alias CSRs through raise an illegal
+instruction exception.
+
+=== Supervisor-level CSRs
+
+Table #tab:CSRs-S[[tab:CSRs-S]] lists the supervisor-level CSRs that are
+added and existing CSRs that are widened to 64 bits, if the hart
+implements S-mode. The functions of these registers all match their
+machine-level counterparts.
+
+[cols="^,^,^,<,<",options="header",]
+|===
+|Number |Privilege |Width |Name |Description
+|Supervisor-Level Window to Indirectly Accessed Registers | | | |
+| |SRW |XLEN | |Supervisor indirect register select
+| |SRW |XLEN | |Supervisor indirect register alias
+|Supervisor-Level Interrupts | | | |
+| |SRW |64 | |Supervisor interrupt-enable bits
+| |SRW |64 | |Supervisor interrupt-pending bits
+| |SRW |SXLEN | |Supervisor top external interrupt (only
+| | | | |with an IMSIC)
+| |SRO |SXLEN | |Supervisor top interrupt
+|Supervisor-Level High-Half CSRs (RV32 only) | | | |
+| |SRW |32 | |Upper 32 bits of
+| |SRW |32 | |Upper 32 bits of
+|===
+
+The space of registers accessible through the / window is separate from
+but parallels that of machine level, being for supervisor-level
+interrupts instead of machine-level interrupts. The allocated values for
+in the range 0 to are once again these:
+
+– & reserved +
+– & major interrupt priorities +
+– & reserved +
+– & external interrupts (only with an IMSIC) +
+
+For maximum compatibility, it is recommended that support at least a
+9-bit range, 0 to , regardless of whether an IMSIC exists.
+
+Because the VS CSR (Section #ch:CSRs-hypervisor[1.3]) always has at
+least 9 bits, and like other VS CSRs, substitutes for when executing in
+a virtual machine (VS-mode or VU-mode), implementing a smaller range for
+allows software to discover it is not running in a virtual machine.
+
+Like , values of with the most-significant bit set (bit
+latexmath:[$\mbox{XLEN - 1} = \mbox{1}$]) are designated for custom use.
+If XLEN changes, the most-significant bit of moves to the new position,
+retaining its value from before. An implementation is not required to
+support any custom values for .
+
+When is a number in a reserved range (currently –, –, or a number above
+not designated for custom use), or in the range – when there is no
+IMSIC, attempts to access should preferably raise an illegal instruction
+exception (unless executing in a virtual machine, covered in the next
+section).
+
+Note that the widths of and are always the current XLEN rather than
+SXLEN. Hence, for example, if MXLEN = 64 and SXLEN = 32, then these
+registers are 64 bits when the current privilege mode is M (running RV64
+code) but 32 bits when the privilege mode is S (RV32 code).
+
+CSR is described with the IMSIC in Chapter #ch:IMSIC[[ch:IMSIC]].
+
+Register reports the highest-priority interrupt that is pending and
+enabled for supervisor level, as specified in
+Section #sec:stopi[[sec:stopi]].
+
+If extension Sscsrind is also implemented, then when has a value in the
+range – or –, attempts to access alias CSRs through raise an illegal
+instruction exception (unless executing in a virtual machine, covered in
+the next section).
+
+[[ch:CSRs-hypervisor]]
+=== Hypervisor and VS CSRs
+
+If a hart implements the Privileged Architecture’s hypervisor extension,
+then the hypervisor and VS CSRs listed in
+Table #tab:CSRs-hypervisor[[tab:CSRs-hypervisor]] are also either added
+or widened to 64 bits.
+
+[cols="^,^,^,<,<",options="header",]
+|===
+|Number |Privilege |Width |Name |Description
+|Delegated and Virtual Interrupts, Interrupt Priorities, for VS Level |
+| | |
+
+| |HRW |64 | |Hypervisor interrupt delegation
+
+| |HRW |64 | |Hypervisor virtual interrupt enables
+
+| |HRW |HSXLEN | |Hypervisor virtual interrupt control
+
+| |HRW |64 | |Hypervisor virtual interrupt-pending bits
+
+| |HRW |64 | |Hypervisor VS-level interrupt priorities
+
+| |HRW |64 | |Hypervisor VS-level interrupt priorities
+
+|VS-Level Window to Indirectly Accessed Registers | | | |
+
+| |HRW |XLEN | |Virtual supervisor indirect register select
+
+| |HRW |XLEN | |Virtual supervisor indirect register alias
+
+|VS-Level Interrupts | | | |
+
+| |HRW |64 | |Virtual supervisor interrupt-enable bits
+
+| |HRW |64 | |Virtual supervisor interrupt-pending bits
+
+| |HRW |VSXLEN | |Virtual supervisor top external interrupt (only
+
+| | | | |with an IMSIC)
+
+| |HRO |VSXLEN | |Virtual supervisor top interrupt
+
+|Hypervisor and VS-Level High-Half CSRs (RV32 only) | | | |
+
+| |HRW |32 | |Upper 32 bits of
+
+| |HRW |32 | |Upper 32 bits of
+
+| |HRW |32 | |Upper 32 bits of
+
+| |HRW |32 | |Upper 32 bits of
+
+| |HRW |32 | |Upper 32 bits of
+
+| |HRW |32 | |Upper 32 bits of
+
+| |HRW |32 | |Upper 32 bits of
+|===
+
+The new hypervisor CSRs in the table (, , , and ) augment for injecting
+interrupts into VS level. The use of these registers is covered in
+Chapter #ch:VSLevel[[ch:VSLevel]] on interrupts for virtual machines.
+
+The new VS CSRs (, , , and ) all match supervisor CSRs, and substitute
+for those supervisor CSRs when executing in a virtual machine (in
+VS-mode or VU-mode).
+
+CSR is required to support at least a 9-bit range of 0 to , whether or
+not an IMSIC is implemented. As with , values of with the
+most-significant bit set (bit latexmath:[$\mbox{XLEN - 1} = \mbox{1}$])
+are designated for custom use. If XLEN changes, the most-significant bit
+of moves to the new position, retaining its value from before.
+
+Like and , the widths of and are always the current XLEN rather than
+VSXLEN. Hence, for example, if HSXLEN = 64 and VSXLEN = 32, then these
+registers are 64 bits when accessed by a hypervisor in HS-mode (running
+RV64 code) but 32 bits for a guest OS in VS-mode (RV32 code).
+
+The space of registers selectable by is more limited than for machine
+and supervisor levels:
+
+– & reserved +
+– & inaccessible +
+– & reserved +
+– & external interrupts (IMSIC only), or inaccessible +
+– & reserved +
+
+For alias CSRs and , the hypervisor extension’s usual rules for when to
+raise a virtual instruction exception (based on whether an instruction
+is _HS-qualified_) are not applicable. The rules given in this section
+for and apply instead, unless overridden by the requirements of
+Section #sec:CSRs-stateen[1.5], which take precedence over this section
+when extension Smstateen is also implemented.
+
+A virtual instruction exception is raised for attempts from VS-mode or
+VU-mode to directly access , or attempts from VU-mode to access .
+
+When has a reserved value (including values above not designated for
+custom use), attempts from M-mode or HS-mode to access , or from VS-mode
+to access (really ), should preferably raise an illegal instruction
+exception.
+
+When has the number of an _inaccessible_ register, attempts from M-mode
+or HS-mode to access raise an illegal instruction exception, and
+attempts from VS-mode to access (really ) raise a virtual instruction
+exception.
+
+Requiring a range of 0– for , even though most or all of the space is
+reserved or inaccessible, permits a hypervisor to emulate indirectly
+accessed registers in the implemented range, including registers that
+may be standardized in the future at locations –.
+
+The indirectly accessed registers for external interrupts (numbers –)
+are accessible only when field VGEIN of is the number of an implemented
+guest external interrupt, not zero. If VGEIN is not the number of an
+implemented guest external interrupt (including the case when no IMSIC
+is implemented), then all indirect register numbers in the ranges – and
+– designate an inaccessible register at VS level.
+
+Along the same lines, when .VGEIN is not the number of an implemented
+guest external interrupt, attempts from M-mode or HS-mode to access CSR
+raise an illegal instruction exception, and attempts from VS-mode to
+access raise a virtual instruction exception.
+
+If extension Sscsrind is also implemented, then when has a value in the
+range – or –, attempts from M-mode or HS-mode to access alias CSRs
+through raise an illegal instruction exception, and attempts from
+VS-mode to access through raise a virtual instruction exception.
+
+=== Virtual instruction exceptions
+
+Following the default rules for the hypervisor extension, attempts from
+VS-mode to directly access a hypervisor or VS CSR other than , or from
+VU-mode to access any supervisor-level CSR (including hypervisor and VS
+CSRs) other than or , usually raise not an illegal instruction exception
+but instead a virtual instruction exception. For details, see the
+Privileged Architecture.
+
+Instructions that read/write CSR or are considered to be _HS-qualified_
+unless all of following are true: the hart has an IMSIC, extension
+Smstateen is implemented, and bit 58 of is zero. (See the next section,
+#sec:CSRs-stateen[1.5], about .)
+
+For and , see both the previous section, #ch:CSRs-hypervisor[1.3], and
+the next, #sec:CSRs-stateen[1.5], for when a virtual instruction
+exception is required instead of an illegal instruction exception.
+
+[[sec:CSRs-stateen]]
+=== Access control by the state-enable CSRs
+
+If extension Smstateen is implemented together with the Advanced
+Interrupt Architecture (AIA), three bits of state-enable register
+control access to AIA-added state from privilege modes less privileged
+than M-mode:
+
+bit 60 & CSRs , , , and +
+bit 59 & all other state added by the AIA and not controlled by bits 60
+and 58 +
+bit 58 & all IMSIC state, including CSRs and +
+
+If one of these bits is zero in , an attempt to access the corresponding
+state from a privilege mode less privileged than M-mode results in an
+illegal instruction trap. As always, the state-enable CSRs do not affect
+the accessibility of any state when in M-mode, only in less privileged
+modes. For more explanation, see the documentation for extension
+Smstateen.
+
+Bit 59 controls access to AIA CSRs , , , , /, , , /, /, , , and , as
+well as to the supervisor-level interrupt priorities accessed through +
+(the array of Section #sec:intrPrios-S[[sec:intrPrios-S]]).
+
+Bit 58 is implemented in only if the hart has an IMSIC. If the
+hypervisor extension is also implemented, this bit does not affect the
+behavior or accessibility of hypervisor CSRs and , or field VGEIN of .
+In particular, guest external interrupts from an IMSIC continue to be
+visible to HS-mode in even when bit 58 of is zero.
+
+An earlier, pre-ratification draft of Smstateen said that when bit 58 of
+is zero, registers and and field VGEIN of are all read-only zeros. That
+effect is no longer correct.
+
+If the hart does not have an IMSIC, bit 58 of is read-only zero, but
+Smstateen has no effect on attempts to access the nonexistent IMSIC
+state.
+
+This means in particular that, when the hart does not have an IMSIC, the
+following raise a virtual instruction exception as described in
+Section #ch:CSRs-hypervisor[1.3], not an illegal instruction exception,
+despite that bit 58 of is zero:
+
+attempts from VS-mode to access (really ) while has a value in the range
+–; and
+
+attempts from VS-mode to access (really ).
+
+If bit 60 of is one, then regardless of any other bits (including bits
+58 and 59 of ), a virtual instruction exception is raised as described
+in Section #ch:CSRs-hypervisor[1.3] for all attempts from VS-mode or
+VU-mode to directly access , and for all attempts from VU-mode to access
+. This behavior is overridden only when bit 60 of is zero.
+
+If the hypervisor extension is implemented, the same three bits are
+defined also in hypervisor CSR but concern only the state potentially
+accessible to a virtual machine executing in privilege modes VS and VU:
+
+bit 60 & CSRs and (really and ) +
+bit 59 & CSRs and (RV32 only) and (really , , and ) +
+bit 58 & all state of IMSIC guest interrupt files, including CSR (really
+) +
+
+If one of these bits is zero in , and the same bit is one in , then an
+attempt to access the corresponding state from VS or VU-mode raises a
+virtual instruction exception. (But note that, for high-half CSRs and ,
+this applies only when XLEN = 32. When
+latexmath:[$\mbox{XLEN} > \mbox{32}$], an attempt to access or raises an
+illegal instruction exception as usual, not a virtual instruction
+exception.)
+
+If bit 60 is one in but is zero in , then all attempts from VS or
+VU-mode to access or raise a virtual instruction exception, not an
+illegal instruction exception, regardless of the value of or any other
+bits.
+
+Bit 58 is implemented in only if the hart has an IMSIC. Furthermore,
+even with an IMSIC, bit 58 may (or may not) be read-only zero in if the
+IMSIC has no _guest interrupt files_ for guest external interrupts
+(Chapter #ch:IMSIC[[ch:IMSIC]]). When this bit is zero (whether
+read-only zero or set to zero), a virtual machine is prevented from
+accessing the hart’s IMSIC the same as when .VGEIN = 0.
+
+Extension Ssstateen is defined as the supervisor-level view of
+Smstateen. Therefore, the combination of Ssaia and Ssstateen
+incorporates the bits defined above for but not those for , since
+machine-level CSRs are not visible to supervisor level.
