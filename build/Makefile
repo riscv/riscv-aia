@@ -48,7 +48,7 @@ JUNK := *.pdf *.aux *.log *.bbl *.blg *.toc *.out *.fdb_latexmk *.fls *.synctex.
 # AIA Specification AsciiDoc Build 
 aia: riscv-interrupts.pdf
 
-riscv-interrupts.pdf: $(SRCDIR)/preamble.adoc $(SRCDIR)/*.adoc
+riscv-interrupts.pdf: $(SRCDIR)/riscv-interrupts.adoc $(SRCDIR)/*.adoc
 	@echo "Building AIA Specification"
 	rm -f $@.tmp
 	asciidoctor-pdf $(ASCIIDOCTOR_OPTS) --out-file=$@.tmp $<
@@ -57,7 +57,7 @@ riscv-interrupts.pdf: $(SRCDIR)/preamble.adoc $(SRCDIR)/*.adoc
 # AIA Specification HTML build
 aia-html: riscv-interrupts.html
 
-riscv-interrupts.html: $(SRCDIR)/preamble.adoc
+riscv-interrupts.html: $(SRCDIR)/riscv-interrupts.adoc
 	@echo "Building AIA HTML Specification"
 	asciidoctor $(ASCIIDOCTOR_OPTS) --out-file=$@ $<
 
