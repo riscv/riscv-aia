@@ -128,13 +128,14 @@ When harts do not have Incoming MSI Controllers, external interrupts are
 signaled to harts through dedicated wires. In that case, an _Advanced
 Platform-Level Interrupt Controller_ (APLIC) acts as a traditional
 central hub for interrupts, routing and prioritizing external interrupts
-for each hart as illustrated in Figure #fig:intrsWithoutIMSICs[1.1].
+for each hart as illustrated in <<intrsWithoutIMSICs>>.
 Interrupts may be selectively routed either to machine level or to
 supervisor level at each hart. The APLIC is specified in
-Chapter #ch:AdvPLIC[[ch:AdvPLIC]].
+<<AdvPLIC>>.
 
-image::intrsWithoutIMSICs.png[ Traditional delivery of wired interrupts
-to harts without support for MSIs. ]
+[[intrsWithoutIMSICs]]
+.Traditional delivery of wired interrupts to harts without support for MSIs.
+image::intrsWithoutIMSICs.png[]
 
 Without IMSICs, the current Advanced Interrupt Architecture does not
 support the direct signaling of external interrupts to virtual machines,
