@@ -94,7 +94,7 @@ organization, which we do not attempt to predict.
 
 [[overalllimits]]
 .Absolute limits on the numbers of harts and interrupt identities in a system.  Individual implementations are likely to have smaller limits.
-[cols="<,^,<",options="header",]
+[%autowidth,float="center",align="center",cols="<,^,<",options="header",]
 |===
 | |Maximum |Requirements
 |Physical harts |16,384 |
@@ -111,11 +111,11 @@ organization, which we do not attempt to predict.
 
 === Overview of main components
 
-A system’s overall architecture for signaling interrupts depends on
+A system's overall architecture for signaling interrupts depends on
 whether it is built mainly for message-signaled interrupts (MSIs) or for
 more traditional wired interrupts. In systems with full support for
 MSIs, every hart has an _Incoming MSI Controller_ (IMSIC) that serves as
-the hart’s own private interrupt controller for external interrupts.
+the hart's own private interrupt controller for external interrupts.
 Conversely, in systems based primarily on traditional wired interrupts,
 harts do not have IMSICs. Larger systems, and especially those with PCI
 devices, are expected to fully support MSIs by giving harts IMSICs,
@@ -133,17 +133,15 @@ Interrupts may be selectively routed either to machine level or to
 supervisor level at each hart. The APLIC is specified in
 <<AdvPLIC>>.
 
-[[intrsWithoutIMSICs]]
-.Traditional delivery of wired interrupts to harts without support for MSIs.
-image::intrsWithoutIMSICs.png[]
-
 Without IMSICs, the current Advanced Interrupt Architecture does not
 support the direct signaling of external interrupts to virtual machines,
-even when harts implement the Privileged Architecture’s hypervisor
+even when harts implement the Privileged Architecture's hypervisor
 extension. Instead, an interrupt must be sent to the relevant
 hypervisor, which can then choose to inject a virtual interrupt into the
 virtual machine.
 
+[NOTE]
+====
 If harts implement the hypervisor extension, it is a topic of ongoing
 study whether an APLIC should be allowed to route external interrupts to
 be the _guest external interrupts_ of the hypervisor extension,
@@ -151,23 +149,21 @@ permitting the delivery of interrupts directly to virtual machines
 without the need for each signaled interrupt to be handled at the
 hypervisor level. For now, we assume that systems that need direct
 signaling of external interrupts to virtual machines will have IMSICs.
+====
+[[intrsWithoutIMSICs]]
+.Traditional delivery of wired interrupts to harts without support for MSIs.
+image::intrsWithoutIMSICs.png[]
 
-image::intrsWithIMSICs.png[ Interrupt delivery by MSIs when harts have
-IMSICs for receiving them. ]
+[[intrsWithIMSICs]]
+.Interrupt delivery by MSIs when harts have IMSICs for receiving them.
+image::intrsWithIMSICs.png[]
 
 ==== External interrupts with IMSICs
 
 To be able to receive message-signaled interrupts (MSIs), each hart must
-have an Incoming MSI Controller (IMSIC) as shown in
-Figure #fig:intrsWithIMSICs[1.2]. Fundamentally, a message-signaled
-interrupt is simply a memory write to a specific address that hardware
-accepts as indicating an interrupt. To that end, every IMSIC is assigned
-one or more distinct addresses in the machine’s address space, and when
-a write is made to one of those addresses in the expected format, the
-receiving IMSIC interprets the write as an external interrupt for the
-respective hart.
+have an Incoming MSI Controller (IMSIC) as shown in <<intrsWithIMSICs>>. Fundamentally, a message-signaled interrupt is simply a memory write to a specific address that hardware accepts as indicating an interrupt. To that end, every IMSIC is assigned one or more distinct addresses in the machine's address space, and when a write is made to one of those addresses in the expected format, the receiving IMSIC interprets the write as an external interrupt for the respective hart.
 
-Because all IMSICs have unique addresses in the machine’s physical
+Because all IMSICs have unique addresses in the machine's physical
 address space, every IMSIC can receive MSI writes from any agent (hart
 or device) with permission to write to it. IMSICs have separate
 addresses for MSIs directed to machine and supervisor levels, in part so
@@ -181,38 +177,32 @@ interrupt-pending bits and a matching array of interrupt-enable bits,
 the latter indicating which individual interrupts the hart is currently
 prepared to receive.
 
-IMSIC units are fully defined in Chapter #ch:IMSIC[[ch:IMSIC]]. The
+IMSIC units are fully defined in <<IMSIC>>. The
 format of MSIs used by the Advanced Interrupt Architecture is described
-in that chapter, Section #sec:MSIEncoding[[sec:MSIEncoding]].
+in that chapter, <<MSIEncoding>>.
 
 When the harts in a system have IMSICs, the system will normally still
 contain an APLIC, but its role is changed. Instead of signaling
-interrupts to harts directly by wires as in
-Figure #fig:intrsWithoutIMSICs[1.1], an APLIC converts incoming wired
-interrupts into MSI writes that are sent to harts via their IMSIC units.
-Each MSI is sent to a single target hart according to the APLIC’s
-configuration set by software.
+interrupts to harts directly by wires as in <<intrsWithoutIMSICs>>, an APLIC converts incoming wired interrupts into MSI writes that are sent to harts via their IMSIC units. Each MSI is sent to a single target hart according to the APLIC's configuration set by software.
 
-If harts implement the Privileged Architecture’s hypervisor extension,
+If harts implement the Privileged Architecture's hypervisor extension,
 IMSICs may have additional _guest interrupt files_ for delivering
-interrupts to virtual machines. Besides Chapter #ch:IMSIC[[ch:IMSIC]] on
-the IMSIC, see Chapter #ch:VSLevel[[ch:VSLevel]] which specifically
+interrupts to virtual machines. Besides <<IMSIC>> on
+the IMSIC, see <<VSLevel>> which specifically
 covers interrupts to virtual machines. If the system also contains an
 IOMMU to perform address translation of memory accesses made by I/O
 devices, then MSIs from those same devices may require special handling.
-This topic is addressed in Chapter #ch:IOMMU[[ch:IOMMU]], ``IOMMU
-Support for MSIs to Virtual Machines.''
+This topic is addressed in <<IOMMU>>, "IOMMU Support for MSIs to Virtual Machines."
 
 ==== Other interrupts
 
 In addition to external interrupts from I/O devices, the Privileged
 Architecture specifies a few other major classes of interrupts for
-harts. The Privileged Architecture’s timer interrupts remain supported
+harts. The Privileged Architecture's timer interrupts remain supported
 in full, and software interrupts remain at least partly supported,
-although neither appears in Figures #fig:intrsWithoutIMSICs[1.1]
-and #fig:intrsWithIMSICs[1.2]. For the specifics on software interrupts,
-refer to Chapter #ch:IPIs[[ch:IPIs]], ``Interprocessor Interrupts
-(IPIs).''
+although neither appears in <<intrsWithoutIMSICs>>
+and <<intrsWithIMSICs>>. For the specifics on software interrupts,
+refer to <<IPIs>>, "Interprocessor Interrupts (IPIs).""
 
 The Advanced Interrupt Architecture adds considerable support for _local
 interrupts_ at a hart, whereby a hart essentially interrupts itself in
@@ -226,15 +216,17 @@ The Privileged Architecture gives every interrupt cause at a hart a
 distinct _major identity number_, which is the Exception Code
 automatically written to CSR or on an interrupt trap. Interrupt causes
 that are standardized by the Privileged Architecture have major
-identities in the range 0–15, while numbers 16 and higher are officially
+identities in the range 0-15, while numbers 16 and higher are officially
 available for platform standards or for custom use. The Advanced
 Interrupt Architecture claims further authority over identity numbers in
-the ranges 16–23 and 32–47, leaving numbers in the range 24–31 and all
+the ranges 16-23 and 32-47, leaving numbers in the range 24-31 and all
 major identities 48 and higher still free for custom use.
-Table #tab:interruptIdents[[tab:interruptIdents]] characterizes all
+<<interruptIdents>> characterizes all
 major interrupt identities with this extension.
 
-[cols="^,^,<",options="header",]
+[[interruptIdents]]
+.Major and minor identities for all interrupt causes at a hart. Major identities 0-15 are the purview of the RISC-V Privileged Architecture.
+[%autowidth,float="center",align="center",cols="^,^,<",options="header",]
 |===
 |Major identity |Minor identity |
 |0 |– |_Reserved by Privileged Architecture_
@@ -259,16 +251,16 @@ major interrupt identities with this extension.
 |36–42 |– |_Reserved for standard local interrupts_
 |43 |– |High-priority RAS event interrupt
 |44–47 |– |_Reserved for standard local interrupts_
-|latexmath:[$\geq \mbox{48}$] |– |_Designated for custom use_
+|&#8805;48 |– |_Designated for custom use_
 |===
 
 Interrupts from most I/O devices are conveyed to a hart by the _external
-interrupt controller_ for the hart, which is either the hart’s IMSIC
-(Figure #fig:intrsWithIMSICs[1.2]) or an APLIC
-(Figure #fig:intrsWithoutIMSICs[1.1]). As
-Table #tab:interruptIdents[[tab:interruptIdents]] shows, external
+interrupt controller_ for the hart, which is either the hart's IMSIC
+(<<intrsWithIMSICs>>) or an APLIC
+(<<intrsWithoutIMSICs>>). As
+<<interruptIdents>> shows, external
 interrupts at a given privilege level all share a single major identity
-number: 11 for machine level, 9 for supervisor level, and 10 for
+number: 11 for machine level, 9 for supervisor level, and 10 for
 VS-level. External interrupts from different causes are distinguished
 from one another at a hart by their _minor identity numbers_ supplied by
 the external interrupt controller.
@@ -278,8 +270,8 @@ own minor identities. However, this document has need to discuss minor
 identities only with regard to external interrupts.
 
 The local interrupts defined by the Advanced Interrupt Architecture and
-their handling are covered mainly in Chapter #ch:MSLevel[[ch:MSLevel]],
-``Interrupts for Machine and Supervisor Levels.''
+their handling are covered mainly in <<MSLevel>>,
+"Interrupts for Machine and Supervisor Levels."
 
 === Selection of harts to receive an interrupt
 
@@ -289,10 +281,10 @@ other architectures, the Advanced Interrupt Architecture provides no
 standard hardware mechanism for the broadcast or multicast of interrupts
 to multiple harts.
 
-For local interrupts, and for any ``virtual'' interrupts that software
+For local interrupts, and for any "virtual" interrupts that software
 injects into lower privilege levels at a hart, the interrupts are
 entirely a local affair at the hart and are never visible to other
-harts. The Privileged Architecture’s timer interrupts are also uniquely
+harts. The Privileged Architecture's timer interrupts are also uniquely
 tied to individual harts. For other interrupts, received by a hart from
 sources outside the hart, each interrupt signal (whether delivered by
 wire or by an MSI) is configured by software to go to only a single
@@ -301,13 +293,13 @@ hart.
 To send an interprocessor interrupt (IPI) to multiple harts, the
 originating hart need only execute a loop, sending an individual IPI to
 each destination hart. For IPIs to a single destination hart, see
-Chapter #ch:IPIs[[ch:IPIs]].
+<<IPIs>>.
 
 The effort that a source hart expends in sending individual IPIs to
 multiple destinations will invariably be dwarfed by the combined effort
 at the receiving harts to handle those interrupts. Hence, providing an
 automated mechanism for IPI multicast could be expected to reduce a
-system’s total overall work only modestly at best. With a very large
+system's total overall work only modestly at best. With a very large
 number of harts, a hardware mechanism for IPI multicast must contend
 with the question of how exactly software specifies the intended
 destination set with each use, and furthermore, the actual physical
@@ -327,7 +319,7 @@ harts is sufficiently rare that standardizing hardware support for
 multicast cannot be justified in this case.
 
 Along with multicast delivery, other architectures support an option for
-``1-of-latexmath:[$N$]'' delivery of interrupts, whereby the hardware
+"1-of-latexmath:[$N$]" delivery of interrupts, whereby the hardware
 chooses a single destination hart from among a configured set of
 latexmath:[$N$] harts, with the goal of automatic load balancing of
 interrupt handling among the harts. Experiments in the 2010s called into
@@ -381,7 +373,7 @@ writing to IMSICs.
 
 As revealed in subsequent chapters, the exact set of CSRs and behavior
 added by the AIA, and hence implied by Smaia or Ssaia, depends on the
-base ISA’s XLEN (RV32 or RV64), on whether S-mode and the hypervisor
+base ISA's XLEN (RV32 or RV64), on whether S-mode and the hypervisor
 extension are implemented, and on whether the hart has an IMSIC. But
 individual AIA extension names are not provided for each possible valid
 subset. Rather, the different combinations are inferable from the
@@ -390,7 +382,7 @@ without the hypervisor extension).
 
 Software development tools like compilers and assemblers need not be
 concerned about whether an IMSIC exists but should just allow attempts
-to access the IMSIC CSRs (described in Chapters #ch:CSRs[[ch:CSRs]]
-and #ch:IMSIC[[ch:IMSIC]]) if Smaia or Ssaia is indicated. Without an
+to access the IMSIC CSRs (described in <<CSRs>>
+and <<IMSIC>>) if Smaia or Ssaia is indicated. Without an
 actual IMSIC, such attempts may trap, but that is not a problem for the
 development tools.
