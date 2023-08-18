@@ -1,4 +1,4 @@
-[[ch:CSRs]]
+[[CSRs]]
 == Control and Status Registers (CSRs) Added to Harts
 
 For each privilege level at which a hart can take interrupt traps, the
