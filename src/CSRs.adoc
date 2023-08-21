@@ -259,105 +259,66 @@ If extension Sscsrind is also implemented, then when `vsiselect` has a value in 
 === Virtual instruction exceptions
 
 Following the default rules for the hypervisor extension, attempts from
-VS-mode to directly access a hypervisor or VS CSR other than , or from
+VS-mode to directly access a hypervisor or VS CSR other than `vsireg`, or from
 VU-mode to access any supervisor-level CSR (including hypervisor and VS
-CSRs) other than or , usually raise not an illegal instruction exception
-but instead a virtual instruction exception. For details, see the
-Privileged Architecture.
+CSRs) other than `sireg` or `vsireg`, usually raise not an illegal instruction exception but instead a virtual instruction exception. For details, see the RISC-V Privileged Architecture.
 
-Instructions that read/write CSR or are considered to be _HS-qualified_
-unless all of following are true: the hart has an IMSIC, extension
-Smstateen is implemented, and bit 58 of is zero. (See the next section,
-#sec:CSRs-stateen[1.5], about .)
+Instructions that read/write CSR `stopei` or `vstopei` are considered to be _HS-qualified_ unless all of following are true: the hart has an IMSIC, extension Smstateen is implemented, and bit 58 of `mstateen0` is zero. (See the next section, <<CSRs-stateen>>, about `mstateen0`.)
 
-For and , see both the previous section, #ch:CSRs-hypervisor[1.3], and
-the next, #sec:CSRs-stateen[1.5], for when a virtual instruction
-exception is required instead of an illegal instruction exception.
+For `sireg` and `vsireg`, see both the previous section, <<CSRs-hypervisor>>, and the next, <<CSRs-stateen>>, for when a virtual instruction exception is required instead of an illegal instruction exception.
 
-[[sec:CSRs-stateen]]
+[[CSRs-stateen]]
 === Access control by the state-enable CSRs
 
 If extension Smstateen is implemented together with the Advanced
-Interrupt Architecture (AIA), three bits of state-enable register
-control access to AIA-added state from privilege modes less privileged
+Interrupt Architecture (AIA), three bits of state-enable register `mstateen0` control access to AIA-added state from privilege modes less privileged
 than M-mode:
 
-bit 60 & CSRs , , , and +
-bit 59 & all other state added by the AIA and not controlled by bits 60
-and 58 +
-bit 58 & all IMSIC state, including CSRs and +
+bit 60 CSRs `siselect`, `sireg`, `vsiselect`, and `vsireg`
+bit 59 all other state added by the AIA and not controlled by bits 60
+and 58
+bit 58 all IMSIC state, including CSRs `stopei` and `vstopei`
 
-If one of these bits is zero in , an attempt to access the corresponding
-state from a privilege mode less privileged than M-mode results in an
-illegal instruction trap. As always, the state-enable CSRs do not affect
-the accessibility of any state when in M-mode, only in less privileged
-modes. For more explanation, see the documentation for extension
-Smstateen.
+If one of these bits is zero in `mstateen0`, an attempt to access the corresponding state from a privilege mode less privileged than M-mode results in an illegal instruction trap. As always, the state-enable CSRs do not affect
+the accessibility of any state when in M-mode, only in less privileged modes. For more explanation, see the documentation for extension Smstateen.
 
-Bit 59 controls access to AIA CSRs , , , , /, , , /, /, , , and , as
-well as to the supervisor-level interrupt priorities accessed through +
-(the array of Section #sec:intrPrios-S[[sec:intrPrios-S]]).
+Bit 59 controls access to AIA CSRs `siph`, `sieh`, `stope`, `hidelegh`, `hvien`/`hvienh`, `hviph`, `hvictl`, `hviprio1`/`hviprio1h`, `hviprio2`/`hviprio2h`, `vsiph`, `vsieh`, and `vstopi`, as well as to the supervisor-level interrupt priorities accessed through `siselect` + `sireg` (the `iprio` array of <<intrPrios-S>>).
 
-Bit 58 is implemented in only if the hart has an IMSIC. If the
+Bit 58 is implemented in `mstateen0` only if the hart has an IMSIC. If the
 hypervisor extension is also implemented, this bit does not affect the
-behavior or accessibility of hypervisor CSRs and , or field VGEIN of .
-In particular, guest external interrupts from an IMSIC continue to be
-visible to HS-mode in even when bit 58 of is zero.
+behavior or accessibility of hypervisor CSRs `hgeip` and `hgeie`, or field VGEIN of `hstatus`. In particular, guest external interrupts from an IMSIC continue to be visible to HS-mode in `hgeip` even when bit 58 of `mstateen0` is zero.
 
-An earlier, pre-ratification draft of Smstateen said that when bit 58 of
-is zero, registers and and field VGEIN of are all read-only zeros. That
-effect is no longer correct.
+[NOTE]
+====
+An earlier, pre-ratification draft of Smstateen said that when bit 58 of `mstateen0` is zero, registers `hgeip` and `hgeie` and field VGEIN of `hstatus` are all read-only zeros. That effect is no longer correct.
+====
 
-If the hart does not have an IMSIC, bit 58 of is read-only zero, but
-Smstateen has no effect on attempts to access the nonexistent IMSIC
+If the hart does not have an IMSIC, bit 58 of `mstateen0` is read-only zero, but Smstateen has no effect on attempts to access the nonexistent IMSIC
 state.
 
+[NOTE]
+====
 This means in particular that, when the hart does not have an IMSIC, the
-following raise a virtual instruction exception as described in
-Section #ch:CSRs-hypervisor[1.3], not an illegal instruction exception,
-despite that bit 58 of is zero:
+following raise a virtual instruction exception as described in <<CSRs-hypervisor>>, not an illegal instruction exception, despite that bit 58 of `mstateen0` is zero:
 
-attempts from VS-mode to access (really ) while has a value in the range
-–; and
+* attempts from VS-mode to access `sireg` (really `vsireg`) while `vsiselect` has a value in the range 0x70–0xFF; and
+* attempts from VS-mode to access `stopei` (really `vstopei`).
+====
 
-attempts from VS-mode to access (really ).
-
-If bit 60 of is one, then regardless of any other bits (including bits
-58 and 59 of ), a virtual instruction exception is raised as described
-in Section #ch:CSRs-hypervisor[1.3] for all attempts from VS-mode or
-VU-mode to directly access , and for all attempts from VU-mode to access
-. This behavior is overridden only when bit 60 of is zero.
+If bit 60 of `mstateen0` is one, then regardless of any other `mstateen` bits (including bits 58 and 59 of `mstateen0`), a virtual instruction exception is raised as described in <<CSRs-hypervisor>> for all attempts from VS-mode or
+VU-mode to directly access `vsireg`, and for all attempts from VU-mode to access `sireg`. This behavior is overridden only when bit 60 of `mstateen0` is zero.
 
 If the hypervisor extension is implemented, the same three bits are
-defined also in hypervisor CSR but concern only the state potentially
-accessible to a virtual machine executing in privilege modes VS and VU:
+defined also in hypervisor CSR `hstateen0` but concern only the state potentially accessible to a virtual machine executing in privilege modes VS and VU:
 
-bit 60 & CSRs and (really and ) +
-bit 59 & CSRs and (RV32 only) and (really , , and ) +
-bit 58 & all state of IMSIC guest interrupt files, including CSR (really
-) +
+bit 60 CSRs and (really `viselect` and `vsireg`)
+bit 59 CSRs `siph` and `sieh` (RV32 only) and `stopi` (really `vsiph`, `vsieh`, and `vstopi`)
+bit 58 all state of IMSIC guest interrupt files, including CSR `stopei`(really `vstopei`)
 
-If one of these bits is zero in , and the same bit is one in , then an
-attempt to access the corresponding state from VS or VU-mode raises a
-virtual instruction exception. (But note that, for high-half CSRs and ,
-this applies only when XLEN = 32. When
-latexmath:[$\mbox{XLEN} > \mbox{32}$], an attempt to access or raises an
-illegal instruction exception as usual, not a virtual instruction
-exception.)
+If one of these bits is zero in `hstateen0`, and the same bit is one in `mstateen0`, then an attempt to access the corresponding state from VS or VU-mode raises a virtual instruction exception. (But note that, for high-half CSRs `siph` and `sieh`, this applies only when XLEN = 32. When XLEN > 32, an attempt to access `siph` or `seph` raises an illegal instruction exception as usual, not a virtual instruction exception.)
 
-If bit 60 is one in but is zero in , then all attempts from VS or
-VU-mode to access or raise a virtual instruction exception, not an
-illegal instruction exception, regardless of the value of or any other
-bits.
+If bit 60 is one in `mstateen0` but is zero in `hstateen0`, then all attempts from VS or VU-mode to access `siselect` or `sireg` raise a virtual instruction exception, not an illegal instruction exception, regardless of the value of `vsiselect` or any other bits.
 
-Bit 58 is implemented in only if the hart has an IMSIC. Furthermore,
-even with an IMSIC, bit 58 may (or may not) be read-only zero in if the
-IMSIC has no _guest interrupt files_ for guest external interrupts
-(Chapter #ch:IMSIC[[ch:IMSIC]]). When this bit is zero (whether
-read-only zero or set to zero), a virtual machine is prevented from
-accessing the hart’s IMSIC the same as when .VGEIN = 0.
+Bit 58 is implemented in `hstaeen0` only if the hart has an IMSIC. Furthermore, even with an IMSIC, bit 58 may (or may not) be read-only zero in `hstateen0` if the IMSIC has no _guest interrupt files_ for guest external interrupts (<<IMSIC>>). When this bit is zero (whether read-only zero or set to zero), a virtual machine is prevented from accessing the hart's IMSIC the same as when `hstatus.VGEIN` = 0.
 
-Extension Ssstateen is defined as the supervisor-level view of
-Smstateen. Therefore, the combination of Ssaia and Ssstateen
-incorporates the bits defined above for but not those for , since
-machine-level CSRs are not visible to supervisor level.
+Extension Ssstateen is defined as the supervisor-level view of Smstateen. Therefore, the combination of Ssaia and Ssstateen incorporates the bits defined above for `hstateen0` but not those for `mstateen0`, since machine-level CSRs are not visible to supervisor level.
