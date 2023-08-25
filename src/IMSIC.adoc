@@ -290,8 +290,8 @@ number of bits needed to represent any hart number. Then the base
 address latexmath:[$A$] should be aligned to a
 latexmath:[${2}^{k+C}$] address boundary, so
 latexmath:[${A+h\times{2}^{C}}$] always equals
-latexmath:[$A$] latexmath:[${(h\times{2}^{C})}$], where the
-vertical bar () represents bitwise logical OR.
+latexmath:[$A$] | latexmath:[${(h\times{2}^{C})}$], where the
+vertical bar (|) represents bitwise logical OR.
 
 The smallest that latexmath:[$C$] can be is 12, with
 latexmath:[${2}^{C}$] being the size of one 4-KiB page. If
@@ -344,7 +344,7 @@ latexmath:[${g\times{2}^{E}}+B+{h\times{2}^{D}}$] for
 supervisor-level interrupt files, with latexmath:[$g$] being a _group
 number_, latexmath:[$h$] being a hart number relative to the group, and
 latexmath:[$E$] being another integer constant
-latexmath:[$\geq$] latexmath:[${k+\max(C,D)}$] but usually much larger.
+latexmath:[$\geq$] latexmath:[${k+\max(C,D)}$] but usually much larger.
 If the largest group number is latexmath:[$g_{\rm max}$], let
 latexmath:[${j = \lceil\log_{2}(g_{\rm max}+{1})\rceil}$], the
 number of bits needed to represent any group number. Besides being
@@ -353,28 +353,28 @@ latexmath:[${2}^{k+D}$] respectively, latexmath:[$A$] and
 latexmath:[$B$] should be chosen so
 
 latexmath:[$\left(({2}^{j}-{1})\times{2}^{E}\right)$]
-latexmath:[$A \,=\, 0$] & and &
+& latexmath:[$A \,=\, 0$] and
 latexmath:[$\left(({2}^{j}-{1})\times{2}^{E}\right)$]
-latexmath:[$B \,=\, 0$]
+& latexmath:[$B \,=\, 0$]
 
-where an ampersand () represents bitwise logical AND. This ensures that
+where an ampersand (&) represents bitwise logical AND. This ensures that
 
-latexmath:[$g\times{2}^{E}+A+h\times{2}^{C}$] & always equals
-& latexmath:[$(g\times{2}^{E})$] latexmath:[$A$]
-latexmath:[$(h\times{2}^{C})$], & and +
-latexmath:[$g\times{2}^{E}+B+h\times{2}^{D}$] & always equals
-& latexmath:[$(g\times{2}^{E})$] latexmath:[$B$]
-latexmath:[$(h\times{2}^{D})$]. +
+latexmath:[$g\times{2}^{E}+A+h\times{2}^{C}$] always equals
+latexmath:[$(g\times{2}^{E})$] latexmath:[$A$]
+latexmath:[$(h\times{2}^{C})$], and
+latexmath:[$g\times{2}^{E}+B+h\times{2}^{D}$] always equals
+latexmath:[$(g\times{2}^{E})$] latexmath:[$B$]
+latexmath:[$(h\times{2}^{D})$]. 
 
 Infilling with read-only-zero pages is expected only within each group,
 not between separate groups. Specifically, if latexmath:[$g$] is any
 integer between 0 and latexmath:[${{2}^{j}-1}$] inclusive, then
 within the address ranges,
 
-latexmath:[$g\times{2}^{E}+A$] & through &
-latexmath:[$g\times{2}^{E}+A+{2}^{k+C}-{1}$], & and +
-latexmath:[$g\times{2}^{E}+B$] & through &
-latexmath:[$g\times{2}^{E}+B+{2}^{k+D}-{1}$], +
+latexmath:[$g\times{2}^{E}+A$] through
+latexmath:[$g\times{2}^{E}+A+{2}^{k+C}-{1}$], and
+latexmath:[$g\times{2}^{E}+B$] through
+latexmath:[$g\times{2}^{E}+B+{2}^{k+D}-{1}$],
 
 pages not occupied by an interrupt file should be read-only zeros.
 
@@ -403,7 +403,7 @@ file (`miselect`), the supervisor-level interrupt file (`siselect`), or a guest 
 Interrupt files at each level act identically. For a given privilege
 level, values of the `*iselect` CSR in the range 0x70-0xFF select these registers of the corresponding interrupt file:
 
-[%autowidth,float="center",align="center",cols="<,<",options="header",grid=none,frame=none]
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
 |===
 |0x70 | `eidelivery`
 |0x72 | `eithreshold`
@@ -434,7 +434,7 @@ accessed indirectly through a `_*iselect_` _CSR_ (`miselect`, `siselect`, or `vs
 
 `eidelivery` is a *WARL* register that controls whether interrupts from this interrupt file are delivered from the IMSIC to the attached hart so they appear as a pending external interrupt in the hart's `mip` or `hgeip` CSR. Register `eidelivery` may optionally also support the direct delivery of interrupts from a PLIC (Platform-Level Interrupt Controller) or APLIC (Advanced PLIC) to the attached hart. Three possible values are currently defined for `eidelivery`:
 
-[%autowidth,float="center",align="center",cols="<,<",options="header",grid=none,frame=none]
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
 |===
 |0 = | Interrupt delivery is disabled
 |1 = | Interrupt delivery from the interrupt file is enabled
