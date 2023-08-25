@@ -322,9 +322,9 @@ should be ordered contiguously as
 S, latexmath:[{G}_{1}$], latexmath:[${G}_{2}$],
 latexmath:[${G}_{3}$], …
 
-where S is the page for the supervisor-level interrupt file and each
+where S is the page for the supervisor-level interrupt file and each
 latexmath:[${G}_{i}$] is the page for the interrupt file of guest
-interrupt number latexmath:[$i$]. Consequently, the smallest that
+interrupt number latexmath:[$i$]. Consequently, the smallest that
 constant latexmath:[$D$] can be is
 latexmath:[${\lceil\log_{\rm 2}({maximum GEILEN}+{1})\rceil}+12$],
 recalling that GEILEN for each IMSIC is the number of guest interrupt
@@ -378,100 +378,79 @@ latexmath:[$g\times{2}^{E}+B+{2}^{k+D}-{1}$], +
 
 pages not occupied by an interrupt file should be read-only zeros.
 
-See also Section #sec:AdvPLIC-MSIAddrs[[sec:AdvPLIC-MSIAddrs]] for the
+See also Section <<AdvPLIC-MSIAddrs>> for the
 default algorithms an Advanced PLIC may use to determine the destination
 addresses of outgoing MSIs, which should be the addresses of IMSIC
 interrupt files.
 
 === CSRs for external interrupts via an IMSIC
 
-Software accesses a hart’s IMSIC primarily through the CSRs introduced
-in Chapter #ch:CSRs[[ch:CSRs]]. There is a separate set of CSRs for each
+Software accesses a hart's IMSIC primarily through the CSRs introduced
+in <<CSRs>>. There is a separate set of CSRs for each
 implemented privilege level that can receive interrupts. The
-machine-level CSRs interact with the IMSIC’s machine-level interrupt
+machine-level CSRs interact with the IMSIC's machine-level interrupt
 file, while, if supervisor mode is implemented, the supervisor-level
-CSRs interact with the IMSIC’s supervisor-level interrupt file. When an
+CSRs interact with the IMSIC's supervisor-level interrupt file. When an
 IMSIC has guest interrupt files, the VS CSRs interact with a single
 guest interrupt file, selected by the VGEIN field of CSR .
 
-For machine level, the relevant CSRs are , , and . When supervisor mode
-is implemented, the set of supervisor-level CSRs matches those of
-machine level: , , and . And when the hypervisor extension is
-implemented, there are three corresponding VS CSRs: , , and .
+For machine level, the relevant CSRs are `miselect`, `mireg`, and `mtopei`. When supervisor mode is implemented, the set of supervisor-level CSRs matches those of machine level: `siselect`, `sireg`, and `stopei`. And when the hypervisor extension is implemented, there are three corresponding VS CSRs: `vsiselect`, `vsireg`, and `vstopei`.
 
-As explained in Chapter #ch:CSRs[[ch:CSRs]], registers and provide
-indirect access to additional machine-level registers. Likewise for
-supervisor-level and , and VS-level and . In each case, a value of the
-_`*iselect` CSR_ (, , or ) in the range – selects a register of the
+As explained in <<CSRs>>, registers `miselect` and `mireg` provide indirect access to additional machine-level registers. Likewise for supervisor-level `siselect` and `sireg`, and VS-level `vsiselect` and `vsireg` . In each case, a value of the `_*iselect_` _CSR_ (`miselect`, `siselect` , or `vsiselect)`) in the range 0x70-0xFF selects a register of the
 corresponding IMSIC interrupt file, either the machine-level interrupt
-file (), the supervisor-level interrupt file (), or a guest interrupt
-file ().
+file (`miselect`), the supervisor-level interrupt file (`siselect`), or a guest interrupt file (`vsiselect`).
 
 Interrupt files at each level act identically. For a given privilege
-level, values of the CSR in the range – select these registers of the
-corresponding interrupt file:
+level, values of the `*iselect` CSR in the range 0x70-0xFF select these registers of the corresponding interrupt file:
 
-& +
-& +
-& +
-& +
-…&  … +
-& +
-& +
-& +
-…&  … +
-& +
+[%autowidth,float="center",align="center",cols="<,<",options="header",grid=none,frame=none]
+|===
+|0x70 | `eidelivery`
+|0x72 | `eithreshold`
+|0x80 | `eip0`
+|0x81 | `eip1`
+|...  | ...
+|0xBF | `eip63`
+|0xC0 | `eie0`
+|0xC1 | `eie1`
+|...  | ...
+|0xFF | `eie63`
+|===
 
-Register numbers and – are reserved. When a CSR has one of these values,
-reads from the matching _`*ireg` CSR_ (, , or ) return zero, and writes
-to the CSR are ignored. (For and , all accesses depend on .VGEIN being
-the valid number of a guest interrupt file.)
+Register numbers 0x71 and 0x73-0x7F are reserved. When an `_*iselect_` _CSR_  has one of these values, reads from the matching `_*ireg_` _CSR_ (`mireg`, `sireg`, or `vsireg`) return zero, and writes to the `_*ieg_` _CSR_ are ignored. (For `vsiselect` and `vsireg`, all accesses depend on `hstatus`.VGEIN being the valid number of a guest interrupt file.)
 
-Registers through contain the pending bits for all implemented interrupt
-identities, and are collectively called the _`eip` array_. Registers
-through contain the enable bits for the same interrupt identities, and
-are collectively called the _`eie` array_.
+Registers `eip0` through `eip63` contain the pending bits for all implemented interrupt identities, and are collectively called the `_eip_` _array_. Registers `eie0` through `eie63` contain the enable bits for the same interrupt identities, and are collectively called the `_eie_` _array_.
 
-The indirectly accessed interrupt-file registers and CSRs , , and are
-all documented in more detail in the next two sections.
+The indirectly accessed interrupt-file registers and CSRs `mtopei`, `stopei`, and `vstopei` are all documented in more detail in the next two sections.
 
 === Indirectly accessed interrupt-file registers
 
 This section describes the registers of an interrupt file that are
-accessed indirectly through a CSR (, , or ) and its partner CSR (, , or
-). The width of these indirect accesses is always the current XLEN,
-32 bits for RV32 code, or 64 bits for RV64 code.
+accessed indirectly through a `_*iselect_` _CSR_ (`miselect`, `siselect`, or `vsiselect`) and its partner `_*ireg_` _CSR_ (`mireg`, `sireg`, or `vsireg`). The width of these indirect accesses is always the current XLEN,
+32 bits for RV32 code, or 64 bits for RV64 code.
 
-[[sec:IMSIC-reg-eidelivery]]
-==== External interrupt delivery enable register ()
+[[IMSIC-reg-eidelivery]]
+==== External interrupt delivery enable register (`eidelivery`)
 
-is a register that controls whether interrupts from this interrupt file
-are delivered from the IMSIC to the attached hart so they appear as a
-pending external interrupt in the hart’s or CSR. Register may optionally
-also support the direct delivery of interrupts from a PLIC
-(Platform-Level Interrupt Controller) or APLIC (Advanced PLIC) to the
-attached hart. Three possible values are currently defined for :
+`eidelivery` is a *WARL* register that controls whether interrupts from this interrupt file are delivered from the IMSIC to the attached hart so they appear as a pending external interrupt in the hart's `mip` or `hgeip` CSR. Register `eidelivery` may optionally also support the direct delivery of interrupts from a PLIC (Platform-Level Interrupt Controller) or APLIC (Advanced PLIC) to the attached hart. Three possible values are currently defined for `eidelivery`:
 
-0 & = Interrupt delivery is disabled +
-1 & = Interrupt delivery from the interrupt file is enabled +
-& = Interrupt delivery from a PLIC or APLIC is enabled (optional) +
+[%autowidth,float="center",align="center",cols="<,<",options="header",grid=none,frame=none]
+|===
+|0 = | Interrupt delivery is disabled
+|1 = | Interrupt delivery from the interrupt file is enabled
+|0x40000000 = | Interrupt delivery from a PLIC or APLIC is enabled (optional)
+|===
 
-If supports value , then a specific PLIC or APLIC in the system may act
-as an alternate external interrupt controller for the attached hart at
-the same privilege level as this interrupt file. When is , the interrupt
-file functions the same as though is 0, and the PLIC or APLIC replaces
-the interrupt file in supplying pending external interrupts at this
-privilege level at the hart.
+If `eidelivery` supports value 0x40000000, then a specific PLIC or APLIC in the system may act as an alternate external interrupt controller for the attached hart at the same privilege level as this interrupt file. When `eidelivery` is 0x40000000, the interrupt file functions the same as though `eidelivery` is 0, and the PLIC or APLIC replaces the interrupt file in supplying pending external interrupts at this privilege level at the hart.
 
-Guest interrupt files do not support value for .
+Guest interrupt files do not support value 0x40000000 for `eidelivery`.
 
-Reset initializes to if that value is supported; otherwise, has an valid
-value (0 or 1) after reset.
+Reset initializes `eidelivery` to 0x40000000 if that value is supported; otherwise, `eidelivery` has an UNSPECIFIED valid value (0 or 1) after reset.
 
-value supports system software that is oblivious to IMSICs and assumes
-instead that the external interrupt controller is a PLIC or APLIC. Such
-software may exist either because it predates the existence of IMSICs or
-because bypassing IMSICs is believed to reduce programming effort.
+[NOTE]
+====
+`eidelivery` value 0x40000000 supports system software that is oblivious to IMSICs and assumes instead that the external interrupt controller is a PLIC or APLIC. Such software may exist either because it predates the existence of IMSICs or because bypassing IMSICs is believed to reduce programming effort.
+====
 
 ==== External interrupt enable threshold register ()
 
