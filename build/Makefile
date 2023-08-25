@@ -24,8 +24,9 @@ all: $(TARGETS)
 
 # Asciidoctor options
 ASCIIDOCTOR_OPTS := --attribute=mathematical-format=svg \
+					--attribute=pdf-fontsdir=../src/docs-resources/fonts \
+					--attribute=pdf-style=../src/docs-resources/themes/riscv-pdf.yml \
                     --failure-level=ERROR \
-                   # --require=asciidoctor-bibtex 
                     --require=asciidoctor-diagram \
                     --require=asciidoctor-mathematical \
                     --trace

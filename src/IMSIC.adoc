@@ -1,4 +1,4 @@
-[[ch:IMSIC]]
+[[IMSIC]]
 == Incoming MSI Controller (IMSIC)
 
 An Incoming MSI Controller (IMSIC) is an optional hardware component
@@ -7,30 +7,28 @@ receives and records incoming message-signaled interrupts (MSIs) for a
 hart, and signals to the hart when there are pending and enabled
 interrupts to be serviced.
 
-An IMSIC has one or more memory-mapped registers in the machine’s
+An IMSIC has one or more memory-mapped registers in the machine's
 address space for receiving MSIs. Aside from those memory-mapped
-registers, software interacts with an IMSIC primarily through several
-CSRs at the attached hart.
+registers, software interacts with an IMSIC primarily through several RISC-V  CSRs at the attached hart.
 
-[[sec:IMSIC-intrFilesAndIdents]]
+[[IMSIC-intrFilesAndIdents]]
 === Interrupt files and interrupt identities
 
-In a system, MSIs are directed not just to a specific hart but to a
+In a RISC-V system, MSIs are directed not just to a specific hart but to a
 specific privilege level of a specific hart, such as machine or
 supervisor level. Furthermore, when a hart implements the hypervisor
 extension, an IMSIC may optionally allow MSIs to be directed to a
 specific virtual hart at virtual supervisor level (VS level).
 
 For each privilege level and each virtual hart to which MSIs may be
-directed at a hart, the hart’s IMSIC contains a separate _interrupt
+directed at a hart, the hart's IMSIC contains a separate _interrupt
 file_. Assuming a hart implements supervisor mode, its IMSIC has at
 least two interrupt files, one for machine level and the other for
 supervisor level. When a hart also implements the hypervisor extension,
 its IMSIC may have additional interrupt files for virtual harts, called
 _guest interrupt files_. The number of guest interrupt files an IMSIC
 has for virtual harts is exactly _GEILEN_, the number of supported guest
-external interrupts, as defined for the hypervisor extension by the
-Privileged Architecture.
+external interrupts, as defined for the hypervisor extension by the RISC-V  Privileged Architecture.
 
 Each individual interrupt file consists mainly of two arrays of bits of
 the same size, one array for recording MSIs that have arrived but are
@@ -40,15 +38,18 @@ specifying which interrupts the hart will currently accept
 with a different interrupt _identity number_ by which MSIs from
 different sources are distinguished at an interrupt file. Because an
 IMSIC is the external interrupt controller for a hart, an interrupt
-file’s interrupt identities become the _minor identities_ for external
+file's interrupt identities become the _minor identities_ for external
 interrupts at the attached hart.
 
 The number of interrupt identities supported by an interrupt file (and
 hence the number of active bits in each array) is one less than a
 multiple of 64, and may be a minimum of 63 and a maximum of 2047.
 
+[NOTE]
+====
 Platform standards may increase the minimum number of interrupt
 identities that must be implemented by each interrupt file.
+====
 
 When an interrupt file supports latexmath:[$N$] distinct interrupt
 identities, valid identity numbers are between 1 and latexmath:[$N$]
@@ -82,7 +83,7 @@ is outside the scope of this specification. It is recommended, however,
 that only machine level be given the power to change the number and
 sizes of interrupt files in an IMSIC.
 
-[[sec:MSIEncoding]]
+[[MSIEncoding]]
 === MSI encoding
 
 Established standards (in particular, for PCI and PCI Express) dictate
@@ -92,28 +93,31 @@ address and value both configured at the device (or device controller)
 by software. Depending on the versions of the standards to which a
 device or controller conforms, the address might be restricted to the
 lower 4-GiB (32-bit) range, and the value written might be limited to a
-16-bit range, with the upper 16 bits always being zeros.
+16-bit range, with the upper 16 bits always being zeros.
 
-When harts have IMSICs, an MSI from a device is normally sent directly
+When RISC-V harts have IMSICs, an MSI from a device is normally sent directly
 to an individual hart that was selected by software to handle the
 interrupt (presumably based on some interrupt affinity policy). An MSI
 is directed to a specific privilege level, or to a specific virtual
 hart, via the corresponding interrupt file that exists in the receiving
-hart’s IMSIC. The MSI write address is the physical address of a
+hart's IMSIC. The MSI write address is the physical address of a
 particular word-size register that is physically connected to the target
 interrupt file. The MSI write data is simply the identity number of the
 interrupt to be made pending in that interrupt file (becoming eventually
 the minor identity for an external interrupt to the attached hart).
 
-By configuring an MSI’s address and data at a device, system software
-fully controls: (a) which hart receives a particular device interrupt,
-(b) the target privilege level or virtual hart, and (c) the identity
+By configuring an MSI's address and data at a device, system software
+fully controls: (a) which hart receives a particular device interrupt,
+(b) the target privilege level or virtual hart, and (c) the identity
 number that represents the MSI in the target interrupt file. Elements a
-and b are determined by which interrupt file is targeted by the MSI
-address, while element c is communicated by the MSI data.
+and b are determined by which interrupt file is targeted by the MSI
+address, while element c is communicated by the MSI data.
 
+[NOTE]
+====
 As the maximum interrupt identity number an IMSIC can support is 2047, a
 16-bit limit on MSI data values presents no problem.
+====
 
 When the hypervisor extension is implemented and a device is being
 managed directly by a guest operating system, MSI addresses from the
@@ -121,7 +125,7 @@ device are initially guest physical addresses, as they are configured at
 the device by the guest OS. These guest addresses must be translated by
 an IOMMU, which gets configured by the hypervisor to redirect those MSIs
 to the interrupt files for the correct guest external interrupts. For
-more on this topic, see Chapter #ch:IOMMU[[ch:IOMMU]].
+more on this topic, see <<IOMMU>>.
 
 === Interrupt priorities
 
@@ -129,6 +133,8 @@ Within a single interrupt file, interrupt priorities are determined
 directly from interrupt identity numbers. Lower identity numbers have
 higher priority.
 
+[NOTE]
+====
 Because MSIs give software complete control over the assignment of
 identity numbers in an interrupt file, software is free to select
 identity numbers that reflect the relative priorities desired for
@@ -141,38 +147,37 @@ additional flexibility would not be utilized often enough to justify the
 extra hardware expense. In fact, for many systems currently employing
 MSIs, it is common practice for software to ignore interrupt priorities
 entirely and act as though all interrupts had equal priority.
-
-An interrupt file’s lowest identity numbers have been given the highest
+====
+[NOTE]
+====
+An interrupt file's lowest identity numbers have been given the highest
 priorities, not the reverse order, because it is only for the
 highest-priority interrupts that priority order may need to be carefully
 managed, yet it is the low-numbered identities, 1 through 63 (or perhaps
 1 through 255), that are guaranteed to exist across all systems.
-Consider, for example, that an interrupt file’s highest-priority
-interrupt—presumably the most time-critical—is always identity number 1.
+Consider, for example, that an interrupt file's highest-priority
+interrupt—presumably the most time-critical—is always identity number 1.
 If priority order were reversed, the highest-priority interrupt would
 have different identity numbers on different machines, depending on how
 many identities are implemented by interrupt files. The ability for
 software to assign fixed identity numbers to the highest-priority
 interrupts is considered worth any discomfort that may be felt from
 interrupt priorities being the reverse of the natural number order.
+====
 
 === Reset and revealed state
 
 Upon reset of an IMSIC, all the state of its interrupt files becomes
 valid and consistent but otherwise , except possibly for the register of
 machine-level and supervisor-level interrupt files, as specified in
-Section #sec:IMSIC-reg-eidelivery[1.8.1].
+<<IMSIC-reg-eidelivery>>.
 
 If an IMSIC contains a supervisor-level interrupt file and software at
-the attached hart enables S-mode that was previously disabled (e.g. by
-changing bit S of CSR from zero to one), all state of the
-supervisor-level interrupt file is valid and consistent but otherwise .
-Likewise, if an IMSIC contains guest interrupt files and software at the
-attached hart enables the hypervisor extension that was previously
-disabled (e.g. by changing bit H of from zero to one), all state of the
-IMSIC’s guest interrupt files is valid and consistent but otherwise .
+the attached hart enables S-mode that was previously disabled (e.g. by
+changing bit S of CSR `misa` from zero to one), all state of the
+supervisor-level interrupt file is valid and consistent but otherwise UNSPECIFIED. Likewise, if an IMSIC contains guest interrupt files and software at the attached hart enables the hypervisor extension that was previously disabled (e.g. by changing bit H of `misa` from zero to one), all state of the IMSIC's guest interrupt files is valid and consistent but otherwise UNSPECIFIED.
 
-[[sec:IMSIC-memRegion]]
+[[IMSIC-memRegion]]
 === Memory region for an interrupt file
 
 Each interrupt file in an IMSIC has one or two memory-mapped 32-bit
@@ -181,60 +186,53 @@ located within a naturally aligned 4-KiB region (a page) of physical
 address space that exists for the interrupt file, i.e., one page per
 interrupt file.
 
-The layout of an interrupt-file’s memory region is:
+The layout of an interrupt-file's memory region is:
 
-offset &  size & register name +
-& 4 bytes & +
-& 4 bytes & +
+[%autowidth,float="center",align="center",cols="<,<,<",options="header",grid=none,frame=none]
+|===
+|offset |size |register name
+3+|
+|0x000 |4 bytes |`seteipnum_le`
+|0x004 |4 bytes |`seteipnum_be`
+|===
 
-All other bytes in an interrupt file’s 4-KiB memory region are reserved
+All other bytes in an interrupt file's 4-KiB memory region are reserved
 and must be implemented as read-only zeros.
 
 Only naturally aligned 32-bit simple reads and writes are supported
-within an interrupt file’s memory region. Writes to read-only bytes are
+within an interrupt file's memory region. Writes to read-only bytes are
 ignored. For other forms of accesses (other sizes, misaligned accesses,
 or AMOs), an IMSIC implementation should preferably report an access
 fault or bus error but must otherwise ignore the access.
 
 If latexmath:[$i$] is an implemented interrupt identity number, writing
-value latexmath:[$i$] in little-endian byte order to (Set External
-Interrupt-Pending bit by Number, Little-Endian) causes the pending bit
-for interrupt latexmath:[$i$] to be set to one. A write to is ignored if
-the value written is not an implemented interrupt identity number in
-little-endian byte order.
+value latexmath:[$i$] in little-endian byte order to `seteipnum_le` (Set External Interrupt-Pending bit by Number, Little-Endian) causes the pending bit for interrupt latexmath:[$i$] to be set to one. A write to `seteipnum_be` is ignored if the value written is not an implemented interrupt identity number in little-endian byte order.
 
 For systems that support big-endian byte order, if latexmath:[$i$] is an
-implemented interrupt identity number, writing value latexmath:[$i$] in
-big-endian byte order to (Set External Interrupt-Pending bit by Number,
-Big-Endian) causes the pending bit for interrupt latexmath:[$i$] to be
-set to one. A write to is ignored if the value written is not an
-implemented interrupt identity number in big-endian byte order. Systems
-that support only little-endian byte order may choose to ignore all
-writes to .
+implemented interrupt identity number, writing value latexmath:[$i$] in
+big-endian byte order to `seteipnum_be` (Set External Interrupt-Pending bit by Number, Big-Endian) causes the pending bit for interrupt latexmath:[$i$] to be set to one. A write to `seteipnum_be` is ignored if the value written is not an implemented interrupt identity number in big-endian byte order. Systems that support only little-endian byte order may choose to ignore all
+writes to `seteipnum_be`.
 
-In most systems, is the write port for MSIs directed to this interrupt
-file. For systems built mainly for big-endian byte order, may serve as
-the write port for MSIs directed to this interrupt file from some
-devices.
+In most systems, `seteipnum_le` is the write port for MSIs directed to this interrupt file. For systems built mainly for big-endian byte order, `seteipnum_be` may serve as the write port for MSIs directed to this interrupt file from some devices.
 
-A read of or returns zero in all cases.
+A read of `seteipnum_le` or `seteipnum_be` returns zero in all cases.
 
-When not ignored, writes to an interrupt file’s memory region are
+When not ignored, writes to an interrupt file's memory region are
 guaranteed to be reflected in the interrupt file eventually, but not
 necessarily immediately. For a single interrupt file, the effects of
 multiple writes (stores) to its memory region, though arbitrarily
 delayed, always occur in the same order as the _global memory order_ of
-the stores as defined by the Unprivileged ISA.
+the stores as defined by the RISC-V Unprivileged ISA.
 
+[NOTE]
+====
 In most circumstances, any delay between the completion of a write to an
-interrupt file’s memory region and the effect of the write on the
+interrupt file's memory region and the effect of the write on the
 interrupt file is indistinguishable from other delays in the memory
-system. However, if a hart writes to a or register of its own IMSIC,
-then a delay between the completion of the store instruction and the
-consequent setting of an interrupt-pending bit in the interrupt file may
-be visible to the hart.
+system. However, if a hart writes to a `seteipnum_le` or `seteipnum_be` register of its own IMSIC, then a delay between the completion of the store instruction and the consequent setting of an interrupt-pending bit in the interrupt file may be visible to the hart.
+====
 
-[[sec:IMSIC-systemMemRegions]]
+[[IMSIC-systemMemRegions]]
 === Arrangement of the memory regions of multiple interrupt files
 
 Each interrupt file that an IMSIC implements has its own memory region
@@ -246,6 +244,8 @@ supervisor-level and guest interrupt files should similarly be located
 together in another part of the address space, according to the rules
 below.
 
+[NOTE]
+====
 The main reason for separating the machine-level interrupt files from
 the other interrupt files in the address space is so harts that
 implement physical memory protection (PMP) can grant supervisor-level
@@ -255,8 +255,9 @@ files are instead interleaved with those of lower-privilege interrupt
 files, the number of PMP table entries needed for granting
 supervisor-level access to all non-machine-level interrupt files could
 equal the number of harts in the system.
+====
 
-If a machine’s construction dictates that harts be subdivided into
+If a machine's construction dictates that harts be subdivided into
 groups, with each group relegated to its own portion of the address
 space, then the best that can be achieved is to locate together the
 machine-level interrupt files of each group of harts separately, and
@@ -264,32 +265,35 @@ likewise locate together the supervisor-level and guest interrupt files
 of each group of harts separately. This situation is further addressed
 later below.
 
+[NOTE]
+====
 A system may divide harts into groups in the address space because each
 group exists on a separate chip (or chiplet in a multi-chip module), and
 weaving together the address spaces of the multiple chips is
 impractical. In that case, granting supervisor-level access to all
 non-machine-level interrupt files takes one PMP table entry per group.
+====
 
 For the purpose of locating the memory pages of interrupt files in the
 address space, assume each hart (or each hart within a group) has a
 unique hart number that may or may not be related to the unique hart
-identifiers (``hart IDs'') that the RISC-V Privileged Architecture
+identifiers ("hart IDs") that the RISC-V Privileged Architecture
 assigns to harts. For convenient addressing, the memory pages of all
 machine-level interrupt files (or all those of a single group of harts)
 should be arranged so that the address of the machine-level interrupt
-file for hart number latexmath:[$h$] is given by the formula
-latexmath:[${A+h\times\mbox{2}^{C}}$] for some integer constants
-latexmath:[$A$] and latexmath:[$C$]. If the largest hart number is
+file for hart number latexmath:[h] is given by the formula
+latexmath:[{A+h\times\mbox{2}^{C}}] for some integer constants
+latexmath:[$A$] and latexmath:[$C$]. If the largest hart number is
 latexmath:[$h_{\rm max}$], let
 latexmath:[${k = \lceil\log_{2}(h_{\rm max}+\mbox{1})\rceil}$], the
 number of bits needed to represent any hart number. Then the base
 address latexmath:[$A$] should be aligned to a
 latexmath:[$\mbox{2}^{k+C}$] address boundary, so
 latexmath:[${A+h\times\mbox{2}^{C}}$] always equals
-latexmath:[$A$]  latexmath:[${(h\times\mbox{2}^{C})}$], where the
+latexmath:[$A$] latexmath:[${(h\times\mbox{2}^{C})}$], where the
 vertical bar () represents bitwise logical OR.
 
-The smallest that latexmath:[$C$] can be is 12, with
+The smallest that latexmath:[$C$] can be is 12, with
 latexmath:[$\mbox{2}^{C}$] being the size of one 4-KiB page. If
 latexmath:[${C > 12}$], the start of the memory page for each
 machine-level interrupt file is aligned not just to a 4-KiB page but to
@@ -303,13 +307,13 @@ returns zero and any write to an aligned word is ignored.
 The memory pages of all supervisor-level interrupt files (or all those
 of a single group of harts) should similarly be arranged so that the
 address of the supervisor-level interrupt file for hart
-number latexmath:[$h$] is latexmath:[${B+h\times\mbox{2}^{D}}$] for some
-integer constants latexmath:[$B$] and latexmath:[$D$], with the base
+number latexmath:[$h$] is latexmath:[${B+h\times\mbox{2}^{D}}$] for some
+integer constants latexmath:[$B$] and latexmath:[$D$], with the base
 address latexmath:[$B$] being aligned to a latexmath:[$\mbox{2}^{k+D}$]
 address boundary.
 
 If an IMSIC implements guest interrupt files, the memory pages for the
-IMSIC’s supervisor-level interrupt file and for its guest interrupt
+IMSIC's supervisor-level interrupt file and for its guest interrupt
 files should be contiguous, starting with the supervisor-level interrupt
 file at the lowest address and followed by the guest interrupt files,
 ordered by guest interrupt number. Schematically, the memory pages
