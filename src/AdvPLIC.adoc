@@ -442,57 +442,61 @@ platform-defined) how these other resets may affect `domaincfg`.
 [[AdvPLIC-reg-sourcecfg]]
 ====  Source configurations (`sourcecfg[1]–sourcecfg[1023]`) 
 
-For each possible interrupt source latexmath:[$i$], register controls
-the _source mode_ for source latexmath:[$i$] in this interrupt domain as
+For each possible interrupt source latexmath:[$i$], register `sourcecfg[latexmath:[$i$]]` controls
+the _source mode_ for source latexmath:[$i$] in this interrupt domain as
 well as any delegation of the source to a child domain. When
-source latexmath:[$i$] is not implemented, or appears in this domain not
-to be implemented, is read-only zero. If source latexmath:[$i$] was not
+source latexmath:[$i$] is not implemented, or appears in this domain not
+to be implemented, `sourcecfg[latexmath:[$i$]]` is read-only zero. If source latexmath:[$i$] was not
 delegated to this domain and is then changed (at the parent domain) to
-become delegated to this domain, remains zero until successfully written
-with a nonzero value.
+become delegated to this domain, `sourcecfg[latexmath:[$i$]]` remains zero until successfully written with a nonzero value.
 
-Bit 10 of is a 1-bit field called D (Delegate). If D = 1,
+Bit 10 of `sourcecfg[latexmath:[$i$]]` is a 1-bit field called D (Delegate). If D = 1,
 source latexmath:[$i$] is delegated to a child domain, and if D = 0, it
-is not delegated to a child domain. Interpretation of the rest of
-depends on field D.
+is not delegated to a child domain. Interpretation of the rest of `sourcecfg[latexmath:[$i$]]` depends on field D.
 
-When interrupt source latexmath:[$i$] is delegated to a child domain,
-has this format:
+When interrupt source latexmath:[$i$] is delegated to a child domain, `sourcecfg[latexmath:[$i$]]` has this format:
 
-bit 10 & D, = 1 +
-bits 9:0 & Child Index () +
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
+|===
+|bit 10 |D, =1 
+|bits 9:0 |Child Index (*WLRL*)
+|===
 
 All other register bits are reserved and read as zeros.
 
-Child Index is a field that specifies the interrupt domain to which this
-source is delegated. For an interrupt domain with latexmath:[$C$] child
+Child Index is a *WLRL* field that specifies the interrupt domain to which this
+source is delegated. For an interrupt domain with latexmath:[$C$] child
 domains, this field must be able to hold integer values in the range 0
-to latexmath:[${C-\mbox{1}}$]. Each interrupt domain has a fixed mapping
+to latexmath:[${C-{1}}$]. Each interrupt domain has a fixed mapping
 from these index numbers to child domains.
 
-If an interrupt domain has no children in the domain hierarchy, bit D
-cannot be set to one in any register for that domain. For such a leaf
-domain, attempting to write a register with a value that has bit 10 = 1
-causes the entire register to be set to zero instead.
+If an interrupt domain has no children in the domain hierarchy, bit D
+cannot be set to one in any `sourcecfg` register for that domain. For such a leaf
+domain, attempting to write a `sourcecfg` register with a value that has bit 10 = 1 causes the entire register to be set to zero instead.
 
-When interrupt source latexmath:[$i$] is not delegated to a child
-domain, has this format:
+When interrupt source latexmath:[$i$] is not delegated to a child
+domain `sourcecfg[latexmath:[$i$]]`, has this format:
 
-bit 10 & D, = 0 +
-bits 2:0 & SM () +
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
+|===
+|bit 10 |D, =0 
+|bits 2:0 |SM (*WARL*)
+|===
 
 All other register bits are reserved and read as zeros.
 
-The SM (Source Mode) field is and controls whether the interrupt source
+The SM (Source Mode) field is *WARL* and controls whether the interrupt source
 is active in this domain, and if so, what values or transitions on the
 incoming wire are interpreted as interrupts. The values allowed for SM
 and their meanings are listed in
-Table #tab:AdvPLIC-sourcecfg-SM[[tab:AdvPLIC-sourcecfg-SM]]. Inactive
-(zero) is always supported for field SM. Implementations are free to
+<<TableAdvPLIC-sourcecfg-SM>>. Inactive
+(zero) is always supported for field SM. Implementations are free to
 choose, independently for each interrupt source, what other values are
 supported for SM.
 
-[cols="^,^,<",options="header",]
+[[TableAdvPLIC-sourcecfg-SM]]
+.Encoding of the SM (Source Mode) field of a sourcecfg register when bit D = 0
+[%autowidth,float="center",align="center",cols="^,^,<",options="header"]
 |===
 |Value |Name |Description
 |0 |Inactive |Inactive in this domain (and not delegated)
@@ -505,20 +509,18 @@ supported for SM.
 |===
 
 An interrupt source is inactive in the interrupt domain if either the
-source is delegated to a child domain (D = 1) or it is not delegated
-(D = 0) and SM is Inactive. Whenever interrupt source latexmath:[$i$] is
+source is delegated to a child domain (D = 1) or it is not delegated
+(D = 0) and SM is Inactive. Whenever interrupt source latexmath:[$i$] is
 inactive in an interrupt domain, the corresponding interrupt-pending and
 interrupt-enable bits within the domain are read-only zeros, and
-register is also read-only zero. If source latexmath:[$i$] is changed
-from inactive to an active mode, the interrupt source’s pending and
+register `target[latexmath:[$i$]]` is also read-only zero. If source latexmath:[$i$] is changed
+from inactive to an active mode, the interrupt source 's pending and
 enable bits remain zeros, unless set automatically for a reason
 specified later in this section or in
-Section #sec:AdvPLIC-pendingBits[1.7], and the defined subfields of
-obtain values.
+<<AdvPLIC-pendingBits>>, and the defined subfields of `target[latexmath:[$i$]]` obtain UNSPECIFIED values.
 
 When a source is configured as Detached, its wire input is ignored;
-however, the interrupt-pending bit may still be set by a write to a or
-register. (This mode can be useful for receiving MSIs, for example.)
+however, the interrupt-pending bit may still be set by a write to a `setip` or `setipnum` register. (This mode can be useful for receiving MSIs, for example.)
 
 An edge-sensitive source can be configured to recognize an incoming
 interrupt on either a rising edge (low-to-high transition) or a falling
@@ -526,7 +528,7 @@ edge (high-to-low transition). When configured for a falling edge (mode
 Edge0), the source is said to be _inverted_.
 
 A level-sensitive source can be configured to interpret either a high
-level (1) or a low level (0) on the wire as the assertion of an
+level (1) or a low level (0) on the wire as the assertion of an
 interrupt. When configured for a low level (mode Level0), the source is
 said to be _inverted_.
 
@@ -539,85 +541,81 @@ inverted).
 For a source that is inactive or Detached, the _rectified input value_
 is zero.
 
-Any write to a register might (or might not) cause the corresponding
-interrupt-pending bit to be set to one if the rectified input value is
-high (= 1) under the new source mode. A write to a register will not by
-itself cause a pending bit to be cleared except when the source is made
-inactive. (But see Section #sec:AdvPLIC-pendingBits[1.7].)
+Any write to a `sourcecfg` register might (or might not) cause the corresponding interrupt-pending bit to be set to one if the rectified input value is high (= 1) under the new source mode. A write to a `sourcescfg` register will not by itself cause a pending bit to be cleared except when the source is made inactive. (But see <<AdvPLIC-pendingBits>>.)
 
-[[sec:AdvPLIC-reg-mmsiaddrcfg]]
-====  Machine MSI address configuration ( and ) 
+[[AdvPLIC-reg-mmsiaddrcfg]]
+====  Machine MSI address configuration (`mmsiaddrcfg` and `mmsiaddrcfgh`) 
 
-For machine-level interrupt domains, registers and may optionally
-provide parameters used to determine the addresses to write outgoing
-MSIs.
+For machine-level interrupt domains, registers `mmsiaddrcfg` and `mmsiaddrcfgh` may optionally provide parameters used to determine the addresses to write outgoing MSIs.
 
-If no interrupt domain of the APLIC supports MSI delivery mode (.DM is
-read-only zero for all domains), these two registers are not implemented
-for any domain. Otherwise, they are implemented for the root domain, and
+If no interrupt domain of the APLIC supports MSI delivery mode (`comaincfg`.DM is read-only zero for all domains), these two registers are not implemented for any domain. Otherwise, they are implemented for the root domain, and
 may or may not be implemented for other machine-level domains. For
 domains not at machine level, they are never implemented. When a domain
-does not implement and , the eight bytes at their locations are simply
-read-only zeros like other reserved bytes.
+does not implement `mmsiaddrcfg` and `mmsiaddrcfgh`, the eight bytes at their locations are simply read-only zeros like other reserved bytes.
 
-Registers and are potentially writable only for the root domain. For all
+Registers `mmsiaddrcfg` and `mmsiaddrcfgh` are potentially writable only for the root domain. For all
 other machine-level domains that implement them, they are read-only.
 
-When implemented, has this format:
+When implemented `mmsiaddrcfg`, has this format:
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
+|===
+|bits 31:0 |Low Base PPN (*WARL*)
+|===
 
-bits 31:0 & Low Base PPN () +
+and `mmsiaddrcfgh` has this format:
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
+|===
+|bits 31:0 |L
+|bits 28:24 |HHXS (*WARL*)
+|bits 22:20 |LHXS (*WARL*)
+|bits 18:16 |HHXW (*WARL*)
+|bits 15:12 |LHXW (*WARL*)
+|bits 11:0 |High Base PPN (*WARL*)
+|===
 
-and has this format:
+All other bits of `mmsiaddrcfgh` are reserved and read as zeros.
 
-bit 31 & L +
-bits 28:24 & HHXS () +
-bits 22:20 & LHXS () +
-bits 18:16 & HHXW () +
-bits 15:12 & LHXW () +
-bits 11:0 & High Base PPN () +
-
-All other bits of are reserved and read as zeros.
-
-Fields High Base PPN from and Low Base PPN from concatenate to form a
+Fields High Base PPN from `mmsiaddrcfgh` and Low Base PPN from `mmsiaddrcfg` concatenate to form a
 44-bit Base PPN (Physical Page Number). The use of this value and fields
 HHXS (High Hart Index Shift), LHXS (Low Hart Index Shift), HHXW (High
 Hart Index Width), and LHXW (Low Hart Index Width) for determining
 target addresses for MSIs is described later, in
-Section #sec:AdvPLIC-MSIAddrs[1.9.1].
+<<AdvPLIC-MSIAddrs>>.
 
-When and are writable (root domain only), all fields other than L are .
+When `mmsiaddrcfg` and `mmsiaddrcfgh` are writable (root domain only), all fields other than L are *WARL*.
 An implementation is free to choose what values are supported.
 Typically, some bits are writable while others are read-only constants.
 In the extreme, the values of all fields may be entirely constant, fixed
 by the implementation.
 
-If bit L in is set to one, and are _locked_, and writes to the registers
-are ignored, making the registers effectively read-only. When L = 1, the
-other fields in and may optionally all read as zeros. In that case, if
+If bit L in `mmsiaddrcfgh` is set to one, `mmsiaddrcfg` and `mmsiaddrcfgh` are _locked_, and writes to the registers
+are ignored, making the registers effectively read-only. When L = 1, the
+other fields in `mmsiaddrcfg` and `mmsiaddrcfgh` may optionally all read as zeros. In that case, if
 these other fields were given nonzero values when L was first set in the
 root domain, their values are retained internally by the APLIC but
 become no longer visible by reading and .
 
-Setting .L to one also locks registers and described in the next
+Setting `mmsiaddrcfgh`.L to one also locks registers `smsiaddrcfg` and `smsiaddrcfgh` described in the next
 subsection, if those registers are implemented as well.
 
-For the root domain, L is initialized at system reset to either zero or
+For the root domain, L is initialized at system reset to either zero or
 one, whichever is deemed appropriate for the specific APLIC
 implementation. If reset initializes L to one, either the other fields
 are hardwired by the APLIC to constants, or the APLIC has a different
 means, outside of this standard, for determining the addresses of
-outgoing MSI writes. In the latter case, the other fields in and may all
-read as zeros, so registers and have only read-only values zero and
-respectively. Any time or has a different value (not zero or
+outgoing MSI writes. In the latter case, the other fields in `mmsiaddrcfg` and `mmsiaddrcfgh` may all
+read as zeros, so registers `mmsiaddrcfg` and `mmsiaddrcfgh` have only read-only values zero and `0x80000000`
+respectively. Any time `mmsiaddrcfg` or `mmsiaddrcfgh` has a different value (not zero or `0x80000000`
 respectively), the addresses for outgoing MSI writes directed to machine
 level must be derivable from the visible values of these registers, as
-specified in Section #sec:AdvPLIC-MSIAddrs[1.9.1].
+specified in <<AdvPLIC-MSIAddrs>>.
 
 For machine-level domains that are not the root domain, if these
-registers are implemented, bit L is always one, and the other fields
-either are read-only copies of and from the root domain, or are all
-zeros.
+registers are implemented, bit L is always one, and the other fields
+either are read-only copies of `mmsiaddrcfg` and `mmsiaddrcfgh` from the root domain, or are all zeros.
 
+[NOTE]
+====
 Giving software the ability to arbitrarily determine the addresses to
 which MSIs are sent, even if allowed only for machine level, permits
 bypassing physical memory protection (PMP). For APLICs that support MSI
@@ -628,227 +626,210 @@ implementations will be able to follow that recommendation.
 
 It is expected that most systems will arrange the physical addresses of
 target IMSICs in a simple linear correspondence with hart index numbers.
-(See Section #sec:IMSIC-systemMemRegions[[sec:IMSIC-systemMemRegions]].)
-Registers and (along with and from the next subsection) allow
+(See <<IMSIC-systemMemRegions>>.)
+Registers `mmsiaddrcfg` and `mmsiaddrcfgh` (along with `smsiaddrcfg` and `smsiaddrcfgh` from the next subsection) allow
 sufficiently trusted machine-level software, early after system reset,
 to configure the pattern of physical addresses for target IMSICs and
 then lock this configuration against subsequent tampering.
 
 APLICs that actually hardwire the IMSIC addresses internally can
-implement these registers simply as read-only with values zero and . Or,
+implement these registers simply as read-only with values zero and `0x80000000`. Or,
 if the IMSIC addresses must be configured by software but the formula is
-too complex for registers and to handle, again the registers can be
-implemented simply as read-only with values zero and , and a separate,
-custom mechanism supplied for configuring the IMSIC addresses.
+too complex for registers `mmsiaddrcfg` and `mmsiaddrcfgh` to handle, again the registers can be
+implemented simply as read-only with values zero and `0x80000000`, and a separate, custom mechanism supplied for configuring the IMSIC addresses.
+====
 
 If an APLIC supports additional forms of reset besides system reset, it
 is implementation-defined (or possibly platform-defined) how these other
-resets may affect and (as well as and ) in the root domain. However, it
+resets may affect `mmsiaddrcfg` and `mmsiaddrcfgh` (as well `smsiaddrcfg` as and `smsiaddrcfgh`) in the root domain. However, it
 must not be possible for insufficiently privileged software to use a
-localized reset to unlock these registers by changing bit L back to
+localized reset to unlock these registers by changing bit L back to
 zero. For this reason, it is likely that only a complete system reset
 affects these registers, and any other resets do not.
 
-[[sec:AdvPLIC-reg-smsiaddrcfg]]
-====  Supervisor MSI address configuration ( and ) 
+[[AdvPLIC-reg-smsiaddrcfg]]
+====  Supervisor MSI address configuration (`(smsiaddrcfg` and `smsiaddrcfgh`) 
 
-For machine-level interrupt domains, registers and may optionally
+For machine-level interrupt domains, registers `smsiaddrcfg` and `smsiaddrcfgh` may optionally
 provide parameters used by supervisor-level domains to determine the
 addresses to write outgoing MSIs.
 
-Registers and are implemented by a domain if the domain implements and
+Registers `smsiaddrcfg` and `smsiaddrcfgh` are implemented by a domain if the domain implements `mmsiaddrcfg` and `mmsiaddrcfgh`
 and the APLIC has at least one supervisor-level interrupt domain. If the
 registers are not implemented, the eight bytes at their locations are
 simply read-only zeros like other reserved bytes.
 
-Like and , registers and are potentially writable only for the root
+Like `mmsiaddrcfg` and `mmsiaddrcfgh`, registers `smsiaddrcfg` and `smsiaddrcfgh` are potentially writable only for the root
 domain. For all other machine-level domains that implement them, they
 are read-only.
 
-When implemented, has this format:
+When implemented, `smsiaddrcfg` has this format:
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
+|===
+|bits 31:0 |Low Base PPN (*WARL*)
+|===
 
-bits 31:0 & Low Base PPN () +
+and `smsiaddrcfgh` has this format:
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
+|===
+|bits 22:20 |LHXS (*WARL*)
+|bits 11:0 |High Base PPN (*WARL*)
+|===
 
-and has this format:
+All other bits of `smsiaddrcfgh` are reserved and read as zeros.
 
-bits 22:20 & LHXS () +
-bits 11:0 & High Base PPN () +
-
-All other bits of are reserved and read as zeros.
-
-Fields High Base PPN from and Low Base PPN from concatenate to form a
+Fields High Base PPN from `smsiaddrcfgh` and Low Base PPN from `smsiaddrcfg` concatenate to form a
 44-bit Base PPN (Physical Page Number). The use of this value and field
 LHXS (Low Hart Index Shift) for determining target addresses for MSIs is
-described later, in Section #sec:AdvPLIC-MSIAddrs[1.9.1].
+described later, in <<AdvPLIC-MSIAddrs>>.
 
-When and are writable (root domain only), all fields are . An
-implementation is free to choose what values are supported, just as for
-and .
+When `smsiaddrcfg` and `smsiaddrcfgh` are writable (root domain only), all fields are *WARL*. An
+implementation is free to choose what values are supported, just as for `mmsiaddrcfg` and `mmsiaddrcfgh`.
 
-If register of the domain has bit L set to one, then and are _locked_ as
-read-only alongside and . When .L = 1, if the readable values of and are
-zero and respectively—because their other fields are hidden—then and are
-hidden also and read as zeros.
+If register `mmsiaddrcfgh` of the domain has bit L set to one, then `smsiaddrcfg` and `smsiaddrcfgh` are _locked_ as
+read-only alongside `mmsiaddrcfg` and `mmsiaddrcfgh`. When `mmsiaddrcfgh`.L = 1, if the readable values of `mmsiaddrcfg` and `mmsiaddrcfgh` are
+zero and `0x80000000` respectively—because their other fields are hidden—then `smsiaddrcfg` and `smsiaddrcfgh` are hidden also and read as zeros.
 
-For the root domain only, if .L = 1 and the MSI-address-configuration
-fields are hidden (so reads as and registers , , and all read as zeros),
-then whatever values and had when .L was first set are retained
+For the root domain only, if `mmsiaddrcfgh`.L = 1 and the MSI-address-configuration
+fields are hidden (so `mmsiaddrcfgh` reads as `0x80000000` and registers `mmsiaddrcfg`, `smsiaddrcfg`, and `smsiaddrcfgh` all read as zeros),
+then whatever values `smsiaddrcfg` and `smsiaddrcfgh` had when `mmsiaddrcfgh`.L was first set are retained
 internally by the APLIC, though those values are no longer visible by
-reading the registers. Alternatively, if system reset initializes .L = 1
+reading the registers. Alternatively, if system reset initializes `mmsiaddrcfgh`.L = 1
 in the root domain, and if all MSI-address-configuration fields never
 appear as anything other than zeros, then the APLIC implementation has
 some other, possibly nonstandard, means for determining the addresses of
 outgoing MSIs, as discussed in the previous subsection,
-#sec:AdvPLIC-reg-mmsiaddrcfg[1.5.3].
+<<AdvPLIC-reg-mmsiaddrcfg>>.
 
-Any time and are not read-only zero and respectively, the addresses for
+Any time `mmsiaddrcfg` and `mmsiaddrcfgh` are not read-only zero and `0x80000000` respectively, the addresses for
 outgoing MSI writes directed to supervisor level must be derivable from
-the visible values of registers , , and , as specified in
-Section #sec:AdvPLIC-MSIAddrs[1.9.1].
+the visible values of registers `mmsiaddrcfgh`, `smsiaddrcfg`, and `smsiaddrcfgh`, as specified in
+<<AdvPLIC-MSIAddrs>>.
 
-For machine-level domains that are not the root domain, if and are
+For machine-level domains that are not the root domain, if `smsiaddrcfg` and `smsiaddrcfgh` are
 implemented and are not read-only zeros, then they are read-only copies
 of the same registers from the root domain.
 
-====  Set interrupt-pending bits (–) 
+====  Set interrupt-pending bits (`setip[0]`-`setip[31]`) 
 
-Reading or writing register reads or potentially modifies the pending
-bits for interrupt sources latexmath:[$k\times\mbox{32}$] through
-latexmath:[${k\times\mbox{32}+\mbox{31}}$]. For an implemented interrupt
-source latexmath:[$i$] within that range, the pending bit for
-source latexmath:[$i$] corresponds with register bit
-latexmath:[${(i\bmod\mbox{32})}$].
+Reading or  `setip[latexmath:[$k$]]` register reads or potentially modifies the pending
+bits for interrupt sources latexmath:[$k\times{32}$] through
+latexmath:[$k\times{32}+{31}$]. For an implemented interrupt
+source latexmath:[$i$] within that range, the pending bit for
+source latexmath:[$i$] corresponds with register bit
+(latexmath:[$i\bmod{32}$]).
 
-A read of a register returns the pending bits of the corresponding
+A read of a `setip` register returns the pending bits of the corresponding
 interrupt sources. Bit positions in the result value that do not
-correspond to an implemented interrupt source (such as bit 0 of ) are
-zeros.
+correspond to an implemented interrupt source (such as bit 0 of `setip[0]`) are zeros.
 
-On a write to a register, for each bit that is one in the 32-bit value
+On a write to a `setip` register, for each bit that is one in the 32-bit value
 written, if that bit position corresponds to an active interrupt source,
 the interrupt-pending bit for that source is set to one if possible. See
-Section #sec:AdvPLIC-pendingBits[1.7] for exactly when a pending bit may
-be set by writing to a register.
+<<AdvPLIC-pendingBits>>for exactly when a pending bit may
+be set by writing to a `setip` register.
 
-==== Set interrupt-pending bit by number ()
+==== Set interrupt-pending bit by number (`setipnum`)
 
 If latexmath:[$i$] is an active interrupt source number in the domain,
-writing 32-bit value latexmath:[$i$] to register causes the pending bit
+writing 32-bit value latexmath:[$i$] to register `setipnum` causes the pending bit
 for source latexmath:[$i$] to be set to one if possible. See
-Section #sec:AdvPLIC-pendingBits[1.7] for exactly when a pending bit may
-be set by writing to .
+<<AdvPLIC-pendingBits>> for exactly when a pending bit may
+be set by writing to `setipnum`.
 
-A write to is ignored if the value written is not an active interrupt
-source number in the domain. A read of always returns zero.
+A write to `setipnum` is ignored if the value written is not an active interrupt
+source number in the domain. A read of `setipnum` always returns zero.
 
-====  Rectified inputs, clear interrupt-pending bits (–) 
+====  Rectified inputs, clear interrupt-pending bits (`in_clrip[0]`-`in_clrip[31]`) 
 
-Reading register returns the rectified input values
-(Section #sec:AdvPLIC-reg-sourcecfg[1.5.2]) for interrupt sources
-latexmath:[$k\times\mbox{32}$] through
-latexmath:[${k\times\mbox{32}+\mbox{31}}$], while writing potentially
+Reading register `in_clrip[latexmath:[$k$]]` returns the rectified input (<<AdvPLIC-reg-sourcecfg>>) for interrupt sources
+latexmath:[$k\times{32}$] through
+latexmath:[${k\times{32}+{31}}$], while writing `in_clrip[latexmath:[$k$]]` potentially
 modifies the pending bits for the same sources. For an implemented
-interrupt source latexmath:[$i$] within the specified range,
-source latexmath:[$i$] corresponds with register bit
-latexmath:[${(i\bmod\mbox{32})}$].
+interrupt source latexmath:[$i$] within the specified range,
+source latexmath:[$i$] corresponds with register bit
+(latexmath:[$i\bmod{32}$]).
 
-A read of an register returns the rectified input values of the
+A read of an `in_clrip` register returns the rectified input values of the
 corresponding interrupt sources. Bit positions in the result value that
-do not correspond to an implemented interrupt source (such as bit 0 of )
-are zeros.
+do not correspond to an implemented interrupt source (such as bit 0 of `in_clrip[0]`) are zeros.
 
-On a write to an register, for each bit that is one in the 32-bit value
-written, if that bit position corresponds to an active interrupt source,
-the interrupt-pending bit for that source is cleared if possible. See
-Section #sec:AdvPLIC-pendingBits[1.7] for exactly when a pending bit may
-be cleared by writing to an register.
+On a write to an `in_clrip` register, for each bit that is one in the 32-bit value written, if that bit position corresponds to an active interrupt source, the interrupt-pending bit for that source is cleared if possible. See
+<<AdvPLIC-pendingBits>> for exactly when a pending bit may
+be cleared by writing to an `in_clrip` register.
 
-==== Clear interrupt-pending bit by number ()
+==== Clear interrupt-pending bit by number (`clripnum`)
 
 If latexmath:[$i$] is an active interrupt source number in the domain,
-writing 32-bit value latexmath:[$i$] to register causes the pending bit
-for source latexmath:[$i$] to be cleared if possible. See
-Section #sec:AdvPLIC-pendingBits[1.7] for exactly when a pending bit may
-be cleared by writing to .
+writing 32-bit value latexmath:[$i$] to register causes the pending bit
+for source latexmath:[$i$] to be cleared if possible. See
+<<AdvPLIC-pendingBits>> for exactly when a pending bit may
+be cleared by writing to `clripnum`.
 
-A write to is ignored if the value written is not an active interrupt
-source number in the domain. A read of always returns zero.
+A write to `clripnum` is ignored if the value written is not an active interrupt
+source number in the domain. A read of `clripnum` always returns zero.
 
-====  Set interrupt-enable bits (–) 
+====  Set interrupt-enable bits (`setie[0]`-`setie[31]`) 
 
-Reading or writing register reads or potentially modifies the enable
-bits for interrupt sources latexmath:[$k\times\mbox{32}$] through
-latexmath:[${k\times\mbox{32}+\mbox{31}}$]. For an implemented interrupt
-source latexmath:[$i$] within that range, the enable bit for
-source latexmath:[$i$] corresponds with register bit
-latexmath:[${(i\bmod\mbox{32})}$].
+Reading or writing `setie[latexmath:[$k$]]` register reads or potentially modifies the enable
+bits for interrupt sources latexmath:[$k\times{32}$] through
+latexmath:[${k\times{32}+{31}}$]. For an implemented interrupt
+source latexmath:[$i$] within that range, the enable bit for
+source latexmath:[$i$] corresponds with register bit
+latexmath:[$i\bmod{32}$].
 
-A read of a register returns the enable bits of the corresponding
+A read of a `setie` register returns the enable bits of the corresponding
 interrupt sources. Bit positions in the result value that do not
-correspond to an implemented interrupt source (such as bit 0 of ) are
-zeros.
+correspond to an implemented interrupt source (such as bit 0 of `setie[0]`) are zeros.
 
-On a write to a register, for each bit that is one in the 32-bit value
+On a write to a `setie` register, for each bit that is one in the 32-bit value
 written, if that bit position corresponds to an active interrupt source,
 the interrupt-enable bit for that source is set to one.
 
-==== Set interrupt-enable bit by number ()
+==== Set interrupt-enable bit by number (`setienum`)
 
 If latexmath:[$i$] is an active interrupt source number in the domain,
-writing 32-bit value latexmath:[$i$] to register causes the enable bit
-for source latexmath:[$i$] to be set to one.
+writing 32-bit value latexmath:[$i$] to register `setienum` causes the enable bit for source latexmath:[$i$] to be set to one.
 
-A write to is ignored if the value written is not an active interrupt
-source number in the domain. A read of always returns zero.
+A write to `setienum` is ignored if the value written is not an active interrupt source number in the domain. A read of `setienum` always returns zero.
 
-====  Clear interrupt-enable bits (–) 
+====  Clear interrupt-enable bits (`clrie[0]`-`clrie[31]`) 
 
-Writing register potentially modifies the enable bits for interrupt
-sources latexmath:[$k\times\mbox{32}$] through
-latexmath:[${k\times\mbox{32}+\mbox{31}}$]. For an implemented interrupt
-source latexmath:[$i$] within that range, the enable bit for
-source latexmath:[$i$] corresponds with register bit
-latexmath:[${(i\bmod\mbox{32})}$].
+Writing register `clrie[latexmath:[$k$]]` potentially modifies the enable bits for interrupt sources latexmath:[$k\times{32}$] through
+latexmath:[${k\times{32}+{31}}$]. For an implemented interrupt
+source latexmath:[$i$] within that range, the enable bit for
+source latexmath:[$i$] corresponds with register bit
+latexmath:[$i\bmod{32}$].
 
-On a write to a register, for each bit that is one in the 32-bit value
-written, the interrupt-enable bit for that source is cleared.
+On a write to a `clrie` register, for each bit that is one in the 32-bit value written, the interrupt-enable bit for that source is cleared.
 
-A read of a register always returns zero.
+A read of a `clrie` register always returns zero.
 
-==== Clear interrupt-enable bit by number ()
+==== Clear interrupt-enable bit by number (`clrienum`)
 
 If latexmath:[$i$] is an active interrupt source number in the domain,
-writing 32-bit value latexmath:[$i$] to register causes the enable bit
-for source latexmath:[$i$] to be cleared.
+writing 32-bit value latexmath:[$i$] to register `clrienum` causes the enable bit for source latexmath:[$i$] to be cleared.
 
-A write to is ignored if the value written is not an active interrupt
-source number in the domain. A read of always returns zero.
+A write to `clrienum` is ignored if the value written is not an active interrupt source number in the domain. A read  `clrienum` always returns zero.
 
-====  Set interrupt-pending bit by number, little-endian () 
+====  Set interrupt-pending bit by number, little-endian (`setipnum_le`) 
 
-Register acts identically to except that byte order is always
-little-endian, as though field BE (Big-Endian) of register is zero.
+Register `setipnum_le` acts identically to `setipnum` except that byte order is always little-endian, as though field BE (Big-Endian) of register `domaincfg` is zero.
 
-For systems that are big-endian-only, with .BE hardwired to one, need
-not be implemented, in which case the four bytes at this offset are
-simply read-only zeros like other reserved bytes.
+For systems that are big-endian-only, with `domaincfg`.BE hardwired to one, `setipnum_be` need not be implemented, in which case the four bytes at this offset simply read-only zeros like other reserved bytes.
 
-may be used as a write port for MSIs.
+`setipnum_le` may be used as a write port for MSIs.
 
-====  Set interrupt-pending bit by number, big-endian () 
+====  Set interrupt-pending bit by number, big-endian (`setipnum_be`) 
 
-Register acts identically to except that byte order is always
-big-endian, as though field BE (Big-Endian) of register is one.
+Register `setipnym_be` acts identically to `setipnum` except that byte order is always big-endian, as though field BE (Big-Endian) of register `domaincfg` is one.
 
-For systems that are little-endian-only, with .BE hardwired to zero,
-need not be implemented, in which case the four bytes at this offset are
-simply read-only zeros like other reserved bytes.
+For systems that are little-endian-only, with `domaincfg`.BE hardwired to zero, `setipnum_be` need not be implemented, in which case the four bytes at this offset are simply read-only zeros like other reserved bytes.
 
-For systems built mainly for big-endian byte order, may be useful as a
-write port for MSIs from some devices.
+For systems built mainly for big-endian byte order, `setipnum_be` may be useful as a write port for MSIs from some devices.
 
-[[sec:AdvPLIC-reg-genmsi]]
-==== Generate MSI ()
+[[AdvPLIC-reg-genmsi]]
+==== Generate MSI (`genmsi`)
 
 When the interrupt domain is configured in MSI delivery mode (.DM = 1),
 register can be used to cause an _extempore_ MSI to be sent from the
