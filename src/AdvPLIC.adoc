@@ -205,17 +205,20 @@ be available to machine level only.
 === Hart index numbers
 
 Within a given interrupt domain, each of the domain’s harts has a unique
-_index number_ in the range 0 to latexmath:[${\mbox{2}^{14}-\mbox{1}}$]
-(= 16,383). The index number a domain associates with a hart may or may
-not have any relationship to the unique hart identifier (``hart ID'')
-that the Privileged Architecture assigns to the hart. Two different
+_index number_ in the range 0 to latexmath:[${{2}^{14}-{1}}$]
+(= 16,383). The index number a domain associates with a hart may or may
+not have any relationship to the unique hart identifier ("hart ID")
+that the RISC-V Privileged Architecture assigns to the hart. Two different
 interrupt domains may employ entirely different index numbers for the
-same set of harts. However, if any of an APLIC’s interrupt domains can
+same set of harts. However, if any of an APLIC's interrupt domains can
 forward interrupts by MSI, then all machine-level domains of the APLIC
 share a common mapping of index numbers to harts.
 
+[NOTE]
+====
 For efficiency, implementations should prefer small integers for hart
 index numbers.
+====
 
 === Overview of interrupt control for a single domain
 
@@ -242,7 +245,7 @@ an interrupt that arrived and has not yet been signaled or forwarded,
 while the enable bit determines whether interrupts from this source
 should currently be delivered, or should remain pending.
 * Target selection. For an active source, target selection determines
-the hart to receive the interrupt and either the interrupt’s priority or
+the hart to receive the interrupt and either the interrupt's priority or
 the new interrupt identity when forwarding as an MSI.
 
 For interrupt domains that deliver interrupts directly to harts rather
@@ -250,67 +253,72 @@ than forwarding by MSIs, the domain has a final set of components for
 controlling interrupt delivery to harts, one instance per hart in the
 domain.
 
+[NOTE]
+====
 Although an APLIC with multiple interrupt domains may appear to
 duplicate the per-source state listed above (source configuration,
-etc.) by a factor equal to the number of domains, in fact, APLIC
+etc.) by a factor equal to the number of domains, in fact, APLIC
 implementations can exploit the fact that each source is ultimately
 active in only one domain. In all domains to which a specific interrupt
 source has not been delegated, the state associated with the source
 appears as read-only zeros, requiring no physical register bits.
+====
 
-[[sec:AdvPLIC-domainControlRegion]]
+[[AdvPLIC-domainControlRegion]]
 === Memory-mapped control region for an interrupt domain
 
 For each interrupt domain that an APLIC supports, there is a dedicated
 memory-mapped control region for managing interrupts in that domain.
-This control region is a multiple of 4 KiB in size and aligned to a
-4-KiB address boundary. The smallest valid control region is 16 KiB. An
-interrupt domain’s control region is populated by a set of 32-bit
-registers. The first 16 KiB contains the registers listed in
-Table #tab:AdvPLIC-domainControlRegion[[tab:AdvPLIC-domainControlRegion]].
+This control region is a multiple of 4 KiB in size and aligned to a
+4-KiB address boundary. The smallest valid control region is 16 KiB. An
+interrupt domain's control region is populated by a set of 32-bit
+registers. The first 16 KiB contains the registers listed in
+<<TableAdvPLIC-domainControlRegion>>.
 
-[cols="^,<,<,<",]
+[[TableAdvPLIC-domainControlRegion]]
+.The registers of the first 16 KiB of an interrupt domain's memory-mapped control region.
+[%autowidth,float="center",align="center",cols="^,<,<,<",grid=none,frame=none]
 |===
-|offset | size |register name |
-| |4 bytes | |
-| |4 bytes |1 |
-| |4 bytes |2 |
-|… | | … |
-| |4 bytes |1023 |
-| |4 bytes | |(machine-level interrupt domains only)
-| |4 bytes | |”
-| |4 bytes | |”
-| |4 bytes | |”
-| |4 bytes |0 |
-| |4 bytes |1 |
-|… | | … |
-| |4 bytes |31 |
-| |4 bytes | |
-| |4 bytes |0 |
-| |4 bytes |1 |
-|… | | … |
-| |4 bytes |31 |
-| |4 bytes | |
-| |4 bytes |0 |
-| |4 bytes |1 |
-|… | | … |
-| |4 bytes |31 |
-| |4 bytes | |
-| |4 bytes |0 |
-| |4 bytes |1 |
-|… | | … |
-| |4 bytes |31 |
-| |4 bytes | |
-| |4 bytes | |
-| |4 bytes | |
-| |4 bytes | |
-| |4 bytes |1 |
-| |4 bytes |2 |
-|… | | … |
-| |4 bytes |1023 |
+|offset | size |register name |
+|`0x0000` |4 bytes |`domaincfg` |
+|`0x0004` |4 bytes |`sourcecfg[1]` |
+|`0x0008` |4 bytes |`sourcecfg[2]` |
+|… | | … |
+|`0x0FFC` |4 bytes |`sourcecfg[1023]` |
+|`0x1BC0` |4 bytes |`mmsiaddrcfg` |(machine-level interrupt domains only)
+|`0x1BC4` |4 bytes |`mmsiaddrcfgh` |”
+|`0x1BC8` |4 bytes |`smsiaddrcfg` |”
+|`0x1BCC` |4 bytes |`smsiaddrcfgh` |”
+|`0x1C00` |4 bytes |`setip[0]` |
+|`0x1C04` |4 bytes |`setip[1]` |
+|… | | … |
+|`0x1C7C` |4 bytes |`setip[31]` |
+|`0x1CDC` |4 bytes |`setipnum` |
+|`0x1D00` |4 bytes |`in clrip[0]` |
+|`0x1D04` |4 bytes |`in clrip[1]` |
+|… | | … |
+|`0x1D7C` |4 bytes |`in clrip[31]` |
+|`0x1DDC` |4 bytes |`clripnum` |
+|`0x1E00` |4 bytes |`setie[0]` |
+|`0x1E04` |4 bytes |`setie[1]` |
+|… | | … |
+|`0x1E7C` |4 bytes |`setie[31]` |
+|`0x1EDC` |4 bytes |`setienum` |
+|`0x1F00` |4 bytes |`clrie[0]` |
+|`0x1F04` |4 bytes |`clrie[1]` |
+|… | | … |
+|`0x1F7C` |4 bytes |`setie[31]` |
+|`0x1FDC` |4 bytes |`clrienum` |
+|`0x2000` |4 bytes |`setipnum le` |
+|`0x2004` |4 bytes |`setipnum be` |
+|`0x3000` |4 bytes |`genmsi` |
+|`0x3004` |4 bytes |`target[1]` |
+|`0x3008` |4 bytes |`target[2]` |
+|… | | … |
+|`0x3FFC` |4 bytes |`target[1023]` |
 |===
 
-Starting at offset , an interrupt domain’s control region may optionally
+Starting at offset `0x4000`, an interrupt domain's control region may optionally
 have an array of _interrupt delivery control_ (IDC) structures, one for
 each potential hart index number in the range 0 to some maximum that is
 at least as large as the maximum hart index number for the interrupt
@@ -320,70 +328,79 @@ An interrupt domain that supports only interrupt forwarding by MSIs and
 not the direct delivery of interrupts by the APLIC does not need IDC
 structures in its control region.
 
-The first IDC structure, if any, is for the hart with index number 0;
-the second is for the hart with index number 1; and so forth. Each IDC
-structure is 32 bytes and has these defined registers:
+The first IDC structure, if any, is for the hart with index number 0;
+the second is for the hart with index number 1; and so forth. Each IDC
+structure is 32 bytes and has these defined registers:
 
-offset &  size & register name +
-& 4 bytes & +
-& 4 bytes & +
-& 4 bytes & +
-& 4 bytes & +
-& 4 bytes & +
+[%autowidth,float="center",align="center",cols="^,<,<",grid=none,frame=none]
+|===
+|offset | size |register name 
+|`0x00` |4 bytes |`idelivery` 
+|`0x04` |4 bytes |`iforce` 
+|`0x08` |4 bytes |`ithreshold` 
+|`0x18` |4 bytes |`topi`
+|`ox1C` |4 bytes |`claimi`
+|===
 
-IDC structures are packed contiguously, 32 bytes per structure, so the
-offset from the beginning of an interrupt domain’s control region to its
-second IDC structure (hart index 1), if it exists, is ; the offset to
-the third IDC structure (hart index 2), if it exists, is ; etc.
+IDC structures are packed contiguously, 32 bytes per structure, so the
+offset from the beginning of an interrupt domain's control region to its
+second IDC structure (hart index 1), if it exists, is `0x4020`; the offset to
+the third IDC structure (hart index 2), if it exists, is `0x4040`; etc.
 
 The array of IDC structures may include some for _potential_ hart index
 numbers that are not _actual_ hart index numbers in the domain. For
-example, the first IDC structure is always for hart index 0, but 0 is
+example, the first IDC structure is always for hart index 0, but 0 is
 not necessarily a valid index number for any hart in the domain. For
 each IDC structure in the array that does not correspond to a valid hart
-index number in the domain, the IDC structure’s registers may (or may
+index number in the domain, the IDC structure's registers may (or may
 not) be all read-only zeros.
 
 Aside from the registers in
-Table #tab:AdvPLIC-domainControlRegion[[tab:AdvPLIC-domainControlRegion]]
+<<TableAdvPLIC-domainControlRegion>>
 and those listed above for IDC structures, all other bytes in an
-interrupt domain’s control region are reserved and are implemented as
+interrupt domain's control region are reserved and are implemented as
 read-only zeros.
 
 Only naturally aligned 32-bit simple reads and writes are supported
-within an interrupt domain’s control region. Writes to read-only bytes
+within an interrupt domain's control region. Writes to read-only bytes
 are ignored. For other forms of accesses (other sizes, misaligned
 accesses, or AMOs), implementations should preferably report an access
 fault or bus error but must otherwise ignore the access.
 
-The registers of the first 16 KiB of an interrupt domain’s control
+The registers of the first 16 KiB of an interrupt domain's control
 region (all but the IDC structures) are documented individually below.
 IDC structures are documented later, in
-Section #sec:AdvPLIC-directMode[1.8], ``Interrupt delivery directly by
-the APLIC.''
+<<AdvPLIC-directMode>>, "Interrupt delivery directly by
+the APLIC.""
 
-[[sec:AdvPLIC-reg-domaincfg]]
-==== Domain configuration ()
+[[AdvPLIC-reg-domaincfg]]
+==== Domain configuration (`domaincfg`)
 
-The register has this format:
+The `domaincfg` register has this format:
 
-bits 31:24 & read-only +
-bit 8 & IE +
-bit 7 & read-only 0 +
-bit 2 & DM () +
-bit 0 & BE () +
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
+|===
+|bits 31:24 |read-only 0x80 
+|bit 8|IE 
+|bit 7|read-only 0
+|bit 2 |DM (*WARL*)
+|bit 0 |BE (*WARL*)
+|===
 
 All other register bits are reserved and read as zeros.
 
 Bit IE (Interrupt Enable) is a global enable for all active interrupt
-sources at this interrupt domain. Only when IE = 1 are
+sources at this interrupt domain. Only when IE = 1 are
 pending-and-enabled interrupts actually signaled or forwarded to harts.
 
-Field DM (Delivery Mode) is and determines how this interrupt domain
+Field DM (Delivery Mode) is *WARL* and determines how this interrupt domain
 delivers interrupts to harts. The two possible values for DM are:
 
-0 = direct delivery mode +
-1 = MSI delivery mode +
+[%autowidth,float="center",align="center",cols=">,<",grid=none,frame=none]
+|===
+|0 = |direct delivery mode 
+|1 =|MSI delivery mode
+|===
 
 In _direct delivery mode_, interrupts are prioritized and signaled
 directly to harts by the APLIC itself. In _MSI delivery mode_,
@@ -392,41 +409,38 @@ further handling by IMSICs at those harts. A given APLIC implementation
 may support either or both of these delivery modes for each interrupt
 domain.
 
-If the interrupt domain’s harts have IMSICs, then unless the relevant
-interrupt files of those IMSICs support value for register , setting DM
+If the interrupt domain's harts have IMSICs, then unless the relevant
+interrupt files of those IMSICs support value `0x40000000` for register `eidelivery`, setting DM
 to zero (direct delivery mode) will have the same effect as setting IE
-to zero. See Sections
-#sec:IMSIC-reg-eidelivery[[sec:IMSIC-reg-eidelivery]]
-and #sec:AdvPLIC-directMode-intrDelivery[1.8.2].
+to zero. See <<IMSIC-reg-eidelivery>>
+and <<AdvPLIC-directMode-intrDelivery>>.
 
-BE (Big-Endian) is a field that determines the byte order for most
-registers in the interrupt domain’s memory-mapped control region. If
-BE = 0, byte order is little-endian, and if BE = 1, it is big-endian.
-For systems that support only little-endian, BE may be read-only zero,
+BE (Big-Endian) is a *WARL* field that determines the byte order for most
+registers in the interrupt domain's memory-mapped control region. If
+BE = 0, byte order is little-endian, and if BE = 1, it is big-endian.
+For RISC-V systems that support only little-endian, BE may be read-only zero,
 and for those that support only big-endian, BE may be read-only one. For
 bi-endian systems, BE is writable.
 
-Field BE affects the byte order of accesses to the register itself, just
+Field BE affects the byte order of accesses to the `domaincfg` register itself, just
 as for other registers in the interrupt domain’s control region. To deal
-with this fact, the read-only value in ’s most-significant byte, bits
-31:24, serves two purposes. First, for any read of , the register’s
-correct byte order is easily determined from the four-byte value
-obtained: When interpreted in the correct byte order, bit 31 is one, and
-in the wrong order, bit 31 is zero. Second, if the value of BE is
+with this fact, the read-only value in `domaincfg’s` most-significant byte, bits
+31:24, serves two purposes. First, for any read of `domaincfg`, the register's correct byte order is easily determined from the four-byte value
+obtained: When interpreted in the correct byte order, bit 31 is one, and
+in the wrong order, bit 31 is zero. Second, if the value of BE is
 uncertain (prior to software initializing the interrupt domain,
-presumably), an 8-bit value latexmath:[$x$] can be safely written to by
-writing (latexmath:[$x$]  24) latexmath:[$x$], where  24 represents
-shifting left by 24 bits, and the vertical bar () represents bitwise
-logical OR. After is written once, the value of BE should then be known,
+presumably), an 8-bit value latexmath:[$x$] can be safely written to `domaincfg` by writing (latexmath:[$x$]  24) latexmath:[$x$], where <<24 represents
+shifting left by 24 bits, and the vertical bar (|) represents bitwise
+logical OR. After `domaincfg` is written once, the value of BE should then be known,
 so subsequent writes should not need to repeat the same trick.
 
-At system reset, all writable bits in are initialized to zero,
-including IE. If an implementation supports additional forms of reset
+At system reset, all writable bits in `domaincfg` are initialized to zero,
+including IE. If an implementation supports additional forms of reset
 for the APLIC, it is implementation-defined (or possibly
-platform-defined) how these other resets may affect .
+platform-defined) how these other resets may affect `domaincfg`.
 
-[[sec:AdvPLIC-reg-sourcecfg]]
-====  Source configurations (–) 
+[[AdvPLIC-reg-sourcecfg]]
+====  Source configurations (`sourcecfg[1]–sourcecfg[1023]`) 
 
 For each possible interrupt source latexmath:[$i$], register controls
 the _source mode_ for source latexmath:[$i$] in this interrupt domain as
