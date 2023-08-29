@@ -1,9 +1,9 @@
 [[ch:AdvPLIC]]
 == Advanced Platform-Level Interrupt Controller (APLIC)
 
-In a system, a Platform-Level Interrupt Controller (PLIC) handles
+In a RISC-V system, a Platform-Level Interrupt Controller (PLIC) handles
 external interrupts that are signaled through wires rather than by MSIs.
-When the harts in a system do not have IMSICs, the harts themselves do
+When the RISC-V harts in a system do not have IMSICs, the harts themselves do
 not support MSIs, and all external interrupts to such harts must pass
 through a PLIC. But even in machines where harts have IMSICs and most
 interrupts are communicated via MSIs, it is not unusual for some device
@@ -17,40 +17,47 @@ commodity devices or controllers to choose wired interrupts over MSIs,
 unless implementing a standard like PCI Express that dictates MSIs.
 
 This chapter specifies an _Advanced PLIC_ (APLIC) that is not backward
-compatible with the earlier PLIC. Full conformance to the Advanced
+compatible with the earlier RISC-V PLIC. Full conformance to the Advanced
 Interrupt Architecture requires the APLIC. However, a workable system
 can be built substituting the older PLIC instead, assuming only wired
 interrupts to harts, not MSIs.
 
+[NOTE]
+====
 We intend eventually to provide a free example parameterized
 implementation of an APLIC, written in portable SystemVerilog, that we
 expect will be suitable for many systems without modification.
+
+'''
 
 A draft specification exists for a _Duo-PLIC_ that is
 software-configurable to act as either an original PLIC or an APLIC.
 However, at this time, it appears unlikely that the International
 Association will ever ratify the Duo-PLIC specification as a standard.
+====
 
-In a machine without IMSICs, every hart accepts interrupts from exactly
-one PLIC or APLIC that is the _external interrupt controller_ for that
+In a machine without IMSICs, every RISC-V hart accepts interrupts from exactly one PLIC or APLIC that is the _external interrupt controller_ for that
 hart. A hart’s external interrupt controller (the PLIC or APLIC) signals
 interrupts to the hart through a dedicated connection, usually a wire,
 for each privilege level that the hart may receive interrupts. (Recall
-Figure #fig:intrsWithoutIMSICs[[fig:intrsWithoutIMSICs]] on page .) A
+<<intrsWithoutIMSICs>>). A
 system without IMSICs will typically have only one PLIC or APLIC,
-serving as the external interrupt controller for all harts.
+serving as the external interrupt controller for all RISC-V harts.
 
-Because every hart without an IMSIC has exactly one PLIC or APLIC as its
+[NOTE]
+====
+Because every RISC-V hart without an IMSIC has exactly one PLIC or APLIC as its
 external interrupt controller, a system with multiple APLICs must
 partition the harts into disjoint subsets, making each APLIC the
 external interrupt controller for a separate subset of the harts. While
 not prohibited, this arrangement is likely to be less efficient than
 having all harts share a single APLIC.
+====
 
-harts that employ IMSICs as their external interrupt controllers can
+RISC-V harts that employ IMSICs as their external interrupt controllers can
 receive external interrupts only in the form of MSIs. In that case, the
 role of an APLIC is to convert wired interrupts into MSIs for harts.
-(Recall Figure #fig:intrsWithIMSICs[[fig:intrsWithIMSICs]] on page .)
+(Recall <<intrsWithIMSICs>>.)
 The APLIC is said to _forward_ incoming wire-signaled interrupts to
 harts by sending MSIs to the harts.
 
@@ -72,11 +79,11 @@ devices or controllers may be combined to drive the incoming wire of a
 single interrupt source at an APLIC. An interrupt source’s incoming wire
 might also be simply tied high or low, if, for example, the source will
 always be configured as Detached. See
-Section #sec:AdvPLIC-reg-sourcecfg[1.5.2] for a description of _source
+<<AdvPLIC-reg-sourcecfg>> for a description of _source
 modes_.)
 
-Each of an APLIC’s interrupt sources has a fixed unique _identity
-number_ in the range 1 to latexmath:[$N$], where latexmath:[$N$] is the
+Each of an APLIC's interrupt sources has a fixed unique _identity
+number_ in the range 1 to latexmath:[$N$], where latexmath:[$N$] is the
 total number of sources at the APLIC. The number zero is not a valid
 interrupt identity number at an APLIC. The maximum number of interrupt
 sources an APLIC may support is 1023.
@@ -103,13 +110,13 @@ memory-mapped control region in the machine’s address space that appears
 to control a complete, separate APLIC, though in fact all domain
 interfaces together access a single combined interrupt controller.
 
-Figures #fig:AdvPLIC-ex-1Domain[1.1] through
-#fig:AdvPLIC-ex-3Domains[1.3] depict some possible hierarchies of
+<<AdvPLIC-ex-1Domain>> through
+<<AdvPLIC-ex-3Domains>> depict some possible hierarchies of
 interrupt domains implemented by an APLIC in a system.
 
 The first figure represents a minimal system that has a single hart not
 supporting supervisor mode, with a single interrupt domain for machine
-level on that hart. The next figure, #fig:AdvPLIC-ex-2Domains[1.2],
+level on that hart. The next figure, <<AdvPLIC-ex-2Domains>>,
 shows a basic arrangement for a larger system designed for symmetric
 multiprocessing (SMP), with multiple harts that all implement supervisor
 mode. In such cases, the APLIC will usually provide a separate interrupt
@@ -119,44 +126,44 @@ S-mode on the multiple harts, to have direct control over the interrupts
 it receives, avoiding the need to call upon M-mode to exercise that
 control.
 
-image::AdvPLIC-ex-1Domain.png[ Example of a system that has a single
-hart implementing only M-mode, with a single machine-level interrupt
-domain for that hart. ]
+[[AdvPLIC-ex-1Domain]]
+.Example of a system that has a single hart implementing only M-mode, with a single machine-level interrupt domain for that hart. 
+image::AdvPLIC-ex-1Domain.png[ ]
 
-image::AdvPLIC-ex-2Domains.png[ An example system with four harts that
-implement M-mode and S-mode, with two APLIC interrupt domains, one each
-for machine and supervisor levels. ]
-
-An APLIC’s interrupt domains are arranged in a tree hierarchy, with the
+An APLIC's interrupt domains are arranged in a tree hierarchy, with the
 root domain always being at machine level. Incoming interrupt wires
 arrive first at the root domain. Each domain may then selectively
 delegate all or a subset of interrupt sources to its child domains in
 the hierarchy. Within a given APLIC, interrupt source numbers are
-invariant across all domains, so source identity number latexmath:[$i$]
+invariant across all domains, so source identity number latexmath:[$i$]
 always refers to the same source in every domain, corresponding to
-incoming wire number latexmath:[$i$]. For an interrupt domain below the
+incoming wire number latexmath:[$i$]. For an interrupt domain below the
 root, interrupt sources not delegated down to that domain appear to the
 domain as being not implemented.
 
-Figure #fig:AdvPLIC-ex-3Domains[1.3] shows a hierarchy of three
+<<AdvPLIC-ex-3Domains>> shows a hierarchy of three
 interrupt domains, two at machine level and one at supervisor level. The
 arrangement in the figure, when combined with PMP (physical memory
 protection), allows machine-level software to isolate a selection of
-interrupts exclusively for hart 0, beyond the reach of the four
+interrupts exclusively for hart 0, beyond the reach of the four
 application harts, even at machine level.
 
-image::AdvPLIC-ex-3Domains.png[ A system that extends the example of
-Figure #fig:AdvPLIC-ex-2Domains[1.2] with a fifth M-mode-only
-``manager'' hart, with a separate machine-level interrupt domain above
-the other domains. ]
+[[AdvPLIC-ex-2Domains]]
+.An example system with four harts implement M-mode and S-mode, with two APLIC interrupt domains, one each for machine and supervisor levels. 
+image::AdvPLIC-ex-2Domains.png[]
 
+[[AdvPLIC-ex-3Domains]]
+.A RISC-V system that extends the example of <<AdvPLIC-ex-2Domains>> with a fifth M-mode-only "manager" hart, with a separate machine-level interrupt domain above the other domains. 
+image::AdvPLIC-ex-3Domains.png[]
+
+[NOTE]
+====
 In order for the harts within an interrupt domain to have direct control
 over the interrupts from the domain, the harts must be cooperatively
 controlled by software at the same privilege level. In particular, a
 single operating system should control all of the harts associated with
-a supervisor-level interrupt domain. In the examples of Figures
-#fig:AdvPLIC-ex-2Domains[1.2] and #fig:AdvPLIC-ex-3Domains[1.3], control
-of the APLIC’s supervisor-level interrupt domain could not be safely
+a supervisor-level interrupt domain. In the examples of <<AdvPLIC-ex-2Domains>> and <<AdvPLIC-ex-3Domains>>, control
+of the APLIC's supervisor-level interrupt domain could not be safely
 split among multiple independent OSes.
 
 Given the domain hierarchies depicted in the figures, if it were
@@ -165,11 +172,12 @@ machine-level software would need to prevent direct OS access to the
 supervisor-level interrupt domain and instead provide SBI services for
 controlling APLIC interrupts or, alternatively, emulate the control
 interfaces of separate supervisor-level interrupt domains, one for each
-OS. Note that such emulation might still make use of the APLIC’s
+OS. Note that such emulation might still make use of the APLIC's
 physical supervisor-level interrupt domain, but under the control of
 machine-level software.
+====
 
-An APLIC’s interrupt domain hierarchy satisfies these rules:
+An APLIC's interrupt domain hierarchy satisfies these rules:
 
 * The root domain is at machine level.
 * The parent of any supervisor-level interrupt domain is a machine-level
@@ -180,7 +188,7 @@ level.
 harts all by the same method, either by wire or by MSIs, not by a
 mixture of methods among the harts.
 
-When a hart’s external interrupt controller is an APLIC, not an IMSIC,
+When a RISC-V hart's external interrupt controller is an APLIC, not an IMSIC,
 the hart can be within only one interrupt domain of this APLIC at each
 privilege level.
 
