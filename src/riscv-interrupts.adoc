@@ -37,8 +37,9 @@
 :lang: en
 :listing-caption: Example
 :sectnums:
+:sectnumlevels: 4
 :toc: preamble
-:toclevels: 3
+:toclevels: 4 
 :source-highlighter: pygments
 ifdef::backend-pdf[]
 :source-highlighter: rouge

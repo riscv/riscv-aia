@@ -831,32 +831,34 @@ For systems built mainly for big-endian byte order, `setipnum_be` may be useful 
 [[AdvPLIC-reg-genmsi]]
 ==== Generate MSI (`genmsi`)
 
-When the interrupt domain is configured in MSI delivery mode (.DM = 1),
-register can be used to cause an _extempore_ MSI to be sent from the
+When the interrupt domain is configured in MSI delivery mode (`domaincfg`.DM = 1), register `genmsi` can be used to cause an _extempore_ MSI to be sent from the
 APLIC to a hart. The main purpose for this function is to assist in
-establishing a temporary known ordering between a hart’s writes to the
-APLIC’s registers and the transmission of MSIs from the APLIC to the
-hart, as explained later in Section #sec:AdvPLIC-MSISync[1.9.3].
+establishing a temporary known ordering between a hart's writes to the
+APLIC's registers and the transmission of MSIs from the APLIC to the
+hart, as explained later in <<AdvPLIC-MSISync>>.
 
+[NOTE]
+====
 For other purposes, sending an MSI to a hart is usually better done by
-writing directly to the hart’s IMSIC, rather than employing an APLIC as
-an intermediary. Use of the register should be minimized to avoid it
+writing directly to the hart's IMSIC, rather than employing an APLIC as
+an intermediary. Use of the `genmsi` register should be minimized to avoid it
 becoming a bottleneck.
+====
 
-Register has this format:
-
-bits 31:18 & Hart Index () +
-bit 12 & Busy (*read-only*) +
-bits 10:0 & EIID () +
+Register `genmsi` has this format:
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
+|===
+|bits 31:18 |Hart Index (*WLRL*)
+|bits 12 |Busy (read-only)
+|bits 10:0 |EIID (*WARL*)
+|===
 
 All other register bits are reserved and read as zeros.
 
-The Busy bit is ordinarily zero (false), but a write to causes Busy to
-become one (true), indicating an extempore MSI is pending. The Hart
+The Busy bit is ordinarily zero (false), but a write to genmsi` causes Busy to become one (true), indicating an extempore MSI is pending. The Hart
 Index field specifies the destination hart, and EIID (External Interrupt
 Identity) specifies the data value for the MSI. Fields Hart Index and
-EIID have the same formats and behavior as in a register, documented in
-the next subsection, #sec:AdvPLIC-reg-target[1.5.16]. For a
+EIID have the same formats and behavior as in a `target` register, documented in the next subsection, <<AdvPLIC-reg-target>>. For a
 machine-level interrupt domain, an extempore MSI is sent to the
 destination hart at machine level, and for a supervisor-level interrupt
 domain, an extempore MSI is sent to the destination hart at supervisor
@@ -864,104 +866,99 @@ level.
 
 A pending extempore MSI should be sent by the APLIC with minimal delay.
 Once it has left the APLIC and the APLIC is able to accept a new write
-to for another extempore MSI, Busy reverts to false. All MSIs previously
-sent from this APLIC to the same hart must be visible at the hart’s
-IMSIC before the extempore MSI becomes visible at the hart’s IMSIC.
+to `genmsi` for another extempore MSI, Busy reverts to false. All MSIs previously sent from this APLIC to the same hart must be visible at the hart's IMSIC before the extempore MSI becomes visible at the hart's IMSIC.
 
-While Busy is true, writes to are ignored.
+While Busy is true, writes to `genmsi` are ignored.
 
-Extempore MSIs are not affected by the IE bit of the domain’s register.
-An extempore MSI is sent even if .IE = 0.
+Extempore MSIs are not affected by the IE bit of the domain's `domaincfg` register. An extempore MSI is sent even if `domaincfg`.IE = 0.
 
-When the interrupt domain is configured in direct delivery mode (.DM
-= 0), register is read-only zero.
+When the interrupt domain is configured in direct delivery mode (`domaincfg`.DM = 0), register `genmsi` is read-only zero.
 
-[[sec:AdvPLIC-reg-target]]
-====  Interrupt targets (-) 
+<<AdvPLIC-reg-target>>
+====  Interrupt targets (`target[1]-`target[1023]`) 
 
-If interrupt source latexmath:[$i$] is inactive in this domain, register
-is read-only zero. If source latexmath:[$i$] is active, determines the
+If interrupt source latexmath:[$i$] is inactive in this domain, register `target[latexmath:[$i$]]` is read-only zero. If source latexmath:[$i$] is active, `target[latexmath:[$i$]]` determines the
 hart to which interrupts from the source are signaled or forwarded. The
-exact interpretation of depends on the delivery mode configured by field
-DM of register .
+exact interpretation of `target[latexmath:[$i$]]` depends on the delivery mode configured by field DM of register `domaincfg`.
 
-If .DM is changed, the registers for all active interrupt sources within
-the domain obtain values in all fields defined for the new delivery
-mode.
+If `domaincfg`.DM is changed, the `target` registers for all active interrupt sources within the domain obtain UNSPECIFIED values in all fields defined for the new delivery mode.
 
 ===== Active source, direct delivery mode
 
-For an active interrupt source latexmath:[$i$], if the domain is
-configured in direct delivery mode (.DM = 0), then register has this
-format:
+For an active interrupt source latexmath:[$i$], if the domain is
+configured in direct delivery mode (`domaincfg`.DM = 0), then register `target[latexmath:[$i$]]` has this format:
 
-bits 31:18 & Hart Index () +
-bits 7:0 & IPRIO () +
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
+|===
+|bits 31:18 |Hart Index (*WLRL*)
+|bits 7:0 |IPRIO (*WARL*)
+|===
 
 All other register bits are reserved and read as zeros.
 
-Hart Index is a field that specifies the hart to which interrupts from
+Hart Index is a *WLRL* field that specifies the hart to which interrupts from
 this source will be delivered.
 
 Field IPRIO (Interrupt Priority) specifies the _priority number_ for the
-interrupt source. This field is a unsigned integer of _IPRIOLEN_ bits,
+interrupt source. This field is a *WARL* unsigned integer of _IPRIOLEN_ bits,
 where IPRIOLEN is a constant parameter for the given APLIC, in the range
-of 1 to 8. Only values 1 through
-latexmath:[$\mbox{2}^{\textrm{IPRIOLEN}} - \mbox{1}$] are allowed for
-IPRIO, not zero. A write to a register sets IPRIO equal to bits
-latexmath:[$({\mbox{IPRIOLEN} - \mbox{1}})$]:0 of the 32-bit value
+of 1 to 8. Only values 1 through
+latexmath:[${2}^{\textrm{IPRIOLEN}} - {1}$] are allowed for
+IPRIO, not zero. A write to a `target` register sets IPRIO equal to bits
+latexmath:[$({{IPRIOLEN} - {1}})$]:0 of the 32-bit value
 written, unless those bits are all zeros, in which case the priority
-number is set to 1 instead. (If IPRIOLEN = 1, these rules cause IPRIO to
-be effectively read-only with value 1.)
+number is set to 1 instead. (If IPRIOLEN = 1, these rules cause IPRIO to
+be effectively read-only with value 1.)
 
 Smaller priority numbers convey higher priority. When interrupt sources
 have equal priority number, the source with the lowest identity number
 has the highest priority.
 
+[NOTE]
+====
 Interrupt priorities are encoded as integers, with smaller numbers
 denoting higher priority, to match the encoding of priorities by IMSICs.
+====
 
 ===== Active source, MSI delivery mode
 
-For an active interrupt source latexmath:[$i$], if the domain is
-configured in MSI delivery mode (.DM = 1), then register has this
-format:
+For an active interrupt source latexmath:[$i$], if the domain is
+configured in MSI delivery mode (`domaincfg`.DM = 1), then register `target[latexmath:[$i$]]` has this format:
 
-bits 31:18 & Hart Index () +
-bits 17:12 & Guest Index () +
-bits 10:0 & EIID () +
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
+|===
+|bits 31:18 |Hart Index (*WLRL*)
+|bits 17:12 |Guest Index (*WLRL*)
+|bits 10:0 |EIID (*WARL*)
+|===
 
-Bit 11 is reserved and reads as zero.
+Bit 11 is reserved and reads as zero.
 
 The Hart Index field specifies the hart to which interrupts from this
 source will be forwarded.
 
-If the interrupt domain is at supervisor level and the domain’s harts
-implement the Privileged Architecture’s hypervisor extension, then Guest
-Index is a field that must be able to hold all integer values in the
-range 0 through GEILEN. (Parameter _GEILEN_ is defined by the Privileged
-Architecture’s hypervisor extension.) Otherwise, field Guest Index is
-read-only zero. For a supervisor-level interrupt domain, a nonzero Guest
-Index is the number of the target hart’s guest interrupt file to which
+If the interrupt domain is at supervisor level and the domain's harts
+implement the RISC-V Privileged Architecture's hypervisor extension, then Guest Index is a *WLRL* field that must be able to hold all integer values in the range 0 through GEILEN. (Parameter _GEILEN_ is defined by the Privileged Architecture's hypervisor extension.) Otherwise, field Guest Index is read-only zero. For a supervisor-level interrupt domain, a nonzero Guest
+Index is the number of the target hart's guest interrupt file to which
 MSIs will be sent. When Guest Index is zero, MSIs from a
 supervisor-level domain are forwarded to the target hart at supervisor
 level. For a machine-level domain, Guest Index is read-only zero, and
 MSIs are forwarded to a target hart always at machine level.
 
-Together, fields Hart Index and Guest Index of register determine the
-address for MSIs forwarded for interrupt source latexmath:[$i$]. The
+Together, fields Hart Index and Guest Index of register `target[latexmath:[$i$]]` determine the
+address for MSIs forwarded for interrupt source latexmath:[$i$]. The
 remaining field EIID (External Interrupt Identity) specifies the data
 value for those MSIs, eventually becoming the minor identity for an
 external interrupt at the target hart.
 
-If the interrupt domain’s harts have IMSIC interrupt files that
+If the interrupt domain's harts have IMSIC interrupt files that
 implement latexmath:[$N$] distinct interrupt identities
-(Section #sec:IMSIC-intrFilesAndIdents[[sec:IMSIC-intrFilesAndIdents]]),
+(<<IMSIC-intrFilesAndIdents>>),
 then EIID is a latexmath:[$k$]-bit unsigned integer field, where
 latexmath:[$\lceil\log_{2}N\rceil \leq k \leq \mbox{11}$]. EIID is thus
-able to hold at least values 0 through latexmath:[$N$]. A write to a
+able to hold at least values 0 through latexmath:[$N$]. A write to a `target`
 register sets the latexmath:[$k$] implemented bits of EIID equal to the
-least-significant latexmath:[$k$] bits of the 32-bit value written.
+least-significant latexmath:[$k$] bits of the 32-bit value written.
 
 === Reset
 
@@ -969,180 +966,177 @@ Upon reset of an APLIC, all its state becomes valid and consistent but
 otherwise , except for:
 
 the register of each interrupt domain
-(Section #sec:AdvPLIC-reg-domaincfg[1.5.1]);
+(<<AdvPLIC-reg-domaincfg>>);
 
 possibly the MSI address configuration registers of machine-level
-interrupt domains (Sections #sec:AdvPLIC-reg-mmsiaddrcfg[1.5.3] and
-#sec:AdvPLIC-reg-smsiaddrcfg[1.5.4]); and
+interrupt domains (<<AdvPLIC-reg-mmsiaddrcfg>> and
+<<AdvPLIC-reg-smsiaddrcfg>>); and
 
-the Busy bit of each interrupt domain’s register, if it exists (Section
-#sec:AdvPLIC-reg-genmsi[1.5.15]).
+the Busy bit of each interrupt domain's `genmsi` register, if it exists (<<AdvPLIC-reg-genmsi>>).
 
-[[sec:AdvPLIC-pendingBits]]
+[[AdvPLIC-pendingBits]]
 === Precise effects on interrupt-pending bits
 
-An attempt to set or clear an interrupt source’s pending bit by writing
-to a register in the interrupt domain’s control region may or may not be
+An attempt to set or clear an interrupt source's pending bit by writing
+to a register in the interrupt domain's control region may or may not be
 successful, depending on the corresponding source mode, the interrupt
-domain’s delivery mode, and the state of the source’s rectified input
-value (defined in Section #sec:AdvPLIC-reg-sourcecfg[1.5.2]). The
+domain's delivery mode, and the state of the source's rectified input
+value (defined in <<AdvPLIC-reg-sourcecfg>>). The
 following enumerates all the circumstances when a pending bit is set or
 cleared for a given source mode.
 
 If the source mode is Detached:
 
-* The pending bit is set to one only by a relevant write to a or
-register.
+* The pending bit is set to one only by a relevant write to a `setip` or `setipnum` register.
 * The pending bit is cleared when the interrupt is claimed at the APLIC
-or forwarded by MSI, or by a relevant write to an register or to .
+or forwarded by MSI, or by a relevant write to an `in_clrip` register or to `clripnum`.
 
 If the source mode is Edge1 or Edge0:
 
 * The pending bit is set to one by a low-to-high transition in the
-rectified input value, or by a relevant write to a or register.
+rectified input value, or by a relevant write to a `setip` or `setipnum` register.
 * The pending bit is cleared when the interrupt is claimed at the APLIC
-or forwarded by MSI, or by a relevant write to an register or to .
+or forwarded by MSI, or by a relevant write to an `in_clrip` register or to `clripnum`.
 
 If the source mode is Level1 or Level0 and the interrupt domain is
-configured in direct delivery mode (.DM = 0):
+configured in direct delivery mode (`domaincfg`.DM = 0):
 
 * The pending bit is set to one whenever the rectified input value is
-high. The pending bit cannot be set by a write to a or register.
+high. The pending bit cannot be set by a write to a `setip` or `setipnum` register.
 * The pending bit is cleared whenever the rectified input value is low.
 The pending bit is not cleared by a claim of the interrupt at the APLIC,
-nor can it be cleared by a write to an register or to .
+nor can it be cleared by a write to an `in_clrip` register or to `clripnum`.
 
 If the source mode is Level1 or Level0 and the interrupt domain is
-configured in MSI delivery mode (.DM = 1):
+configured in MSI delivery mode (`domaincfg`.DM = 1):
 
 * The pending bit is set to one by a low-to-high transition in the
 rectified input value. The pending bit may also be set by a relevant
-write to a or register when the rectified input value is high, but not
-when the rectified input value is low.
+write to a `setip` or `setipnum` register when the rectified input value is high, but not when the rectified input value is low.
 * The pending bit is cleared whenever the rectified input value is low,
-when the interrupt is forwarded by MSI, or by a relevant write to an
-register or to .
+when the interrupt is forwarded by MSI, or by a relevant write to an `in_clrip` register or to `clripnum`.
 
+[NOTE]
+====
 When an interrupt domain is in direct delivery mode, the pending bit for
 a level-sensitive source is always just a copy of the rectified input
 value. Even in MSI delivery mode, the pending bit for a level-sensitive
-source is never set (= 1) when the rectified input value is low.
+source is never set (= 1) when the rectified input value is low.
+====
 
 In addition to the rules above, a write to a register can cause the
 source’s interrupt-pending bit to be set to one, as specified in
-Section #sec:AdvPLIC-reg-sourcecfg[1.5.2].
+<<AdvPLIC-reg-sourcecfg>>.
 
-[[sec:AdvPLIC-directMode]]
+[[AdvPLIC-directMode]]
 === Interrupt delivery directly by the APLIC
 
-When an interrupt domain is in direct delivery mode (.DM = 0),
+When an interrupt domain is in direct delivery mode (`domaincfg`.DM = 0),
 interrupts are delivered from the APLIC to harts by a unique signal to
-each hart, usually a dedicated wire. In this case, the domain’s
+each hart, usually a dedicated wire. In this case, the domain's
 memory-mapped control region contains at the end an array of interrupt
 delivery control (IDC) structures, one IDC structure per potential hart
-index. The first IDC structure is for the domain’s hart with index 0;
-the second is for the hart with index 1; etc.
+index. The first IDC structure is for the domain's hart with index 0;
+the second is for the hart with index 1; etc.
 
-[[sec:AdvPLIC-IDC]]
+[[AdvPLIC-IDC]]
 ==== Interrupt delivery control (IDC) structure
 
-Each IDC structure is 32 bytes (naturally aligned to a 32-byte address
+Each IDC structure is 32 bytes (naturally aligned to a 32-byte address
 boundary) and has these defined registers:
 
-offset &  size & register name +
-& 4 bytes & +
-& 4 bytes & +
-& 4 bytes & +
-& 4 bytes & +
-& 4 bytes & +
+[%autowidth,float="center",align="center",cols="<,<,<",grid=none,frame=none]
+|===
+|offset |size |register name
+|`0x00` |4 bytes |`idelivery`
+|`ox04` |4 bytes |`iforce`
+|`0x08` |4 bytes |`ithreshold`
+|`0x18` |4 bytes |`topi`
+|`0x1C` |4 bytes |`claimi`
+|===
 
 If the IDC structure is for a hart index number that is not valid for
 any actual hart in the interrupt domain, then these registers may
 optionally be all read-only zeros. Otherwise, the registers are
 documented individually below.
 
+[NOTE]
+====
 A particular APLIC might be built to support up to some maximum number
 of harts without complete knowledge of the set of hart index numbers the
 system will employ in each interrupt domain. In that case, for the hart
 index numbers that are unused, the APLIC may have IDC structures that
 are functional within the APLIC (not read-only zeros) but simply left
 unconnected to any physical harts.
+====
 
-===== Interrupt delivery enable ()
+===== Interrupt delivery enable (`idelivery`)
 
-is a register that controls whether interrupts that are targeted to the
-corresponding hart are delivered to the hart so they appear as a pending
-interrupt in the hart’s CSR. Only two values are currently defined for :
+`idelivery` is a *WARL* register that controls whether interrupts that are targeted to the corresponding hart are delivered to the hart so they appear as a pending interrupt in the hart's `mip` CSR. Only two values are currently defined for `idelivery`:
 
-0 = interrupt delivery is disabled +
-1 = interrupt delivery is enabled +
+[%autowidth,float="center",align="center",cols=">,<",grid=none,frame=none]
+|===
+|0 = | interrupt delivery is disabled
+|1 = | interrupt delivery is enabled
+|===
 
 If an IDC structure is for a nonexistent hart (i.e., corresponding to a
 hart index number that is not valid for any actual hart in the interrupt
-domain), setting to 1 does not deliver interrupts to any hart.
+domain), setting `idelivery` to 1 does not deliver interrupts to any hart.
 
-===== Interrupt force ()
+===== Interrupt force (`iforce`)
 
-is a register useful for testing. Only values 0 and 1 are allowed.
-Setting = 1 forces an interrupt to be asserted to the corresponding hart
-whenever both the IE field of is one and interrupt delivery is enabled
-to the hart by the register. When is zero, this creates a _spurious
-external interrupt_ for the hart.
+`iforce` is a *WARL* register useful for testing. Only values 0 and 1 are allowed. Setting `iforce` = 1 forces an interrupt to be asserted to the corresponding hart whenever both the IE field of `domaincfg` is one and interrupt delivery is enabled to the hart by the `idelivery` register. When `topi` is zero, this creates a _spurious external interrupt_ for the hart.
 
-When a read of register returns an interrupt identity of zero
-(indicating a spurious interrupt), is automatically cleared to zero.
+When a read of register `claimi` returns an interrupt identity of zero
+(indicating a spurious interrupt), `iforce` is automatically cleared to zero.
 
-===== Interrupt enable threshold ()
+===== Interrupt enable threshold (`ithreshold`)
 
-is a register that determines the minimum interrupt priority (maximum
-priority number) for an interrupt to be signaled to the corresponding
-hart. Register implements exactly IPRIOLEN bits, and thus is capable of
+`ithreshold` is a *WLRL* register that determines the minimum interrupt priority (maximum priority number) for an interrupt to be signaled to the corresponding hart. Register `ithreshold` implements exactly IPRIOLEN bits, and thus is capable of
 holding all priority numbers from 0 to
-latexmath:[${\mbox{2}^{\textrm{IPRIOLEN}} - \mbox{1}}$].
+latexmath:[${{2}^{\textrm{IPRIOLEN}} - {1}}$].
 
-When is a nonzero value latexmath:[$P$], interrupt sources with priority
+When `ithreshold` is a nonzero value latexmath:[$P$], interrupt sources with priority
 numbers latexmath:[$P$] and higher do not contribute to signaling
 interrupts to the hart, as though those sources were not enabled,
-regardless of the settings of their interrupt-enable bits. When is zero,
-all enabled interrupt sources can contribute to signaling interrupts to
-the hart.
+regardless of the settings of their interrupt-enable bits. When `ithreshold` is zero, all enabled interrupt sources can contribute to signaling interrupts to the hart.
 
-===== Top interrupt ()
+===== Top interrupt (`topi`)
 
-is a read-only register whose value indicates the current
+`topi` is a read-only register whose value indicates the current
 highest-priority pending-and-enabled interrupt targeted to this hart
-that also exceeds the priority threshold specified by , if not zero.
+that also exceeds the priority threshold specified by `ithreshold`, if not zero.
 
-A read of returns zero either if no interrupt that is targeted to this
+A read of `topi` returns zero either if no interrupt that is targeted to this
 hart is both pending and enabled, or if is not zero and no
 pending-and-enabled interrupt targeted to this hart has a priority
-number less than the value of . Otherwise, the value returned from a
-read of has this format:
+number less than the value of `ithreshold`. Otherwise, the value returned from a read of `topi` has this format:
 
-bits 25:16 & Interrupt identity (source number) +
-bits 7:0 & Interrupt priority +
+[%autowidth,float="center",align="center",cols=">,<",grid=none,frame=none]
+|===
+|bits 25:16 | Interrupt identity (source number)
+|bits 7:0 | Interrupt priority
+|===
 
 All other bit positions are zeros.
 
-The interrupt identity reported in is the minor identity for an external
-interrupt at the target hart.
+The interrupt identity reported in `topi` is the minor identity for an external interrupt at the target hart.
 
-Writes to are ignored.
+Writes to `topi` are ignored.
 
-===== Claim top interrupt ()
+===== Claim top interrupt (`claimi`)
 
-Register has the same value as . When this value is not zero, reading
-has the simultaneous side effect of clearing the pending bit for the
-reported interrupt identity, if possible. See
-Section #sec:AdvPLIC-pendingBits[1.7] for exactly when the pending bit
-is cleared by a read of .
+Register `claimi` has the same value as `topi`. When this value is not zero, reading `claimi` has the simultaneous side effect of clearing the pending bit for the reported interrupt identity, if possible. See
+<<AdvPLIC-pendingBits>> for exactly when the pending bit
+is cleared by a read of `claimi`.
 
-A read from that returns a value of zero has the simultaneous side
-effect of setting the register to zero.
+A read from `claimi` that returns a value of zero has the simultaneous side
+effect of setting the `iforce` register to zero.
 
-Writes to are ignored.
+Writes to `claimi` are ignored.
 
-[[sec:AdvPLIC-directMode-intrDelivery]]
+[[AdvPLIC-directMode-intrDelivery]]
 ==== Interrupt delivery and handling
 
 When an interrupt domain is configured so the APLIC delivers interrupts
