@@ -1140,70 +1140,67 @@ Writes to `claimi` are ignored.
 ==== Interrupt delivery and handling
 
 When an interrupt domain is configured so the APLIC delivers interrupts
-directly to harts (field DM of is zero), the APLIC supplies the
+directly to harts (field DM of `domaincfg` is zero), the APLIC supplies the
 _external interrupt_ signals, at the domain’s privilege level, for all
-harts of the domain, so long as one of the following is true: (a) the
-harts do not have IMSICs, or (b) the registers of the relevant IMSIC
-interrupt files are set to
-(Section #sec:IMSIC-reg-eidelivery[[sec:IMSIC-reg-eidelivery]]). For a
+harts of the domain, so long as one of the following is true: (a) the
+harts do not have IMSICs, or (b) the `eidelivery` registers of the relevant IMSIC
+interrupt files are set to `0x40000000` (<<IMSIC-reg-eidelivery>>). For a
 machine-level domain, the interrupt signals from the APLIC appear as bit
-MEIP (Machine External Interrupt-Pending) in each hart’s CSR. For a
+MEIP (Machine External Interrupt-Pending) in each hart's `mip` CSR. For a
 supervisor-level domain, the interrupt signals appear as bit SEIP
-(Supervisor External Interrupt-Pending) in each hart’s and CSRs. Each
+(Supervisor External Interrupt-Pending) in each hart's `mip` and `sip` CSRs. Each
 interrupt signal may be arbitrarily delayed traveling from the APLIC to
 the proper hart.
 
 At the APLIC, each interrupt signal to a hart is derived from the IE
-field of register and the current state of the hart’s IDC structure in
-the memory-mapped control region for the domain. If either .IE = 0 or
-interrupt delivery to the hart is disabled by the register ( = 0), the
-interrupt signal is held de-asserted. When .IE = 1 and interrupt
-delivery is enabled ( = 1), the interrupt signal is asserted whenever
-either register or is not zero.
+field of register `domaincfg` and the current state of the hart's IDC structure in
+the memory-mapped control region for the domain. If either `domaincfg`.IE = 0 or
+interrupt delivery to the hart is disabled by the `idelivery` register (`idelivery` = 0), the
+interrupt signal is held de-asserted. When `domaincfg`.IE = 1 and interrupt
+delivery is enabled (`idelivery` = 1), the interrupt signal is asserted whenever either register `iforce` or `topi` is not zero.
 
 Due to likely delay in the communication between an APLIC and a hart, it
 may happen that an external interrupt trap is taken, yet no interrupt is
-pending and enabled for the hart when a read of the hart’s register
+pending and enabled for the hart when a read of the hart's `claimi` register
 actually occurs. In such a circumstance, the interrupt identity reported
 by the claim will be zero, resulting in an apparent _spurious interrupt_
 from the APLIC. Portable software must be prepared for the possibility
 of spurious interrupts at the APLIC, which can safely be ignored and
 should be rare. For testing purposes, a spurious interrupt can be
-triggered for a hart by setting an IDC structure’s register to 1.
+triggered for a hart by setting an IDC structure's `iforce` register to 1.
 
 A trap handler solely for external interrupts via an APLIC could be
 written roughly as follows:
-
-save processor registers +
-read register from the hart’s IDC structure at the APLIC +
- +
-call the interrupt handler for external interrupt (minor identity) +
-restore processor registers +
-return from trap +
+[%autowidth,float="center",align="center",cols=">",grid=none,frame=none]
+|===
+|save processor registers
+|i = read register `claimi` from the hart's IDC structure at the APLIC
+|i = i>>16
+|call the interrupt handler for external interrupt (minor identity)
+|restore processor registers
+|return from trap
+|===
 
 To account for spurious interrupts, this pseudocode assumes there is an
-interrupt handler for ``external interrupt 0'' which does nothing.
+interrupt handler for "external interrupt 0 which does nothing.
 
 === Interrupt forwarding by MSIs
 
-In MSI delivery mode (.DM = 1), an interrupt domain forwards interrupts
-to target harts by MSIs.
+In MSI delivery mode (`domaincfg`.DM = 1), an interrupt domain forwards interrupts to target harts by MSIs.
 
-An MSI is sent for a specific source only when the source’s
+An MSI is sent for a specific source only when the source's
 corresponding pending and enable bits are both one and the IE field of
-register is also one. If and when an MSI is sent, the source’s interrupt
-pending bit is cleared.
+register `domaincfg` is also one. If and when an MSI is sent, the source's interrupt pending bit is cleared.
 
-[[sec:AdvPLIC-MSIAddrs]]
+[[AdvPLIC-MSIAddrs]]
 ==== Addresses and data for outgoing MSIs
 
 To forward interrupts by MSIs, an APLIC must know the MSI target address
 for each hart. For any given system, these addresses are fixed and
 should be hardwired into the APLIC if possible. However, some APLIC
 implementations may require that software supply the MSI target
-addresses. In that case, the root domain’s registers , , , and (Sections
-#sec:AdvPLIC-reg-mmsiaddrcfg[1.5.3]
-and #sec:AdvPLIC-reg-smsiaddrcfg[1.5.4]) may be used to configure the
+addresses. In that case, the root domain's registers `mmsiaddrcfg`, `mmsiaddrcfgh`, `smsiaddrcfg`, and `smsiaddrcfgh` <<AdvPLIC-reg-mmsiaddrcfg>>
+and <<AdvPLIC-reg-smsiaddrcfg>> may be used to configure the
 MSI addresses for all interrupt domains. Alternatively MSI addresses may
 be configured by some custom means outside this standard. If MSI target
 addresses must be configured by software, this should be done only from
@@ -1211,18 +1208,18 @@ a suitably privileged execution mode, typically just once, early after
 system reset.
 
 For a machine-level interrupt domain, if MSI target addresses are
-determined by and , then the address for an outgoing MSI for interrupt
-source latexmath:[$i$] is computed from those registers and from the
+determined by `mmsiaddrcfg` and `mmsiaddrcfgh`, then the address for an outgoing MSI for interrupt
+source latexmath:[$i$] is computed from those registers and from the
 Hart Index field of register as follows:
+[%autowidth,float="center",align="center",cols="<",grid=none,frame=none]
+|===
+|latexmath:[$g = (Hart Index>>LHXW){\text{&}}({2}^{HHXW}-{1})$]
+|latexmath:[$h = {Hart Index \text{&} } ({2}^{LHXW}-1)$]
+|latexmath:[$MSI address = {Base PPN | }({g}<<(HHXS+12))| (h<<LHXS)<<12$]
+|===
 
-latexmath:[$g =
-  (\mbox{Hart Index\z{>>}LHXW})\mbox{ \z{\&} }(\mbox{2}^{\rm HHXW}-\mbox{1})$] +
-latexmath:[$h = \mbox{Hart Index \z{\&} }(\mbox{2}^{\rm LHXW}-\mbox{1})$] +
-latexmath:[$\mbox{MSI address} =
-  \bigl(\,
-    \mbox{Base PPN \z{|} }(g\mbox{\z{<<}}(\mbox{HHXS}+\mbox{12}))
-      \mbox{ \z{|} }(h\mbox{\z{<<}LHXS})
-  \,\bigr)\mbox{\z{<<}12}$]
+
+
 
 Here, latexmath:[$\,k$] and latexmath:[$\,k$] represent shifting left
 and right by latexmath:[$k$] bits, an ampersand () represents bitwise
