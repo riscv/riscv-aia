@@ -593,6 +593,6 @@ written roughly as follows:
 
 The combined read and write of `mtopei` or `stopei` in the second step can be done by a single CSRRW machine instruction,
 
-    `csrrw` _rd_, `mtopei/stopei`, `x0`
+`csrrw` _rd_, `mtopei/stopei`, `x0`
 
 where _rd_ is the destination register for value _i_.
