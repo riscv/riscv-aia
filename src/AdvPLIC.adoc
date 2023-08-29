@@ -1221,47 +1221,38 @@ Hart Index field of register as follows:
 
 
 
-Here, latexmath:[$\,k$] and latexmath:[$\,k$] represent shifting left
-and right by latexmath:[$k$] bits, an ampersand () represents bitwise
-logical AND, and a vertical bar () represents bitwise logical OR.
-Assuming the recommendations of
-Section #sec:IMSIC-systemMemRegions[[sec:IMSIC-systemMemRegions]] are
-followed for the arrangement of IMSIC interrupt files in the machine’s
+Here, latexmath:[<<k$] and latexmath:[>>k$] represent shifting left
+and right by latexmath:[$k$] bits, an ampersand (&) represents bitwise
+logical AND, and a vertical bar (|) represents bitwise logical OR.
+Assuming the recommendations of <<IMSIC-systemMemRegions>> are
+followed for the arrangement of IMSIC interrupt files in the machine's
 address space, value latexmath:[$g$] is intended to be the number of a
-hart group (always zero if HHXW = 0), while latexmath:[$h$] is the
+hart group (always zero if HHXW = 0), while latexmath:[$h$] is the
 number of the target hart within that group. Represented in the terms of
-Section #sec:IMSIC-systemMemRegions[[sec:IMSIC-systemMemRegions]], HHXW
-= latexmath:[$j$], LHXW = latexmath:[$k$], HHXS = latexmath:[${E-24}$],
-LHXS = latexmath:[${C-12}$], and Base PPN = latexmath:[$A$]12.
+<<IMSIC-systemMemRegions>>, HHXW = latexmath:[$j$], LHXW = latexmath:[$k$], HHXS = latexmath:[${E-24}$], LHXS = latexmath:[${C-12}$], and Base PPN = latexmath:[$A$]12.
 
 For a supervisor-level domain, if MSI target addresses are determined by
-the root domain’s configuration registers ( and others), then to
+the root domain's configuration registers ( and others), then to
 construct the address for an outgoing MSI for interrupt
-source latexmath:[$i$], the Hart Index from register must first be
+source latexmath:[$i$], the Hart Index from register must first be
 converted into the index number that machine-level domains use for the
 same hart. (These numbers are often the same, but they may not be.) The
 address for the MSI is then computed using this machine-level hart index
 together with the Base PPN and LHXS values from and , the other fields
 (HHXW, LHXW, and HHXS) from , and the Guest Index from , as follows:
 
-latexmath:[$g =
-  (\mbox{machine-level hart index\z{>>}LHXW})
-    \mbox{ \z{\&} }(\mbox{2}^{\rm HHXW}-\mbox{1})$] +
-latexmath:[$h = \mbox{machine-level hart index \z{\&} }(\mbox{2}^{\rm LHXW}-\mbox{1})$] +
-latexmath:[$\mbox{MSI address} =
-  \bigl(\,
-    \mbox{Base PPN \z{|} }(g\mbox{\z{<<}}(\mbox{HHXS}+\mbox{12}))
-      \mbox{ \z{|} }(h\mbox{\z{<<}LHXS})\mbox{ \z{|} Guest Index}
-  \,\bigr)\mbox{\z{<<}12}$]
+[%autowidth,float="center",align="center",cols="<",grid=none,frame=none]
+|===
+|latexmath:[$g = ({machine-level hart index\z{>>}LHXW}){ \z{\&} }({2}^{\rm HHXW}-{1})$]
+|latexmath:[$h = {machine-level hart index \z{\&} }({2}^{\rm LHXW}-{1})$] +
+|latexmath:[$\mbox{MSI address} = \bigl(\,{Base PPN \z{|} }(g{\z{<<}}({HHXS}+{12})){ \z{|} }(h{\z{<<}LHXS}){ \z{|} Guest Index}\,\bigr){\z{<<}12}$]
+|===
 
 Represented in the terms of
-Section #sec:IMSIC-systemMemRegions[[sec:IMSIC-systemMemRegions]], HHXW
-= latexmath:[$j$], LHXW = latexmath:[$k$], HHXS = latexmath:[${E-24}$],
-LHXS = latexmath:[${D-12}$], and Base PPN = latexmath:[$B$]12.
+<<IMSIC-systemMemRegions>>, HHXW = latexmath:[$j$], LHXW = latexmath:[$k$], HHXS = latexmath:[${E-24}$], LHXS = latexmath:[${D-12}$], and Base PPN = latexmath:[$B$]12.
 
-The data for an outgoing MSI write is taken from the EIID field of ,
-zero-extended to 32 bits. An MSI’s 32-bit data is always written in
-little-endian byte order, regardless of the BE field of the domain’s
+The data for an outgoing MSI write is taken from the EIID field of `target[latexmath:[$i$]]`, zero-extended to 32 bits. An MSI's 32-bit data is always written in
+little-endian byte order, regardless of the BE field of the domain's `domaincfg`
 register.
 
 ==== Special consideration for level-sensitive interrupt sources
@@ -1274,7 +1265,7 @@ constant stream of repeated MSIs from the APLIC to the target hart for
 the same interrupt. However, after an interrupt service routine has
 addressed a cause found for the interrupt, the incoming interrupt wire
 might remain asserted at the APLIC for another reason, despite that the
-interrupt’s pending bit at the APLIC was cleared and will remain so
+interrupt's pending bit at the APLIC was cleared and will remain so
 without intervention from software. If the interrupt service routine
 then exits without further action, a continued interrupt from this
 source might never receive attention.
@@ -1284,7 +1275,7 @@ for a level-sensitive interrupt may do one of the following before
 exiting:
 
 The first option is to test whether the interrupt wire into the APLIC is
-still asserted, by reading the appropriate register at the APLIC. If the
+still asserted, by reading the appropriate `in_clrip` register at the APLIC. If the
 incoming interrupt is still asserted, the body of the interrupt service
 routine may be repeated to find and address an additional interrupt
 cause before the source wire is tested again. Once the incoming wire is
@@ -1293,17 +1284,17 @@ any new interrupt assertion will cause the pending bit to become set and
 a new MSI sent to the hart.
 
 A second option is for the interrupt service routine to write the
-APLIC’s source identity number for the interrupt to the domain’s
-register just before exiting. This will cause the interrupt’s pending
+APLIC's source identity number for the interrupt to the domain's `swtipnum`
+register just before exiting. This will cause the interrupt's pending
 bit to be set to one again if the source is still asserting an
 interrupt, but not if the source is not asserting an interrupt.
 
-[[sec:AdvPLIC-MSISync]]
+[[AdvPLIC-MSISync]]
 ==== Synchronizing interactions between a hart and the APLIC
 
 When an APLIC sends an MSI to a hart, there is an unspecified travel
-delay before the MSI is observed at the hart’s IMSIC. Consequently,
-after an APLIC’s configuration is changed by writing to an APLIC
+delay before the MSI is observed at the hart's IMSIC. Consequently,
+after an APLIC's configuration is changed by writing to an APLIC
 register, harts may continue to see MSIs arrive from the APLIC from the
 time before the write, for an unspecified amount of time.
 
@@ -1314,27 +1305,27 @@ may involve reconfiguring one or more APLICs. Even after the APLICs are
 reconfigured, the hart still cannot be safely turned off until it is
 known no more MSIs are destined for it.
 
-The register (Section #sec:AdvPLIC-reg-genmsi[1.5.15]) exists to allow
+The `genmsi` register (<<AdvPLIC-reg-genmsi>>]) exists to allow
 software to determine when all earlier MSIs have arrived at a hart. To
-use for this purpose, software can dedicate one external interrupt
-identity at each hart’s IMSIC interrupt file solely for APLIC
-synchronization. Assuming there are multiple harts, an APLIC’s register
+use `genmsi` for this purpose, software can dedicate one external interrupt
+identity at each hart's IMSIC interrupt file solely for APLIC
+synchronization. Assuming there are multiple harts, an APLIC's `genmsi` register
 should also be protected by a standard mutual-exclusion lock. The
 following sequence can then be used to synchronize between an APLIC and
 a specific hart:
 
-. At the hart’s IMSIC, clear the pending bit for the specific minor
+. At the hart's IMSIC, clear the pending bit for the specific minor
 interrupt identity latexmath:[$i$] used exclusively for APLIC
 synchronization.
-. Acquire the shared lock for the APLIC’s register.
-. Write to generate an MSI to the hart with interrupt
-identity latexmath:[$i$].
-. Repeatedly read until bit Busy is false.
-. Release the lock for .
+. Acquire the shared lock for the APLIC's `genmsi` register.
+. Write `genmsi` to generate an MSI to the hart with interrupt
+identity latexmath:[$i$].
+. Repeatedly read `genmsi` until bit Busy is false.
+. Release the lock for `genmsi`.
 . Repeatedly read the pending bit for minor interrupt identity
-latexmath:[$i$] at the hart’s IMSIC until it is found set.
+latexmath:[$i$] at the hart's IMSIC until it is found set.
 
 The loops of steps 4 and 6 are expected normally to succeed very
 quickly, often on the first or second attempt. When this sequence is
 complete, all earlier MSIs from the APLIC must also have arrived at the
-hart’s IMSIC.
+hart's IMSIC.
