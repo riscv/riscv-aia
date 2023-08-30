@@ -1,17 +1,16 @@
-[[ch:MSLevel]]
+[[MSLevel]]
 == Interrupts for Machine and Supervisor Levels
 
-The Privileged Architecture defines several major identities in the
-range 0–15 for interrupts at a hart, including machine-level and
-supervisor-level external interrupts (numbers 11 and 9), machine- and
-supervisor-level timer interrupts (7 and 5), and machine- and
-supervisor-level software interrupts (3 and 1). Beyond these major
+The RISC-V Privileged Architecture defines several major identities in the
+range 0-15 for interrupts at a hart, including machine-level and
+supervisor-level external interrupts (numbers 11 and 9), machine- and
+supervisor-level timer interrupts (7 and 5), and machine- and
+supervisor-level software interrupts (3 and 1). Beyond these major
 labels, the _external_ interrupts at each privilege level are given
 secondary, minor identities by an external interrupt controller such as
 an APLIC or IMSIC, distinguishing interrupts from different devices or
 causes. These minor identities for external interrupts were covered in
-Chapters #ch:IMSIC[[ch:IMSIC]] and #ch:AdvPLIC[[ch:AdvPLIC]] specifying
-the IMSIC and APLIC components.
+<<IMSIC>> and <<AdvPLIC>> specifying the IMSIC and APLIC components.
 
 The Advanced Interrupt Architecture reserves another 24 major interrupt
 identities for additional _local interrupts_ that arise within or in
@@ -25,43 +24,72 @@ interrupts (such as the timer and software interrupts, and any local
 interrupts) such that they may mix with the priorities set for external
 interrupts by a PLIC, APLIC, or IMSIC.
 
-[[sec:majorIntrs]]
+[[majorIntrs]]
 === Defined major interrupts and default priorities
 
-Table #tab:majorIntrs[[tab:majorIntrs]] lists all the major interrupts
+<<TablemajorIntrs>> lists all the major interrupts
 currently defined for harts that conform to this Advanced Interrupt
 Architecture (AIA). Besides the major interrupts specified by the
-Privileged Architecture, the AIA adds interrupt numbers 35 and 43 as
+RISC-V Privileged Architecture, the AIA adds interrupt numbers 35 and 43 as
 local interrupts for low- and high-priority _RAS events_.
 
-[cols="^,<,<",]
+[[TablemajorIntrs]]
+.The standard major interrupt codes, listed in default priority order
+[%autowidth,float="center",align="center",cols="1^,2<,3<"]
 |===
-|Default | |
-|priority order |Major interrupt numbers |Description
-|Highest |43 |Local interrupt: high-priority RAS event
-| |11, 3, 7 |Machine interrupts: external, software, timer
-| | 9, 1, 5 |Supervisor interrupts: external, software, timer
-| |12 |Supervisor guest external interrupt
-| |10, 2, 6 |VS interrupts: external, software, timer
-| |13 |Local interrupt: counter overflow
-|Lowest |35 |Local interrupt: low-priority RAS event
+|Default priority order |Major interrupt numbers ^|Description
+.5+.<|Highest +
+ +
+ +
+ +
+ +
+Lowest
+|43 |Local interrupt: high-priority RAS event
+<|11, 3, 7 +
+9, 1, 5 +
+12 +
+10, 2, 6 +
+13
+|Machine interrupts: external, software, timer +
+Supervisor interrupts: external, software, timer +
+Supervisor guest external interrupt +
+VS interrupts: external, software, timer +
+Local interrupt: counter overflow
+|35 |Local interrupt: low-priority RAS event
+|===
+
+[[TablemajorIntrCategories]]
+.Categorization of current and future major interrupts.
+[%autowidth,float="center",align="center",cols="2<,3<"]
+|===
+|Major interrupt numbers ^|Category
+|0-12 +
+13-15|Not Local interrupts }  Assigned by the +
+Local interrupts }      Privileged Architecture
+<|16-23 +
+24-31 +
+32-47 +
+&#8805; 48
+|Local interrupts +
+_Deisgnated for custom use_ +
+Local interrupts +
+_Designated for custom use_
 |===
 
 Of the major interrupts controlled by the Privileged Architecture
-(numbers 0–15), the AIA categorizes the counter overflow interrupt
-(code 13) as a _local interrupt_. It is assumed furthermore that any
+(numbers 0-15), the AIA categorizes the counter overflow interrupt
+(code 13) as a _local interrupt_. It is assumed furthermore that any
 future definitions for reserved interrupt numbers 14 and 15 will also be
 local interrupts. Besides the two RAS interrupts, the AIA additionally
-reserves major interrupt numbers in the ranges 16–23 and 32–47 for
-standard local interrupts that other extensions may define. The
+reserves major interrupt numbers in the ranges 16-23 and 32-47 for
+standard local interrupts that other RISC-V extensions may define. The
 remaining major interrupts allocated to the Privileged Architecture,
-numbers 0–12, are categorized as not local interrupts. Taken altogether,
-Table #tab:majorIntrCategories[[tab:majorIntrCategories]] summarizes the
-AIA’s categorization of all major interrupt identities.
+numbers 0-12, are categorized as not local interrupts. Taken altogether,
+<<TablemajorIntrCategories>> summarizes the AIA's categorization of all major interrupt identities.
 
 _RAS_ is an abbreviation for _Reliability, Availability, and
 Serviceability_. Typically a RAS event corresponds to the detection of
-corrupted data (e.g. as a result of a soft or hard error) and/or the use
+corrupted data (e.g. as a result of a soft or hard error) and/or the use
 of such data. The high-priority RAS event local interrupt may, for
 example, signal an occurrence of an urgent uncorrected error that needs
 action from a RAS error handler to contain the error and, if possible,
@@ -83,28 +111,15 @@ As always, platform standards may further constrain how a system reports
 events, whether RAS events or other.
 
 For the standard local interrupts not defined by the Privileged
-Architecture (numbers 16–23 and 32–47), the current plan is to assign
+Architecture (numbers 16-23 and 32-47), the current plan is to assign
 default priorities in the order shown in this table:
 
-[cols="^,<,<",]
-|===
-|Highest |47, 23, 46, 45, 22, 44, |
-| |43, 21, 42, 41, 20, 40 |
-| |11, 3, 7 |Machine interrupts: external, software, timer
-| | 9, 1, 5 |Supervisor interrupts: external, software, timer
-| |12 |Supervisor guest external interrupt
-| |10, 2, 6 |VS interrupts: external, software, timer
-| |13 |Counter overflow interrupt
-| |39, 19, 38, 37, 18, 36, |
-|Lowest |35, 17, 34, 33, 16, 32 |
-|===
-
-Among interrupts 16–23, a higher interrupt number conveys higher default
-priority, and likewise for interrupts 32–47. These two groups are
+Among interrupts 16-23, a higher interrupt number conveys higher default
+priority, and likewise for interrupts 32-47. These two groups are
 interleaved together in the complete order, and the Privileged
-Architecture’s standard interrupts, 0–15, are inserted into the middle
+Architecture's standard interrupts, 0-15, are inserted into the middle
 of the sequence. This proposed default priority order is arranged so
-that interrupts 0–31 can potentially be an adequate subset on their own
+that interrupts 0-31 can potentially be an adequate subset on their own
 for 32-bit systems.
 
 In actuality, future extensions may or may not stick to this plan for
