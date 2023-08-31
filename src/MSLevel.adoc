@@ -130,7 +130,7 @@ of the sequence. This proposed default priority order is arranged so
 that interrupts 0-31 can potentially be an adequate subset on their own
 for 32-bit RISC-V systems.
 
-In actuality, future RISC-V extensions may or may not stick to this plan for
+In actualitmajorIntrsy, future RISC-V extensions may or may not stick to this plan for
 the default priority order of interrupts they define.
 
 '''
@@ -177,174 +177,210 @@ assigned the same priority number.
 === Interrupts at machine level
 
 For whichever standard local interrupts are implemented, the
-corresponding bits in CSRs and must be writable, and the corresponding
-bits in (if that CSR exists because supervisor mode is implemented) must
+corresponding bits in CSRs `mip` and `mie`  must be writable, and the corresponding
+bits in `mideleg` (if that CSR exists because supervisor mode is implemented) must
 each either be writable or be hardwired to zero. An occurrence of a
-local interrupt event causes the interrupt-pending bit in to be set to
+local interrupt event causes the interrupt-pending bit in `mip` to be set to
 one. This bit then remains set until cleared by software.
 
-As established by the Privileged Architecture, an interrupt traps to
-M-mode whenever all of the following are true: (a) either the current
+As established by the RISC-V Privileged Architecture, an interrupt traps to
+M-mode whenever all of the following are true: (a) either the current
 privilege mode is M-mode and machine-level interrupts are enabled by the
-MIE bit of , or the current privilege mode has less privilege than
-M-mode; (b) matching bits in and are both one; and (c) if exists, the
-corresponding bit in is zero.
+MIE bit of `mstatus`, or the current privilege mode has less privilege than
+M-mode; (b) matching bits in `mip` and `mie` are both one; and (c) if `mideleg` exists, the corresponding bit in `mideleg` is zero.
 
 When multiple interrupt causes are ready to trigger simultaneously, the
 interrupt taken first is determined by priority order, which may be the
-default order specified in the previous section (#sec:majorIntrs[1.1]),
-or may be a modified order configured by software.
+default order specified in the previous section <<majorIntrs>>, or may be a modified order configured by software.
 
-[[sec:intrPrios-M]]
+[[intrPrios-M]]
 ==== Configuring priorities of major interrupts at machine level
 
-The machine-level priorities for major interrupts 0–63 may be configured
-by a set of registers accessed through the and CSRs introduced in
-Chapter #ch:CSRs[[ch:CSRs]]. When XLEN = 32, sixteen of these registers
-are defined, listed below with their addresses:
+The machine-level priorities for major interrupts 0-63 may be configured
+by a set of registers accessed through the `miselect` and `mireg` CSRs introduced in
+<<CSRs>>. When XLEN = 32, sixteen of these registers are defined, listed below with their `miselect` addresses:
 
-& +
-& +
-…&  … +
-& +
+[%autowidth,float="center",align="center",cols="<m,<m",grid=none,frame=none]
+|===
+|0x30 |iprio0
+|0x31 |iprio1
+| ... |  ...
+|0x3F |iprio15
+|===
 
 Each register controls the priorities of four interrupts, with one 8-bit
-byte per interrupt. For a number latexmath:[$k$] in the range 0–15,
+byte per interrupt. For a number latexmath:[$k$] in the range 0-15,
 register latexmath:[$k$] controls the priorities of interrupts
-latexmath:[$k\times\mbox{4}$] through
-latexmath:[${k\times\mbox{4}+\mbox{3}}$], formatted as follows:
+latexmath:[$k\times{4}$] through
+latexmath:[${k\times{4}+{3}}$], formatted as follows:
 
-bits 7:0 & Priority number for interrupt latexmath:[$k\times\mbox{4}$] +
-bits 15:8 & Priority number for interrupt
-latexmath:[$k\times\mbox{4}+\mbox{1}$] +
-bits 23:16 & Priority number for interrupt
-latexmath:[$k\times\mbox{4}+\mbox{2}$] +
-bits 31:24 & Priority number for interrupt
-latexmath:[$k\times\mbox{4}+\mbox{3}$] +
+[%autowidth,float="center",align="center",cols="<m,<m",grid=none,frame=none]
+|===
+|bits 7:0 |Priority number for interrupt latexmath:[$k\times{4}$]
+|bits 15:8 |Priority number for interrupt latexmath:[$k\times{4}+{1}$]
+|bits 23:16 |Priority number for interrupt latexmath:[$k\times{4}+{2}$]
+|bits 31:24 |Priority number for interrupt latexmath:[$k\times{4}+{3}$]
+|===
 
-When XLEN = 64, only the even-numbered registers exist:
+When XLEN = 64, only the even-numbered registers exist:
 
-& +
-& +
-…&  … +
-& +
+[%autowidth,float="center",align="center",cols="<m,<m",grid=none,frame=none]
+|===
+|0x30 |iprio0
+|0x32 |iprio2
+^|... ^|...
+|0x3E |iprio14
+|===
 
 Each register controls the priorities of eight interrupts. For
-even latexmath:[$k$] in the range 0–14, register latexmath:[$k$]
-controls the priorities of interrupts latexmath:[$k\times\mbox{4}$]
-through latexmath:[${k\times\mbox{4}+\mbox{7}}$], formatted as follows:
+even latexmath:[$k$] in the range 0-14, register latexmath:[$k$]
+controls the priorities of interrupts latexmath:[$k\times{4}$]
+through latexmath:[${k\times{4}+{7}}$], formatted as follows:
 
-bits 7:0 & Priority number for interrupt latexmath:[$k\times\mbox{4}$] +
-bits 15:8 & Priority number for interrupt
-latexmath:[$k\times\mbox{4}+\mbox{1}$] +
-bits 23:16 & Priority number for interrupt
-latexmath:[$k\times\mbox{4}+\mbox{2}$] +
-bits 31:24 & Priority number for interrupt
-latexmath:[$k\times\mbox{4}+\mbox{3}$] +
-bits 39:32 & Priority number for interrupt
-latexmath:[$k\times\mbox{4}+\mbox{4}$] +
-bits 47:40 & Priority number for interrupt
-latexmath:[$k\times\mbox{4}+\mbox{5}$] +
-bits 55:48 & Priority number for interrupt
-latexmath:[$k\times\mbox{4}+\mbox{6}$] +
-bits 63:56 & Priority number for interrupt
-latexmath:[$k\times\mbox{4}+\mbox{7}$] +
+[%autowidth,float="center",align="center",cols="<m,<m",grid=none,frame=none]
+|===
+|bits 7:0 |Priority number for interrupt latexmath:[$k\times{4}$]
+|bits 15:8 |Priority number for interrupt latexmath:[$k\times{4}+{1}$]
+|bits 23:16 |Priority number for interrupt latexmath:[$k\times{4}+{2}$]
+|bits 31:24 |Priority number for interrupt latexmath:[$k\times{4}+{3}$]
+|bits 39:32 |Priority number for interrupt latexmath:[$k\times{4}+{4}$]
+|bits 47:40 |Priority number for interrupt latexmath:[$k\times{4}+{5}$]
+|bits 55:48 |Priority number for interrupt latexmath:[$k\times{4}+{6}$]
+|bits 63:56 |Priority number for interrupt latexmath:[$k\times{4}+{7}$]
+|===
 
-When XLEN = 64 and is an odd value in the range –, attempting to access
-raises an illegal instruction exception.
+When XLEN = 64 and `miselect` is an odd value in the range `0x31`-`ox3F`, attempting to access `mireg` raises an illegal instruction exception.
 
-The valid registers – are known collectively as the _`iprio` array_ for
-machine level.
+The valid registers `iprio0`-`iprio15` are known collectively as the `_iprio_` _array_ for machine level.
 
 The width of priority numbers for external interrupts is _IPRIOLEN_.
 This parameter is affected by the main external interrupt controller for
 the hart, whether a PLIC, APLIC, or IMSIC.
 
-For an APLIC, IPRIOLEN is in the range 1–8 as specified in
-Chapter #ch:AdvPLIC[[ch:AdvPLIC]] on the APLIC.
+For an APLIC, IPRIOLEN is in the range 1-8 as specified in <<AdvPLIC>> on the APLIC.
 
-For an IMSIC, IPRIOLEN is 6, 7, or 8. IPRIOLEN may be 6 only if the
-number of external interrupt identities implemented by the IMSIC is 63.
+For an IMSIC, IPRIOLEN is 6, 7, or 8. IPRIOLEN may be 6 only if the
+number of external interrupt identities implemented by the IMSIC is 63.
 IPRIOLEN may be 7 only if the number of external interrupt identities
 implemented by the IMSIC is no more than 127. IPRIOLEN may be 8 for any
 IMSIC, regardless of the number of external interrupt identities
 implemented.
 
-Each byte of a valid latexmath:[$k$] register is either a read-only zero
-or a unsigned integer field implementing exactly IPRIOLEN bits. For a
-given interrupt number, if the corresponding bit in is read-only zero,
-then the interrupt’s priority number in the array must be read-only zero
+Each byte of a valid ``iprio``latexmath:[$k$] register is either a read-only zero
+or a *WARL* unsigned integer field implementing exactly IPRIOLEN bits. For a
+given interrupt number, if the corresponding bit in `mie` is read-only zero,
+then the interrupt's priority number in the `iprio` array must be read-only zero
 as well. The priority number for a machine-level external interrupt
-(bits 31:24 of register ) must also be read-only zero. Aside from these
+(bits 31:24 of register `iprio2`) must also be read-only zero. Aside from these
 two restrictions, implementations may freely choose which priority
 number fields are settable and which are read-only zeros. If all bytes
-in the array are read-only zeros, priorities can be configured only for
+in the `iprio` array are read-only zeros, priorities can be configured only for
 external interrupts, not for any other interrupts.
 
+[NOTE]
+====
 Platform standards may require that priorities be configurable for
 certain interrupt causes.
+====
 
-The array accessed via and affects the prioritization of interrupts only
-when they trap to M-mode. When an interrupt’s priority number in the
+The `iprio` array accessed via `miselect` and `mireg` affects the prioritization of interrupts only when they trap to M-mode. When an interrupt’s priority number in the
 array is zero (either read-only zero or set to zero), its priority is
-the default order from Section #sec:majorIntrs[1.1]. Setting an
-interrupt’s priority number instead to a nonzero value latexmath:[$p$]
+the default order from <<majorIntrs>>. Setting an
+interrupt's priority number instead to a nonzero value latexmath:[$p$]
 gives that interrupt nominally the same priority as a machine-level
-external interrupt with priority number latexmath:[$p$]. For a major
+external interrupt with priority number latexmath:[$p$]. For a major
 interrupt that defaults to a higher priority than machine external
 interrupts, setting its priority number to a nonzero value _lowers_ its
 priority. For a major interrupt that defaults to a lower priority than
 machine external interrupts, setting its priority number to a nonzero
 value _raises_ its priority. When two interrupt causes have been
 assigned the same nominal priority, ties are broken by the default
-priority order. Table #tab:intrPrios-M[[tab:intrPrios-M]] summarizes the
-effect of priority numbers on interrupt priority.
+priority order. <<TableintrPrios-M>> summarizes the effect of priority numbers on interrupt priority.
 
-[cols="^,^,^,^",]
+[%autowidth.stretch,%header,float="center",align="center",cols="^,^,^,^"]
 |===
-| |Interrupts with default |Machine external |Interrupts with default
-| |priority above machine |interrupts |priority below machine
-| |external interrupts | |external interrupts
-| |Priority number in |Priority number from |Priority number in
-|Priority |machine-level |interrupt controller |machine-level
-|order |array |(APLIC or IMSIC) |array
-|Highest |0 | |
-| |1 |1 |1
-| |2 |2 |2
-| |latexmath:[$\cdots$] |latexmath:[$\cdots$] |latexmath:[$\cdots$]
-| |254 |254 |254
-| |255 |255 |255
-| | |256 and above |
-| | |(IMSIC only) |
-|Lowest | | |0
+||Interrupts with default
+priority above machine
+external interrupts |Machine external
+interrupts |Interrupts with default
+priority below machine
+external interrupts 
+|Priority +
+order|Priority number in machine-level `iprio` array
+|Priority number from
+interrupt controller
+(APLIC or IMSIC) |Priority number in
+machine-level
+`iprio` array 
+|===
+[[TableintrPrios-M]]
+.Effect of the machine-level iprio array on the priorities of interrupts taken in M-mode. For interrupts with the same priority number, the default order of <<majorIntrs>> prevails.
+[%autowidth.stretch,%header,float="center",align="center",cols="^,^,^,^"]
+|===
+.4+|Highest +
+ +
+ +
+ +
+ +
+ +
+ +
+ +
+ +
+ +
+ +
+ +
+ +
+ +
+ Lowest
+|0 ||
+|1 +
+2 +
+... +
+254 +
+255
+|1 +
+2 +
+... +
+254 +
+255
+|1 +
+2 +
+... +
+254 +
+255
+||256 and above (IMSIC only)|
+|||0
 |===
 
+[NOTE]
+====
 When a hart has an IMSIC supporting more than 255 minor identities for
 external interrupts, the only non-default priorities that can be
 configured for other interrupts are those corresponding to external
-interrupt identities 1–255, not those of identities 256 or higher.
+interrupt identities 1-255, not those of identities 256 or higher.
 
 Implementing the priority configurability of this section requires that
-a hart’s external interrupt controller communicate to the hart not only
+a RIC-V hart's external interrupt controller communicate to the hart not only
 the existence of a pending-and-enabled external interrupt but also the
-interrupt’s priority number. Typically this implies that the width of
+interrupt's priority number. Typically this implies that the width of
 the connection for signaling an external interrupt to the hart is not
-just a single wire as usual but now latexmath:[$\mbox{IPRIOLEN} + 1$]
+just a single wire as usual but now latexmath:[${IPRIOLEN} + 1$]
 wires.
 
 It is expected that many systems will forego priority configurability of
 major interrupts and simply have the array be all read-only zeros.
 Systems that need this priority configurability can try to arrange for
-each hart’s external interrupt controller to be relatively close to the
+each hart's external interrupt controller to be relatively close to the
 hart, by, for example, limiting the system to at most a few small cores
 connected to an APLIC, or alternatively by giving every hart its own
 IMSIC.
+====
 
 If supported, setting the priority number for supervisor-level external
-interrupts (bits 15:8 of ) to a nonzero value latexmath:[$p$] has the
+interrupts (bits 15:8 of `iprio2`) to a nonzero value latexmath:[$p$] has the
 effect of giving the entire category of supervisor external interrupts
 nominally the same priority as a machine external interrupt with
-priority number latexmath:[$p$]. But note that this applies only to the
+priority number latexmath:[$p$]. But note that this applies only to the
 case when supervisor external interrupts trap to M-mode.
 
 (Because supervisor guest external interrupts and VS-level external
@@ -353,82 +389,90 @@ hypervisor extension is implemented, the machine-level priority numbers
 for these interrupts are always ignored and should be read-only zeros.)
 
 If the system has an original PLIC for backward compatibility with older
-software, reset should initialize the machine-level array to all zeros.
+software, reset should initialize the machine-level `iprio` array to all zeros.
 
-[[sec:mtopi]]
-==== Machine top interrupt CSR ()
+[[mtopi]]
+==== Machine top interrupt CSR (`mtopi`)
 
-Machine-level CSR is read-only with width MXLEN. A read of returns
+Machine-level CSR `mtopi` is read-only with width MXLEN. A read of `mtopi` returns
 information about the highest-priority pending-and-enabled interrupt for
 machine level, in this format:
 
-bits 27:16 & IID +
-bits 7:0 & IPRIO +
+[%autowidth,float="center",align="center",cols="<m,<m",grid=none,frame=none]
+|===
+|bits 27:16 |IID
+|bits 7:0 |IPRIO
+|===
 
-All other bits of are reserved and read as zeros.
+All other bits of `mtopi` are reserved and read as zeros.
 
-The value of is zero unless there is an interrupt pending in and enabled
-in that is not delegated to a lower privilege level. When there is a
+The value of `mtopi` is zero unless there is an interrupt pending in `mip` and enabled
+in `mie` that is not delegated to a lower privilege level. When there is a
 pending-and-enabled major interrupt for machine level, field IID
 (Interrupt Identity) is the major identity number of the
 highest-priority interrupt, and field IPRIO indicates its priority.
 
-If all bytes of the machine-level array are read-only zeros, a
+If all bytes of the machine-level `iprio` array are read-only zeros, a
 simplified implementation of field IPRIO is allowed in which its value
 is always 1 whenever is not zero.
 
-Otherwise, when is not zero, if the priority number for the reported
+Otherwise, when `mtopi` is not zero, if the priority number for the reported
 interrupt is in the range 1 to 255, IPRIO is simply that number. If the
-interrupt’s priority number is zero or greater than 255, IPRIO is set to
+interrupt's priority number is zero or greater than 255, IPRIO is set to
 either 0 or 255 as follows:
 
-* If the interrupt’s priority number is greater than 255, then IPRIO is
+* If the interrupt's priority number is greater than 255, then IPRIO is
 255 (lowest priority).
-* If the interrupt’s priority number is zero and interrupt number IID
+* If the interrupt's priority number is zero and interrupt number IID
 has a default priority higher than a machine external interrupt, then
 IPRIO is 0 (highest priority).
-* If the interrupt’s priority number is zero and interrupt number IID
+* If the interrupt's priority number is zero and interrupt number IID
 has a default priority lower than a machine external interrupt, then
 IPRIO is 255 (lowest priority).
 
-To ensure that is never zero when an interrupt is pending and enabled
-for machine level, if major interrupt 0 can trap to M-mode, it must have
+[NOTE]
+====
+To ensure that `mtopi` is never zero when an interrupt is pending and enabled
+for machine level, if major interrupt 0 can trap to M-mode, it must have
 a default priority lower than a machine external interrupt.
+====
 
-The value of is not affected by the global interrupt enable MIE in CSR .
+The value of `mtopi` is not affected by the global interrupt enable MIE in CSR `mstatus`.
 
-The Privileged Architecture ensures that, when the value of is not zero,
+The RISC-V Privileged Architecture ensures that, when the value of `mtopi` is not zero,
 a trap is taken to M-mode for the interrupt indicated by field IID if
-either the current privilege mode is M and .MIE is one, or the current
+either the current privilege mode is M and `mstatus`.MIE is one, or the current
 privilege mode has less privilege than M-mode. The trap itself does not
-cause the value of to change.
+cause the value of `mtopi` to change.
 
 The following pseudocode shows how a machine-level trap handler might
-read to avoid redundant restoring and saving of processor registers when
+read `mtopi` to avoid redundant restoring and saving of processor registers when
 an interrupt arrives during the handling of another trap (either a
 synchronous exception or an earlier interrupt):
 
-save processor registers +
-read CSR +
- +
-handle synchronous exception +
-restore if necessary +
- +
- +
-loop +
-read CSR +
-exit loop +
- +
-call the interrupt handler for major interrupt +
- +
- +
-restore processor registers +
-return from trap +
+[,c]
+----
+save processor registers
+i = read CSR mcause
+if (i >= 0) {
+    handle synchronous exception i
+    restore mstatus if necessary
+}
+if (mstatus.MPIE == 1) {
+    loop {
+        i = read CSR mtopi
+        if (i == 0) exit loop
+        i = i>>16
+        call the interrupt handler for major interrupt
+    }
+}
+restore processor registers
+return from trap
+----
 
-(This example can be further optimized, but with an increase in
-complexity.)
+(This example can be further optimized, but with an increase in complexity.)
 
-[[sec:virtIntrs-S]]
+[[virtIntrs-S]]
 === Interrupt filtering and virtual interrupts for supervisor level
 
 When supervisor mode is implemented, the Advanced Interrupt Architecture
