@@ -35,22 +35,26 @@ local interrupts for low- and high-priority _RAS events_.
 
 [[TablemajorIntrs]]
 .The standard major interrupt codes, listed in default priority order
-[%autowidth,float="center",align="center",cols="1^,2<,3<"]
+[%autowidth,%header,float="center",align="center",cols="1^,2<,3<"]
 |===
 |Default priority order |Major interrupt numbers ^|Description
-.5+.<|Highest +
+
+.7+.<|Highest +
+ +
+ +
+ +
  +
  +
  +
  +
 Lowest
 |43 |Local interrupt: high-priority RAS event
-<|11, 3, 7 +
++<|11, 3, 7 +
 9, 1, 5 +
 12 +
 10, 2, 6 +
 13
-|Machine interrupts: external, software, timer +
++|Machine interrupts: external, software, timer +
 Supervisor interrupts: external, software, timer +
 Supervisor guest external interrupt +
 VS interrupts: external, software, timer +
@@ -101,6 +105,8 @@ the two local interrupts defined for this purpose. Systems are free to
 report any or all RAS events another way, such as by external interrupts
 routed through an APLIC or IMSIC, or by custom interrupts.
 
+[NOTE]
+====
 In all likelihood, the method for reporting a particular RAS event will
 depend on where in the system the event is detected. The AIA defines
 local interrupt numbers for RAS events so systems have a standard way to
@@ -110,9 +116,11 @@ solely on external or custom interrupts.
 As always, platform standards may further constrain how a system reports
 events, whether RAS events or other.
 
-For the standard local interrupts not defined by the Privileged
+For the standard local interrupts not defined by the RISC-V Privileged
 Architecture (numbers 16-23 and 32-47), the current plan is to assign
 default priorities in the order shown in this table:
+
+TODO: PUT TABLE HERE
 
 Among interrupts 16-23, a higher interrupt number conveys higher default
 priority, and likewise for interrupts 32-47. These two groups are
@@ -120,38 +128,46 @@ interleaved together in the complete order, and the Privileged
 Architecture's standard interrupts, 0-15, are inserted into the middle
 of the sequence. This proposed default priority order is arranged so
 that interrupts 0-31 can potentially be an adequate subset on their own
-for 32-bit systems.
+for 32-bit RISC-V systems.
 
-In actuality, future extensions may or may not stick to this plan for
+In actuality, future RISC-V extensions may or may not stick to this plan for
 the default priority order of interrupts they define.
 
+'''
+
 In addition to the existing major interrupts of
-Table #tab:majorIntrs[[tab:majorIntrs]], the following local interrupts
+<<TablemajorIntrs>>, the following local interrupts
 are tentatively proposed, listed in order of decreasing default
 priority:
 
-23 & Bus or system error +
-45 & Per-core high-power or over-temperature event +
-17 & Debug/trace interrupt +
+ 23 Bus or system error
+ 45 Per-core high-power or over-temperature event
+ 17 Debug/trace interrupt
 
-These local interrupts are expected to be specified by other extensions.
+These local interrupts are expected to be specified by other RISC-V extensions.
 Be aware, this list is not final and may change as the relevant
 extensions are developed and ratified.
 
-If a future version of the Privileged Architecture defines interrupt 0,
-the Advanced Interrupt Architecture needs it to have a default priority
-lower than certain external interrupts. See Sections #sec:mtopi[1.2.2]
-and #sec:stopi[1.4.2] on CSRs and .
+'''
 
-Interrupt numbers 24–31 and 48 and higher are all designated for custom
+If a future version of the RISC-V Privileged Architecture defines interrupt 0,
+the Advanced Interrupt Architecture needs it to have a default priority
+lower than certain external interrupts. See <<mtopi>>
+and <<stopi>> on CSRs `mtopi` and `stopi`.
+====
+
+Interrupt numbers 24-31 and 48 and higher are all designated for custom
 use. If a hart implements any custom interrupts, their positions in the
 default priority order must be documented for the hart.
 
-While many of the standard registers such as and have space for major
-interrupts only in the range 0–63, custom interrupts with numbers 64 and
-above are conceivable with added custom support. CSRs
-(Section #sec:mtopi[1.2.2]) and (Section #sec:stopi[1.4.2]) allow for
+[NOTE]
+====
+While many of the standard registers such as `mip` and `mie` have space for major
+interrupts only in the range 0-63, custom interrupts with numbers 64 and
+above are conceivable with added custom support. CSRs `mtopi`
+(<<mtopi>>) and `stopi` (<<stopi>>) allow for
 major interrupt numbers potentially as large as 4095.
+====
 
 When a hart supports the arbitrary configuration of interrupt priorities
 by software (described in later sections), the default priority order
