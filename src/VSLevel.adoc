@@ -1,4 +1,4 @@
-[[ch:VSLevel]]
+[[VSLevel]]
 == Interrupts for Virtual Machines (VS Level)
 
 When the hypervisor extension is implemented, a hart’s set of possible
