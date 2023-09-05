@@ -694,7 +694,7 @@ must be treated differently.
 ==== MSI PTE, MRIF mode
 
 If memory-resident interrupt files are supported and an MSI PTE has
-fields V = 1, C = 0, and M = 1 (MRIF mode), the PTE’s complete format
+fields V = 1, C = 0, and M = 1 (MRIF mode), the PTE's complete format
 is:
 [%autowidth,%headers,float="center",align="center",cols="<m,<m,<m",frame=none,grid=none]
 |===
