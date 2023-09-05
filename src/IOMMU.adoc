@@ -1,4 +1,4 @@
-[[ch:IOMMU]]
+[[IOMMU]]
 == IOMMU Support for MSIs to Virtual Machines
 
 The existence of an IOMMU in a system makes it possible for a guest
@@ -30,16 +30,19 @@ recognizes and processes MSIs directed to virtual machines. Most other
 functions and details of an IOMMU are beyond the scope of this standard,
 and must be specified elsewhere.
 
-The IOMMU Architecture Specification provides a detailed description of
+[NOTE]
+====
+The RISC-V IOMMU Architecture Specification provides a detailed description of
 the IOMMU architecture, dividing translation and transaction processing
 functionality into blocks such as IOMMU, IO Bridge, etc. and describing
 how those blocks are integrated into a system.
+====
 
 If a single physical I/O device can be subdivided for control by
 multiple separate device drivers, each sub-device is referred to here as
 one device.
 
-[[sec:IOMMU-deviceContexts]]
+[[IOMMU-deviceContexts]]
 === Device contexts at an IOMMU
 
 The following assumptions are made about the IOMMUs in a system:
@@ -75,31 +78,33 @@ MSIs; and
 translation and/or conversion of MSIs from the device.
 
 The MSI address mask and address pattern are each unsigned integers with
-the same width as guest physical page numbers, i.e., 12 bits narrower
+the same width as guest physical page numbers, i.e., 12 bits narrower
 than the maximum supported width of a guest physical address. Their use
-is explained in Section #sec:IOMMU-identIncomingMSIs[1.4],
-``Identification of page addresses of a VM’s interrupt files.''
+is explained in <<IOMMU-identIncomingMSIs>>,
+"Identification of page addresses of a VM's interrupt files.""
 
-A device context’s MSI page table is separate from the usual
+A device context's MSI page table is separate from the usual
 address-translation data structures used to translate other memory
 accesses from the same device. The form and function of MSI page tables
 are the subject of most of the rest of this chapter.
 
+[NOTE]
+====
 A device context is given an independent page table for MSIs for two
 reasons:
 
 First, hypervisors running under Linux or a similar OS can benefit from
 separate control of MSI translations to help simplify the case when
 virtual harts are migrated from one physical hart to another. As noted
-in Section #sec:virtHartMigration[[sec:virtHartMigration]], when a
-virtual hart’s interrupt files are mapped to guest interrupt files in
+in <<virtHartMigration>>, when a
+virtual hart's interrupt files are mapped to guest interrupt files in
 the real machine, migration of the virtual hart causes the physical
 guest interrupt files underlying those virtual interrupt files to
-change. However, because on other systems (not ) the migration of a
+change. However, because on other systems (not RISC-V) the migration of a
 virtual hart does not affect the mapping from guest physical addresses
 to real physical addresses, the internal functions of Linux that perform
-this migration are not set up to modify an IOMMU’s address-translation
-tables to adjust for the changing physical locations of virtual
+this migration are not set up to modify an IOMMU's address-translation
+tables to adjust for the changing physical locations of RISC-V virtual
 interrupt files. Giving a hypervisor control of a separate MSI
 translation table at an IOMMU bypasses this limitation. The MSI page
 table can be modified at will by the hypervisor and/or by the subsystem
@@ -108,19 +113,20 @@ components concerned with regular address translation.
 
 Second, specifying a separate MSI page table facilitates the use of
 _memory-resident interrupt files_ (MRIFs), which are introduced in
-Section #sec:IOMMU-MRIFs[1.3]. A dedicated MSI page table can easily
+<<IOMMU-MRIFs>>. A dedicated MSI page table can easily
 support a special table entry format for MRIFs
-(Section #sec:IOMMU-MSIPTE-MRIF[1.5.2]) that would be entirely foreign
+(<<IOMMU-MSIPTE-MRIF>>) that would be entirely foreign
 and difficult to retrofit to any other address-translation data
 structures.
+====
 
 === Translation of addresses for MSIs from devices
 
-To support the delivery of MSIs from I/O devices directly to virtual
+To support the delivery of MSIs from I/O devices directly to RISC-V virtual
 machines without hypervisor intervention, an IOMMU must be able to
 translate the guest physical address of an MSI to the real physical
 address of an IMSIC’s guest interrupt file in the machine, as
-illustrated in Figure #fig:IOMMU-guestIntrFiles[1.1]. This address
+illustrated in <<IOMMU-guestIntrFiles>>. This address
 translation is controlled by the MSI page table configured in the
 appropriate device context at the IOMMU. Because every interrupt file,
 real or virtual, occupies a naturally aligned 4-KiB page of address
@@ -128,29 +134,30 @@ space, the required address translation is from a virtual (guest) page
 address to a physical page address, the same as supported by regular
 page-based address translation.
 
-image::IOMMU-guestIntrFiles.png[ Translation of a device-sourced MSI
-that a guest OS intended to go to a (virtual) IMSIC interrupt file in
-the OS’s virtual machine. Referencing an MSI page table supplied by the
-controlling hypervisor, the IOMMU redirects the MSI to a guest interrupt
-file of the real machine. ]
+[[IOMMU-guestIntrFiles]]
+.Translation of a device-sourced MSI that a guest OS intended to go to a (virtual) IMSIC interrupt file in the OS's virtual machine. Referencing an MSI page table supplied by the controlling hypervisor, the IOMMU redirects the MSI to a guest interrupt file of the real machine.
+image::IOMMU-guestIntrFiles.png[]
 
 Memory writes from a device are recognized as MSIs by the destination
 address of the write. If an IOMMU determines that a 32-bit write is to
 the location of a (virtual) interrupt file in the relevant virtual
 machine, the write is considered an MSI within the VM, else not. The
 exact formula for recognizing MSIs is documented in
-Section #sec:IOMMU-identIncomingMSIs[1.4].
+<<IOMMU-identIncomingMSIs>>.
 
+[NOTE]
+====
 Although the translation of MSIs is controlled by its own separate page
 table, the fact that MSI translations are at the same page granularity
-as regular address translations implies that an address translation
+as regular RISC-V address translations implies that an address translation
 cache within an IOMMU requires little modification to also cache MSI
 translations. Only on a translation cache miss does the IOMMU need to
 treat MSIs significantly differently than other memory accesses from the
 same device, to choose the correct translation table and to access and
 interpret the table properly.
+====
 
-[[sec:IOMMU-MRIFs]]
+[[IOMMU-MRIFs]]
 === Memory-resident interrupt files
 
 An IOMMU may optionally support memory-resident interrupt files (MRIFs).
