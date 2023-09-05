@@ -630,7 +630,6 @@ but may simply be all read-only zeros.
 
 The supervisor-level `iprio` array accessed via `siselect` and `sireg` affects the prioritization of interrupts only when they trap to S-mode. When an interrupt's priority number in the array is zero (either read-only zero or set to zero), its priority is the default order from <<majorIntrs>>. Setting an interrupt's priority number instead to a nonzero value latexmath:[$p$] gives that interrupt nominally the same priority as a supervisor-level external interrupt with priority number latexmath:[$p$]. For an interrupt that defaults to a higher priority than supervisor external interrupts, setting its priority number to a nonzero value lowers its priority. For an interrupt that defaults to a lower priority than supervisor external interrupts, setting its priority number to a nonzero value raises its priority. When two interrupt causes have been assigned the same nominal priority, ties are broken by the default priority order. <<TableintrPrios-S>> summarizes the effect of priority numbers on interrupt priority.
 
-[[TableintrPrios-S]]
 [%autowidth.stretch,%header,float="center",align="center",cols="^,^,^,^"]
 |===
 ||Interrupts with default
@@ -647,6 +646,7 @@ interrupt controller
 supervisor-level
 `iprio` array 
 |===
+[[TableintrPrios-S]]
 .Effect of the supervisor-level iprio array on the priorities of interrupts taken in S-mode. For interrupts with the same priority number, the default order of <<majorIntrs>> prevails.
 [%autowidth.stretch,%header,float="center",align="center",cols="^,^,^,^"]
 |===

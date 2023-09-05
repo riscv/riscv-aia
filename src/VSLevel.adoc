@@ -421,63 +421,74 @@ When `hvictl`.IID = 9, DPR is ignored.
 [[vstopi]]
 ==== Virtual supervisor top interrupt CSR ()
 
-Read-only CSR is VSXLEN bits wide and has the same format as :
+Read-only CSR `vstopi` is VSXLEN bits wide and has the same format as `stopi`:
 
-bits 27:16 & IID +
-bits 7:0 & IPRIO +
+ bits 27:16 IID
+ bits 7:0   IPRIO
 
-returns information about the highest-priority interrupt for VS level,
-found from among these candidates (prefixed by + signs):
+`vstopi` returns information about the highest-priority interrupt for VS level,
+found from among these candidates (prefixed by + signs):
 
-* if bit 9 is one in both and , .VGEIN is the valid number of a guest
-interrupt file, and is not zero:
-* if bit 9 is one in both and , .VGEIN = 0, and fields IID = 9 and
-latexmath:[$\mbox{IPRIO} \neq \mbox{0}$]:
-* if bit 9 is one in both and , and neither of the first two cases
+* if bit 9 is one in both `vsip` and `vsie`, `hstatus`.VGEIN is the valid number of a guest
+interrupt file, and `vstopei` is not zero:
+** + a supervisor external interrupt (code 9) with the priority number indicated by `vstopei`;
+* if bit 9 is one in both `vsip` and `vsie`, `hstatus`.VGEIN = 0, and `hvictl` fields IID = 9 and
+latexmath:[${IPRIO} \neq {0}$]:
+** + a supervisor external interrupt (code 9) with priority number `hvictl`.IPRIO;
+* if bit 9 is one in both `vsip` and `vsie`, and neither of the first two cases
 applies:
-* if .VTI = 0:
-* if fields VTI = 1 and latexmath:[$\mbox{IID} \neq \mbox{9}$]:
+** + a supervisor external interrupt (code 9) with priority number 256;
+* if `hvictl`.VTI = 0:
+** + the highest-priority pending-and-enabled major interrupt indicated by `vsip` and `vsie`
+other than a supervisor external interrupt (code 9), using the priority numbers assigned
+by `hviprio1` and `hviprio2`;
+* if `hvictl` fields VTI = 1 and latexmath:[${IID} \neq {9}$]:
+** + the major interrupt specified by `hvictl` fields IID, DPR, and IPRIO.
 
-In the list above, all ``supervisor'' external interrupts are virtual,
+In the list above, all "supervisor" external interrupts are virtual,
 directed to VS level, having major code 9 at VS level.
 
+[NOTE]
+====
 The list of candidate interrupts can be reduced to two finalists
 relatively easily by observing that the first three list items are
 mutually exclusive of one another, and the remaining two items are also
 mutually exclusive of one another.
 
-When .VTI = 1, the absence of an interrupt for VS level can be indicated
-only by setting .IID = 9. Software might want to use the pair IID = 9,
-IPRIO = 0 generally to represent _no interrupt_ in .
+>>>
+When `hvictl`.VTI = 1, the absence of an interrupt for VS level can be indicated
+only by setting `hvictl`.IID = 9. Software might want to use the pair IID = 9,
+IPRIO = 0 generally to represent _no interrupt_ in `hvictl`.
+====
 
 When no interrupt candidates satisfy the conditions of the list above,
-is zero. Else, fields IID and IPRIO are determined by the
+`vstopi` is zero. Else, fields IID and IPRIO are determined by the
 highest-priority interrupt from among the candidates. The usual priority
 order for supervisor level applies, as specified by
-Table #tab:intrPrios-S[[tab:intrPrios-S]] on page , except that priority
+<<TableintrPrios-S>>, except that priority
 numbers are taken from the candidate list above, not from the
-supervisor-level array. Ties in nominal priority are broken as usual by
+supervisor-level `iprio` array. Ties in nominal priority are broken as usual by
 the default priority order from
-Section #sec:majorIntrs[[sec:majorIntrs]], unless fields VTI = 1 and
-latexmath:[$\mbox{IID} \neq \mbox{9}$] (last item in the candidate list
+<<TablemajorIntrs>>, unless `hvictl` fields VTI = 1 and
+latexmath:[${IID} \neq {9}$] (last item in the candidate list
 above), in which case default priority order is determined solely by
-.DPR. If bit IPRIOM (IPRIO Mode) of is zero, IPRIO in is 1; else, if the
+`hvictl`.DPR. If bit IPRIOM (IPRIO Mode) of `hvictl` is zero, IPRIO in `vstopi` is 1; else, if the
 priority number for the highest-priority candidate is within the range 1
 to 255, IPRIO is that value; else, IPRIO is set to either 0 or 255 in
-the manner documented for in Section #sec:stopi[[sec:stopi]].
+the manner documented for in <<stopi>>.
 
 ==== Interrupt traps to VS-mode
 
-The Advanced Interrupt Architecture modifies the standard Privileged
+The Advanced Interrupt Architecture modifies the standard RISC-V Privileged
 Architecture such that an interrupt is pending at VS level if and only
-if is not zero. CSRs and do not by themselves determine whether a
+if `vstopi` is not zero. CSRs `vsip` and `vsie` do not by themselves determine whether a
 VS-level interrupt is pending, though they may do so indirectly through
-their effect on .
+their effect on `vstopi`.
 
-Whenever is not zero, if either the current privilege mode is VS-mode
-and the SIE bit in CSR is one, or the current privilege mode is VU-mode,
-a trap is taken to VS-mode for the interrupt indicated by field IID of .
+Whenever `vstopi` is not zero, if either the current privilege mode is VS-mode
+and the SIE bit in CSR `vstatus` is one, or the current privilege mode is VU-mode,
+a trap is taken to VS-mode for the interrupt indicated by field IID of `vstopi`.
 
-The Exception Code field of must implement at least as many bits as
-needed to represent the largest value that field IID of can have for the
+The Exception Code field of `vscause` must implement at least as many bits as
+needed to represent the largest value that field IID of `vstopi` can have for the
 given hart.
