@@ -455,7 +455,7 @@ relatively easily by observing that the first three list items are
 mutually exclusive of one another, and the remaining two items are also
 mutually exclusive of one another.
 
->>>
+'''
 When `hvictl`.VTI = 1, the absence of an interrupt for VS level can be indicated
 only by setting `hvictl`.IID = 9. Software might want to use the pair IID = 9,
 IPRIO = 0 generally to represent _no interrupt_ in `hvictl`.
