@@ -1,15 +1,15 @@
 [[VSLevel]]
 == Interrupts for Virtual Machines (VS Level)
 
-When the hypervisor extension is implemented, a hart’s set of possible
+When the hypervisor extension is implemented, a hart's set of possible
 privilege modes includes the _virtual supervisor_ (VS) and _virtual
 user_ (VU) modes for hosting virtual harts. The Advanced Interrupt
 Architecture adds to the hypervisor extension new interrupt facilities
 aligned with those described earlier for supervisor-level interrupts.
 
-As introduced in Chapter #ch:CSRs[[ch:CSRs]], several hypervisor and VS
-CSRs are added: , , , , , , , and . (And for RV32, the following
-high-half CSRs are also added: , , , , , , and .) As always, when
+As introduced in <<CSRs>>, several hypervisor and VS
+CSRs are added: `hvien`, `hvictl`, `hviprio1`, `hviprio2`, `vsiselect`, `vsireg`, `vstopei`, and `vstopi`. (And for RV32, the following
+high-half CSRs are also added: `hidelegh`, `hvienh`, `hviph`, `hviprio1h`, `hviprio2h`, `vsiph` and `vsieh`.) As always, when
 executing in VS-mode or VU-mode, the VS CSRs substitute for the
 corresponding supervisor CSRs.
 
@@ -27,30 +27,32 @@ When a hart implements the hypervisor extension, it is recommended that
 the hart also have an IMSIC with guest interrupt files. Assuming guest
 interrupt files are available, each can be assigned to a virtual hart at
 the physical hart to act as the supervisor-level interrupt file for that
-virtual hart. If there are latexmath:[$N$] guest interrupt files, then
-latexmath:[$N$] virtual harts at that physical hart may each have a
+virtual hart. If there are latexmath:[$N$] guest interrupt files, then
+latexmath:[$N$] virtual harts at that physical hart may each have a
 physical guest interrupt file to serve as its (virtual) supervisor-level
 interrupt file. The guest interrupt file for the current virtual hart is
 always indicated by the VGEIN field of CSR . When VGEIN is not the valid
 number of a guest interrupt file, the current virtual hart has no guest
 interrupt file to act as its supervisor-level interrupt file.
 
-When .VGEIN is the valid number of a guest interrupt file, values of in
-the range – select registers of this guest interrupt file, just as
-values of in the same range select registers of the IMSIC’s true
+When `hstatus`.VGEIN is the valid number of a guest interrupt file, values of `viselect` in
+the range `0x70`-`0xFF` select registers of this guest interrupt file, just as
+values of `siselect` in the same range select registers of the IMSIC's true
 supervisor-level interrupt file. The registers of an interrupt file that
-are accessed indirectly through and are documented in
-Chapter #ch:IMSIC[[ch:IMSIC]] on the IMSIC, along with IMSIC-only CSR .
+are accessed indirectly through `vsiselect` and `vsireg` are documented in
+<<IMSIC>> on the IMSIC, along with IMSIC-only CSR `vstopei`.
 Because all IMSIC interrupt files act identically, the guest interrupt
-file that a virtual hart accesses through CSRs , , and is
+file that a virtual hart accesses through CSRs `siselect`, `sireg`, and `stopei` is
 indistinguishable from a true supervisor-level interrupt file as seen
 from S-mode (or HS-mode).
 
 In addition to an IMSIC at each hart, a virtual machine may also need to
-see a PLIC or APLIC. However, unlike an IMSIC’s ability to provide
+see a PLIC or APLIC. However, unlike an IMSIC's ability to provide
 physical guest interrupt files for virtual harts, a PLIC or APLIC must
 be emulated for a virtual machine by the hypervisor.
 
+[NOTE]
+====
 The Advanced Interrupt Architecture does not currently include hardware
 assistance for virtualizing an APLIC. For small numbers of harts, such
 hardware would be substantially larger than that required to implement
@@ -60,15 +62,16 @@ directly to guest interrupt files (such as devices attached through a
 PCI Express interconnect). For the types of devices whose interrupts
 must go through a (virtual) APLIC, the overhead cost of emulating the
 APLIC is expected to be less significant.
+====
 
 When a virtual hart appears to have an IMSIC because a guest interrupt
 file is assigned to it, all external interrupts, real or emulated,
 destined for the virtual hart must go through this perceived IMSIC. A
 hypervisor can easily inject an emulated external interrupt into the
-guest interrupt file selected by .VGEIN by setting a bit in the
-interrupt-pending array indirectly accessed through and . When a virtual
+guest interrupt file selected by `hstatus`.VGEIN by setting a bit in the
+interrupt-pending array indirectly accessed through `vsiselect` and `vsireg`. When a virtual
 hart has a guest interrupt file, a hypervisor is not normally expected
-to set bit VSEIP in CSR .
+to set bit VSEIP in CSR `hvip`.
 
 In the special case that an emulated APLIC for a virtual machine has a
 wired interrupt source that equates to an actual interrupt source of a
@@ -109,10 +112,10 @@ converting guest physical addresses into true physical addresses.
 Because each virtual hart is assigned a dedicated, physical guest
 interrupt file that is indistinguishable from a true supervisor-level
 interrupt file, no translation is needed for the data of an MSI write,
-which specifies the interrupt’s identity number in the target interrupt
+which specifies the interrupt's identity number in the target interrupt
 file.
 
-[[sec:virtHartMigration]]
+[[virtHartMigration]]
 ==== Migrating a virtual hart to a different guest interrupt file
 
 When it is necessary to move a virtual hart from one physical hart to
@@ -128,10 +131,10 @@ another is more complex than moving most other state held by the virtual
 hart. After the destination guest interrupt file has been chosen at the
 new physical hart, the following steps are recommended:
 
-. At the old interrupt file, save to memory the values of registers and
-, and set = 0.
-. At the new interrupt file, set = 0, and zero all implemented
-interrupt-pending bits (the array).
+. At the old interrupt file, save to memory the values of registers `eidelivery` and
+`eithreshold`, and set `eidelivery` = 0.
+. At the new interrupt file, set `eidelivery` = 0, and zero all implemented
+interrupt-pending bits (the `eip` array).
 . Modify the relevant translation tables at all IOMMUs so that MSIs for
 this virtual interrupt file are now sent to the new physical interrupt
 file. Likewise, if any interrupts at an APLIC are forwarded by MSIs to
@@ -139,26 +142,29 @@ the old interrupt file, reconfigure the APLIC to send them to the new
 interrupt file. As needed, synchronize with all IOMMUs and APLICs to
 ensure that no straggler MSIs will arrive at the old interrupt file
 after this step. Synchronizing with an APLIC can be accomplished using
-the algorithm of Section #sec:AdvPLIC-MSISync[[sec:AdvPLIC-MSISync]].
+the algorithm of <<AdvPLIC-MSISync>>.
 . At the old interrupt file, dump to memory all implemented
-interrupt-pending and interrupt-enable bits (the and arrays). After this
+interrupt-pending and interrupt-enable bits (the `eip` and `eie` arrays). After this
 step is done, the old interrupt file is no longer in use.
 . At the new interrupt file, logically OR the interrupt-pending bits
-that were saved in step 4 into the new interrupt file, using instruction
-CSRS to write to the array. Also, load the interrupt-enable bits that
-were saved in step 4 into the array.
-. At the new interrupt file, load registers and with the values that
-were saved in step 1.
+that were saved in step 4 into the new interrupt file, using instruction
+CSRS to write to the `eip` array. Also, load the interrupt-enable bits that
+were saved in step 4 into the `eie` array.
+. At the new interrupt file, load registers `eithreshold` and `eidelivery` with the values that
+were saved in step 1.
 
 Resuming execution of the virtual hart at the new physical hart is not
 recommended until the entire interrupt file has been fully migrated.
 
+[NOTE]
+====
 Resuming execution of the virtual hart before the interrupt file is
 fully migrated could allow software running in the virtual machine to
 see multiple MSIs arriving from a single device in an order that should
 not happen. While this would rarely matter in practice, it runs the risk
 of wedging a device driver that depends (perhaps inadvertently) on a
 valid ordering of events.
+====
 
 === VS-level external interrupts without a guest interrupt file
 
