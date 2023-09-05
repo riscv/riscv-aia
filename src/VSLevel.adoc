@@ -180,10 +180,10 @@ virtual hart.
 When emulating an external interrupt controller for a virtual hart, if
 configurable interrupt priority is not supported for the virtual hart
 other than for external interrupts, then external interrupts may be
-asserted to VS level simply by setting bit VSEIP in , as defined by the
-Privileged Architecture. However, to emulate both an external interrupt
+asserted to VS level simply by setting bit VSEIP in `hvip`, as defined by the
+RISC-V Privileged Architecture. However, to emulate both an external interrupt
 controller and priority configurability for non-external interrupts, a
-hypervisor must make use of CSR (Hypervisor Virtual Interrupt Control),
+hypervisor must make use of CSR `hvictl` (Hypervisor Virtual Interrupt Control),
 described later in the next section.
 
 === Interrupts at VS level
@@ -193,79 +193,90 @@ described later in the next section.
 Like for supervisor level, the Advanced Interrupt Architecture
 optionally allows major VS-level interrupts to be configured by software
 to intermix in priority with VS-level external interrupts. As documented
-in Section #sec:intrs-S[[sec:intrs-S]], interrupt priorities for
+in <<intrs-S>>, interrupt priorities for
 supervisor level are configured by the array accessed indirectly through
-CSRs and . The addresses for the array registers are –.
+CSRs `siselect` and `sireg`. The addresses for the array registers are `0x30`-`0x3F`.
 
-VS level has its own and , but unlike supervisor level, there are no
-registers at addresses –. When has a value in the range –, an attempt
-from VS-mode to access (really ) causes a virtual instruction exception.
-To give a virtual hart the illusion of an array of registers accessed
-through and , a hypervisor must emulate the VS-level array when accesses
-to from VS-mode cause virtual instruction traps.
+VS level has its own `vsiseelect` and `vsireg`, but unlike supervisor level, there are no
+registers at `vsiselect` addresses `0x30`-`0x3F`. When `vsiselect` has a value in the range `0x30`-`ox3F`, an attempt
+from VS-mode to access `sireg` (really `vsireg`) causes a virtual instruction exception.
+To give a virtual hart the illusion of an array of `iprio` registers accessed
+through `siselect` and `sireg`, a hypervisor must emulate the VS-level `iprio` array when accesses
+to `sireg` from VS-mode cause virtual instruction traps.
 
-Instead of a physical VS-level array, a separate hardware mechanism is
+Instead of a physical VS-level `iprio` array, a separate hardware mechanism is
 provided for configuring the priorities of a subset of interrupts for VS
-level, using hypervisor CSRs and . The subset of major interrupt numbers
+level, using hypervisor CSRs `hviprio1` and `hviprio2`. The subset of major interrupt numbers
 whose priority may be configured in hardware are these:
 
- 1 & Supervisor software interrupt +
- 5 & Supervisor timer interrupt +
-13 & Counter overflow interrupt +
-14–23 & _Reserved for standard local interrupts +
-_
+[%autowidth,float="center",align="center",cols="^,<",grid=none,frame=none]
+|===
+|1 |Supervisor software interrupt
+|5 |Supervisor timer interrupt
+|13|Counter overflow interrupt
+|14-23|_Reserved for standard local interrupts_
+|===
 
 For interrupts directed to VS level, software-configurable priorities
 are not supported in hardware for standard local interrupts in the range
-32–48.
+32-48.
 
+[NOTE]
+====
 For custom interrupts, priority configurability may be supported in
-hardware by custom CSRs, expanding upon and for standard interrupts.
+hardware by custom CSRs, expanding upon `hviprio1` and `hviprio2` for standard interrupts.
+====
 
-Registers and have these formats:
+Registers `hviprio1` and `hviprio2` have these formats:
 
-:
+`hviprio1`:
 
-bits 7:0 & _Reserved for priority number for interrupt 0; reads as
-zero +
-bits 15:8 & Priority number for interrupt 1, supervisor software
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
+|===
+|bits 7:0 | _Reserved for priority number for interrupt 0; reads as
+zero_
+|bits 15:8 | Priority number for interrupt 1, supervisor software
 interrupt +
-bits 23:16 & _Reserved for priority number for interrupt 4; reads as
-zero +
-bits 31:24 & Priority number for interrupt 5, supervisor timer
-interrupt +
-bits 39:32 & _Reserved for priority number for interrupt 8; reads as
-zero +
-bits 47:40 & Priority number for interrupt 13, counter overflow
-interrupt +
-bits 55:48 & Priority number for interrupt 14 +
-bits 63:56 & Priority number for interrupt 15 +
-___
+|bits 23:16 | _Reserved for priority number for interrupt 4; reads as
+zero_
+|bits 31:24 | Priority number for interrupt 5, supervisor timer
+interrupt
+|bits 39:32 | _Reserved for priority number for interrupt 8; reads as
+zero_ 
+|bits 47:40 | Priority number for interrupt 13, counter overflow
+interrupt 
+|bits 55:48 | Priority number for interrupt 14
+|bits 63:56 & Priority number for interrupt 15
+|===
 
-:
+`hviprio2`:
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
+|===
+|bits 7:0 | Priority number for interrupt 16
+|bits 15:8 | Priority number for interrupt 17
+|bits 23:16 | Priority number for interrupt 18
+|bits 31:24 | Priority number for interrupt 19
+|bits 39:32 | Priority number for interrupt 20
+|bits 47:40 | Priority number for interrupt 21
+|bits 55:48 | Priority number for interrupt 22
+|bits 63:56 | Priority number for interrupt 23
+|===
 
-bits 7:0 & Priority number for interrupt 16 +
-bits 15:8 & Priority number for interrupt 17 +
-bits 23:16 & Priority number for interrupt 18 +
-bits 31:24 & Priority number for interrupt 19 +
-bits 39:32 & Priority number for interrupt 20 +
-bits 47:40 & Priority number for interrupt 21 +
-bits 55:48 & Priority number for interrupt 22 +
-bits 63:56 & Priority number for interrupt 23 +
-
-Each priority number in and is a unsigned integer field that is either
-read-only zero or implements a minimum of IPRIOLEN bits or 6 bits,
-whichever is larger, and preferably all 8 bits. Implementations may
+Each priority number in `hviprio1` and `hviprio2` is a *WARL* unsigned integer field that is either
+read-only zero or implements a minimum of IPRIOLEN bits or 6 bits,
+whichever is larger, and preferably all 8 bits. Implementations may
 freely choose which priority number fields are read-only zeros, but all
 other fields must implement the same number of integer bits. A minimal
 implementation of these CSRs has them both be read-only zeros.
 
-A hypervisor can choose to employ registers and when emulating the
-(virtual) supervisor-level array accessed indirectly through and (really
-and ) for a virtual hart. For interrupts not in the subset supported by
-and , the priority number bytes in the emulated array can be read-only
+A hypervisor can choose to employ registers `hviprio1` and `hviprio2` when emulating the
+(virtual) supervisor-level `iprio` array accessed indirectly through `siselect` and `sireg` (really
+`vsiselect` and `vsireg`) for a virtual hart. For interrupts not in the subset supported by
+`hviprio1` and `hviprio2`, the priority number bytes in the emulated `iprio` array can be read-only
 zeros.
 
+[NOTE]
+====
 Providing hardware support for configurable priority for only a subset
 of major interrupts at VS level is a compromise. The utility of being
 able to control interrupt priorities at VS level is arguably illusory
@@ -278,128 +289,136 @@ added CSRs that must be swapped on a virtual hart switch.
 
 Major interrupts outside the priority-configurable subset can still be
 directed to VS level, but their priority will simply be the default
-order defined in Section #sec:majorIntrs[[sec:majorIntrs]].
+order defined in <<majorIntrs>>.
+====
 
 If a hypervisor really must emulate configurability of priority for
-interrupts beyond the subset supported by and , it can do so with extra
-effort by setting bit VTI of CSR , described in the next subsection.
+interrupts beyond the subset supported by `hviprio1` and `hviprio2`, it can do so with extra
+effort by setting bit VTI of CSR `hvictl`, described in the next subsection.
 
 ==== Virtual interrupts for VS level
 
 Assuming a virtual hart does not need configurable priority for major
-interrupts beyond the subset supported in hardware by and , a hypervisor
-can assert interrupts to the virtual hart using CSRs (Hypervisor
-Virtual-Interrupt-Enable) and (Hypervisor Virtual-Interrupt-Pending
-bits). These CSRs affect interrupts for VS level much the same way that
-and do for supervisor level, as explained in
-Section #sec:virtIntrs-S[[sec:virtIntrs-S]].
+interrupts beyond the subset supported in hardware by `hviprio1` and `hviprio2`, a hypervisor
+can assert interrupts to the virtual hart using CSRs `hvien` (Hypervisor
+Virtual-Interrupt-Enable) and `hvip` (Hypervisor Virtual-Interrupt-Pending
+bits). These CSRs affect interrupts for VS level much the same way that `mvien`
+and `mvip` do for supervisor level, as explained in
+<<virtIntrs-S>>.
 
-Each bit of registers and corresponds with an interrupt number in the
-range 0–63. Bits 12:0 of are reserved and must be read-only zeros, while
-bits 12:0 of are defined by the Privileged Architecture. Specifically,
-bits 10, 6, and 2 of are writable bits that correspond to VS-level
+Each bit of registers `hvien` and `hvip` corresponds with an interrupt number in the
+range 0-63. Bits 12:0 of `hvip` are reserved and must be read-only zeros, while
+bits 12:0 of `hvip` are defined by the RISC-V Privileged Architecture. Specifically,
+bits 10, 6, and 2 of `hvip` are writable bits that correspond to VS-level
 external interrupts (VSEIP), VS-level timer interrupts (VSTIP), and
 VS-level software interrupts (VSSIP), respectively.
 
-The following applies only to the CSR bits for interrupt numbers 13–63:
-When a bit in is one, then the same bit position in is an alias for the
-corresponding bit in . Else, when a bit in is zero and the matching bit
-in is one, the same bit position in is an alias for the corresponding
-bit in . A bit in is read-only zero when the corresponding bits in and
-are both zero. The combined effects of and on and are summarized in
-Table #tab:intrFilteringForVS[[tab:intrFilteringForVS]].
+The following applies only to the CSR bits for interrupt numbers 13-63:
+When a bit in `hideleg` is one, then the same bit position in `vsip` is an alias for the
+corresponding bit in `sip`. Else, when a bit in `hideleg` is zero and the matching bit
+in `hvien` is one, the same bit position in `vsip` is an alias for the corresponding
+bit in `hvip`. A bit in `vsip` is read-only zero when the corresponding bits in `hideleg` and `hvien`
+are both zero. The combined effects of `hideleg` and `hvien` on `vsip` and `vsie` are summarized in <<intrFilteringForVS>>.
 
-[cols="^,^,^,^",options="header",]
+[[intrFilteringForVS]]
+.The effects of `hideleg` and `hvien` on `vsip` and `vsie` for major interrupts 13-63.
+[%autowidth,float="center",align="center",cols="^,^,^,^",options="header"]
 |===
-|latexmath:[$n$] |latexmath:[$n$] |latexmath:[$n$] |latexmath:[$n$]
+|`hideleg`[latexmath:[$n$]] |`hvien`[latexmath:[$n$]] |`vsip`[latexmath:[$n$]] |`vsie`[latexmath:[$n$]]
 |0 |0 |Read-only 0 |Read-only 0
-|0 |1 |Alias of latexmath:[$n$] |Writable
-|1 |– |Alias of latexmath:[$n$] |Alias of latexmath:[$n$]
+|0 |1 |Alias of `hvip`[latexmath:[$n$]] |Writable
+|1 |- |Alias of `sip`[latexmath:[$n$]] |Alias of `sie`[latexmath:[$n$]]
 |===
 
-For interrupt numbers 13–63, a bit in is writable if and only if the
-corresponding bit is set in either or . When an interrupt is delegated
-by , the writable bit in is an alias of the corresponding bit in ; else
+For interrupt numbers 13-63, a bit in `vsie` is writable if and only if the
+corresponding bit is set in either `hideleg` or `hiven`. When an interrupt is delegated
+by `hideleg`, the writable bit in `vsie` is an alias of the corresponding bit in `sie`; else
 it is an independent writable bit. The Privileged Architecture specifies
-when bits 12:0 of are aliases of bits in . As usual, bits that are not
-writable in must be read-only zeros.
+when bits 12:0 of `vsie` are aliases of bits in `hie`. As usual, bits that are not
+writable in `vsie` must be read-only zeros.
 
-If a bit of is zero and the corresponding bit in is changed from zero to
-one, then the value of the matching bit in becomes . Likewise, if a bit
-of is one and the corresponding bit in is changed from one to zero, the
-value of the matching bit in again becomes .
+If a bit of `hideleg` is zero and the corresponding bit in `hvien` is changed from zero to
+one, then the value of the matching bit in `vsie` becomes UNSPECIFIED. Likewise, if a bit
+of `hvien` is one and the corresponding bit in `hideleg` is changed from one to zero, the
+value of the matching bit in `vsie` again becomes UNSPECIFIED.
 
-For interrupt numbers 13–63, implementations may freely choose which
-bits of are writable and which bits are read-only zero or one. If such a
-bit in is read-only zero (preventing the virtual interrupt from being
-enabled), the same bit should be read-only zero in . All other bits for
-interrupts 13–63 must be writable in .
+For interrupt numbers 13-63, implementations may freely choose which
+bits of `hvien` are writable and which bits are read-only zero or one. If such a
+bit in `hvien` is read-only zero (preventing the virtual interrupt from being
+enabled), the same bit should be read-only zero in `hvip`. All other bits for
+interrupts 13-63 must be writable in `hvip`.
 
-CSR (Hypervisor Virtual Interrupt Control) provides further flexibility
+CSR `hvictl` (Hypervisor Virtual Interrupt Control) provides further flexibility
 for injecting interrupts into VS level in situations not fully supported
 by the facilities described thus far, but only with more active
-involvement of the hypervisor. A hypervisor must use for any of the
+involvement of the hypervisor. A hypervisor must use `hvictl` for any of the
 following:
 
-* asserting for VS level a major interrupt not supported by and ;
+* asserting for VS level a major interrupt not supported by `hvvien` and `hvip`;
 * implementing configurability of priorities at VS level for major
-interrupts beyond those supported by and ; or
+interrupts beyond those supported by `hviprio1` and `hviprio2`; or
 * emulating an external interrupt controller for a virtual hart without
 the use of an IMSIC’s guest interrupt file, while also supporting
 configurable priorities both for external interrupts and for major
 interrupts to the virtual hart.
 
-The format of is:
+The format of `hvictl` is:
 
-bit 30 & VTI +
-bits 27:16 & IID () +
-bit 9 & DPR +
-bit 8 & IPRIOM +
-bits 7:0 & IPRIO +
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
+|===
+|bit 30 |VTI
+|bits 27:16 |IID (*WARL*)
+|bit 9 |DPR
+|bit 8 |IPRIOM
+|bits 7:0 |IPRIO
+|===
 
-All other bits of are reserved and read as zeros.
+All other bits of `hvictl` are reserved and read as zeros.
 
-When bit VTI (Virtual Trap Interrupt control) = 1, attempts from VS-mode
-to explicitly access CSRs and (or, for RV32 only, and ) cause a virtual
+When bit VTI (Virtual Trap Interrupt control) = 1, attempts from VS-mode
+to explicitly access CSRs `sip` and `sie` (or, for RV32 only, `siph` and `sieh`) cause a virtual
 instruction exception. Furthermore, for any given CSR, if there is some
-circumstance in which a write to the register may cause a bit of to
-change from one to zero, excluding bit 9 for external interrupts (SEIP),
-then when VTI = 1, a virtual instruction exception is raised also for
+circumstance in which a write to the register may cause a bit of `vsip` to
+change from one to zero, excluding bit 9 for external interrupts (SEIP),
+then when VTI = 1, a virtual instruction exception is raised also for
 any attempt by the guest to write this register. Both the value being
-written to the CSR and the value of (before or after) are ignored for
+written to the CSR and the value of `vsip` (before or after) are ignored for
 determining whether to raise the exception. (Hence a write would not
-actually need to change a bit of from one to zero for the exception to
-be raised.) In particular, if register is implemented (from extension
-Sstc), then attempts from VS-mode to write to (or, for RV32 only, )
-cause a virtual instruction exception when VTI = 1.
+actually need to change a bit of `vsip` from one to zero for the exception to
+be raised.) In particular, if register `vstimecmp` is implemented (from extension
+Sstc), then attempts from VS-mode to write to `stimecmp` (or, for RV32 only, `stimecmph`)
+cause a virtual instruction exception when VTI = 1.
 
-For the standard local interrupts (major identities 13–23 and 32–47),
+[NOTE]
+====
+For the standard local interrupts (major identities 13-23 and 32-47),
 and for software interrupts (SSI), the corresponding interrupt-pending
-bits in are defined as ``sticky,'' meaning a guest can clear them only
-by writing directly to (really ). Among the standard-defined interrupts,
+bits in `vsip` are defined as "sticky," meaning a guest can clear them only
+by writing directly to `sip` (really `vsip`). Among the standard-defined interrupts,
 that leaves only timer interrupts (STI), which can potentially be
-cleared in by writing a new value to .
+cleared in `vsip` by writing a new value to `vstimecmp`.
+====
 
-All fields together can affect the value of CSR (Virtual Supervisor Top
-Interrupt) and therefore the interrupt identity reported in when an
-interrupt traps to VS-mode. IID is a unsigned integer field with at
-least 6 implemented bits, while IPRIO is always the full 8 bits. If
+All `hvictl` fields together can affect the value of CSR `vstopi` (Virtual Supervisor Top
+Interrupt) and therefore the interrupt identity reported in `vscause` when an
+interrupt traps to VS-mode. IID is a *WARL* unsigned integer field with at
+least 6 implemented bits, while IPRIO is always the full 8 bits. If
 latexmath:[$k$] bits are implemented for IID, then all values 0 through
-latexmath:[$\mbox{2}^{k}-\mbox{1}$] are supported, and a write to sets
-IID equal to bits (latexmath:[$\mbox{15}+k$]):16 of the value written.
+latexmath:[${2}^{k}-{1}$] are supported, and a write to `hvictl` sets
+IID equal to bits (latexmath:[${15}+k$]):16 of the value written.
 
-For a virtual interrupt specified for VS level by , if VTI = 1 and
-latexmath:[$\mbox{IID} \neq \mbox{9}$], field DPR (Default Priority
+For a virtual interrupt specified for VS level by `hvictl`, if VTI = 1 and
+latexmath:[${IID} \neq {9}$], field DPR (Default Priority
 Rank) determines the interrupt’s presumed default priority order
 relative to a (virtual) supervisor external interrupt (SEI), major
 identity 9, as follows:
 
-0 = interrupt has higher default priority than an SEI +
-1 = interrupt has lower default priority than an SEI +
+ 0 = interrupt has higher default priority than an SEI
+ 1 = interrupt has lower default priority than an SEI
 
-When .IID = 9, DPR is ignored.
+When `hvictl`.IID = 9, DPR is ignored.
 
-[[sec:vstopi]]
+[[vstopi]]
 ==== Virtual supervisor top interrupt CSR ()
 
 Read-only CSR is VSXLEN bits wide and has the same format as :
