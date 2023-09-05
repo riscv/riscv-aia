@@ -39,8 +39,7 @@ local interrupts for low- and high-priority _RAS events_.
 |===
 |Default priority order |Major interrupt numbers ^|Description
 
-.7+.<|Highest +
- +
+.8+.<|Highest +
  +
  +
  +
@@ -49,17 +48,17 @@ local interrupts for low- and high-priority _RAS events_.
  +
 Lowest
 |43 |Local interrupt: high-priority RAS event
-+<|11, 3, 7 +
+|11, 3, 7 +
 9, 1, 5 +
 12 +
 10, 2, 6 +
 13
-+|Machine interrupts: external, software, timer +
+|Machine interrupts: external, software, timer +
 Supervisor interrupts: external, software, timer +
 Supervisor guest external interrupt +
 VS interrupts: external, software, timer +
 Local interrupt: counter overflow
-|35 |Local interrupt: low-priority RAS event
+|35|Local interrupt: low-priority RAS event
 |===
 
 [[TablemajorIntrCategories]]

@@ -1,4 +1,4 @@
-[[ch:AdvPLIC]]
+[[AdvPLIC]]
 == Advanced Platform-Level Interrupt Controller (APLIC)
 
 In a RISC-V system, a Platform-Level Interrupt Controller (PLIC) handles
