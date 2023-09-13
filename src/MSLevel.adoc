@@ -635,43 +635,17 @@ but may simply be all read-only zeros.
 
 The supervisor-level `iprio` array accessed via `siselect` and `sireg` affects the prioritization of interrupts only when they trap to S-mode. When an interrupt's priority number in the array is zero (either read-only zero or set to zero), its priority is the default order from <<majorIntrs>>. Setting an interrupt's priority number instead to a nonzero value latexmath:[$p$] gives that interrupt nominally the same priority as a supervisor-level external interrupt with priority number latexmath:[$p$]. For an interrupt that defaults to a higher priority than supervisor external interrupts, setting its priority number to a nonzero value lowers its priority. For an interrupt that defaults to a lower priority than supervisor external interrupts, setting its priority number to a nonzero value raises its priority. When two interrupt causes have been assigned the same nominal priority, ties are broken by the default priority order. <<TableintrPrios-S>> summarizes the effect of priority numbers on interrupt priority.
 
-[%autowidth.stretch,%header,float="center",align="center",cols="^,^,^,^"]
+[%header,float="center",align="center",cols="^,^,^,^"]
 |===
-||Interrupts with default
-priority above supervisor
-external interrupts |Supervisor external
-interrupts |Interrupts with default
-priority below supervisor
-external interrupts 
-|Priority +
-order|Priority number in supervisor-level `iprio` array
-|Priority number from
-interrupt controller
-(APLIC or IMSIC) |Priority number in
-supervisor-level
-`iprio` array 
+||Interrupts with default priority above supervisor external interrupts |Supervisor external interrupts |Interrupts with default priority below supervisor external  interrupts|Priority +
+order|Priority number in supervisor-level `iprio` array |Priority number from interrupt controller (APLIC or IMSIC) |Priority number in supervisor-level `iprio` array 
 |===
 [[TableintrPrios-S]]
 .Effect of the supervisor-level iprio array on the priorities of interrupts taken in S-mode. For interrupts with the same priority number, the default order of <<majorIntrs>> prevails.
-[%autowidth.stretch,%header,float="center",align="center",cols="^,^,^,^"]
+[%header,float="center",align="center",cols="^,^,^,^"]
 |===
-.4+|Highest +
- +
- +
- +
- +
- +
- +
- +
- +
- +
- +
- +
- +
- +
- Lowest
-|0 ||
-|1 +
+|Highest|0 ||
+||1 +
 2 +
 ... +
 254 +
@@ -686,8 +660,8 @@ supervisor-level
 ... +
 254 +
 255
-||256 and above (IMSIC only)|
-|||0
+|||256 and above (IMSIC only)|
+|Lowest|||0
 |===
 
 If supported, setting the priority number for VS-level external interrupts (bits 23:16 of `iprio2`) to a nonzero value latexmath:[$p$] has the effect of giving the entire category of VS external interrupts nominally  the same priority as a supervisor external interrupt with priority number latexmath:[$p$], when VS external interrupts trap to S-mode.
