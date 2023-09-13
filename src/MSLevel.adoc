@@ -322,42 +322,19 @@ value _raises_ its priority. When two interrupt causes have been
 assigned the same nominal priority, ties are broken by the default
 priority order. <<TableintrPrios-M>> summarizes the effect of priority numbers on interrupt priority.
 
-[%autowidth.stretch,%header,float="center",align="center",cols="^,^,^,^"]
+[%header,float="center",align="center",cols="^,^,^,^"]
 |===
-||Interrupts with default
-priority above machine
-external interrupts |Machine external
-interrupts |Interrupts with default
-priority below machine
-external interrupts 
+||Interrupts with default priority above machine external interrupts |Machine external interrupts |Interrupts with default priority below machine external interrupts 
 |Priority +
 order|Priority number in machine-level `iprio` array
-|Priority number from
-interrupt controller
-(APLIC or IMSIC) |Priority number in
-machine-level
-`iprio` array 
+|Priority number from interrupt controller (APLIC or IMSIC) |Priority number in machine-level `iprio` array 
 |===
+
 [[TableintrPrios-M]]
 .Effect of the machine-level iprio array on the priorities of interrupts taken in M-mode. For interrupts with the same priority number, the default order of <<majorIntrs>> prevails.
-[%autowidth.stretch,%header,float="center",align="center",cols="^,^,^,^"]
+[%header,float="center",align="center",cols="^,^,^,^"]
 |===
-.4+|Highest +
- +
- +
- +
- +
- +
- +
- +
- +
- +
- +
- +
- +
- +
- Lowest
-|0 ||
+|Highest |0|||
 |1 +
 2 +
 ... +
@@ -373,8 +350,11 @@ machine-level
 ... +
 254 +
 255
-||256 and above (IMSIC only)|
-|||0
+|
+|
+|256 and above (IMSIC only)|
+|Lowest|
+||0
 |===
 
 [NOTE]
