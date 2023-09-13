@@ -39,7 +39,9 @@ local interrupts for low- and high-priority _RAS events_.
 |===
 |Default priority order |Major interrupt numbers ^|Description
 
-.8+.<|Highest +
+.3+.<|Highest +
+ +
+ +
  +
  +
  +
