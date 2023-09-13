@@ -726,7 +726,7 @@ correspond to an implemented interrupt source (such as bit 0 of `setip[0]`) are 
 On a write to a `setip` register, for each bit that is one in the 32-bit value
 written, if that bit position corresponds to an active interrupt source,
 the interrupt-pending bit for that source is set to one if possible. See
-<<AdvPLIC-pendingBits>>for exactly when a pending bit may
+<<AdvPLIC-pendingBits>> for exactly when a pending bit may
 be set by writing to a `setip` register.
 
 ==== Set interrupt-pending bit by number (`setipnum`)
@@ -874,8 +874,8 @@ Extempore MSIs are not affected by the IE bit of the domain's `domaincfg` regist
 
 When the interrupt domain is configured in direct delivery mode (`domaincfg`.DM = 0), register `genmsi` is read-only zero.
 
-<<AdvPLIC-reg-target>>
-====  Interrupt targets (`target[1]-`target[1023]`) 
+[[AdvPLIC-reg-target]]
+====  Interrupt targets (`target[1]-target[1023]`) 
 
 If interrupt source latexmath:[$i$] is inactive in this domain, register `target[latexmath:[$i$]]` is read-only zero. If source latexmath:[$i$] is active, `target[latexmath:[$i$]]` determines the
 hart to which interrupts from the source are signaled or forwarded. The
