@@ -322,6 +322,13 @@ value _raises_ its priority. When two interrupt causes have been
 assigned the same nominal priority, ties are broken by the default
 priority order. <<TableintrPrios-M>> summarizes the effect of priority numbers on interrupt priority.
 
+[NOTE]
+====
+When a hart has an IMSIC supporting more than 255 minor identities for
+external interrupts, the only non-default priorities that can be
+configured for other interrupts are those corresponding to external
+interrupt identities 1-255, not those of identities 256 or higher.
+
 [%header,float="center",align="center",cols="^,^,^,^"]
 |===
 ||Interrupts with default priority above machine external interrupts |Machine external interrupts |Interrupts with default priority below machine external interrupts 
@@ -356,13 +363,6 @@ order|Priority number in machine-level `iprio` array
 |Lowest|
 ||0
 |===
-
-[NOTE]
-====
-When a hart has an IMSIC supporting more than 255 minor identities for
-external interrupts, the only non-default priorities that can be
-configured for other interrupts are those corresponding to external
-interrupt identities 1-255, not those of identities 256 or higher.
 
 Implementing the priority configurability of this section requires that
 a RIC-V hart's external interrupt controller communicate to the hart not only
