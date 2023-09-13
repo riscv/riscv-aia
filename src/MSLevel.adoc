@@ -64,7 +64,7 @@ Local interrupt: counter overflow
 
 [[TablemajorIntrCategories]]
 .Categorization of current and future major interrupts.
-[%autowidth,float="center",align="center",cols="2<,3<"]
+[%autowidth,float="center",align="center",cols="2^,3<"]
 |===
 |Major interrupt numbers ^|Category
 |0-12 +
@@ -120,8 +120,33 @@ For the standard local interrupts not defined by the RISC-V Privileged
 Architecture (numbers 16-23 and 32-47), the current plan is to assign
 default priorities in the order shown in this table:
 
-TODO: PUT TABLE HERE
+[%autowidth,%header,float="center",align="center",cols="1^,2<,3<"]
+|===
 
+.3+.<|Highest +
+ +
+ +
+ +
+ +
+ +
+ +
+ +
+ +
+Lowest |47, 23, 46, 45, 22, 44, +
+43, 21, 42, 41, 20, 40 |
+|11, 3, 7 +
+9, 1, 5 +
+12 +
+10, 2, 6 +
+13
+|Machine interrupts: external, software, timer +
+Supervisor interrupts: external, software, timer +
+Supervisor guest external interrupt +
+VS interrupts: external, software, timer +
+Counter overflow interrupt
+|39, 19, 38, 37, 18, 36, +
+35, 17, 34, 33, 16, 32|
+|===
 Among interrupts 16-23, a higher interrupt number conveys higher default
 priority, and likewise for interrupts 32-47. These two groups are
 interleaved together in the complete order, and the Privileged
