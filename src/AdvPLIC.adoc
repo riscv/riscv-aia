@@ -1166,7 +1166,7 @@ triggered for a hart by setting an IDC structure's `iforce` register to 1.
 
 A trap handler solely for external interrupts via an APLIC could be
 written roughly as follows:
-[%autowidth,float="center",align="center",cols=">",grid=none,frame=none]
+[%autowidth,float="center",align="center",cols="<",grid=none,frame=none]
 |===
 |save processor registers
 |i = read register `claimi` from the hart's IDC structure at the APLIC
