@@ -1206,15 +1206,15 @@ For a machine-level interrupt domain, if MSI target addresses are
 determined by `mmsiaddrcfg` and `mmsiaddrcfgh`, then the address for an outgoing MSI for interrupt
 source latexmath:[$i$] is computed from those registers and from the
 Hart Index field of register as follows:
+
+<<<
+
 [%autowidth,float="center",align="center",cols="<",grid=none,frame=none]
 |===
 |latexmath:[$g = (Hart Index>>LHXW){\text{&}}({2}^{HHXW}-{1})$]
 |latexmath:[$h = {Hart Index \text{&} } ({2}^{LHXW}-1)$]
-|latexmath:[$MSI address = {Base PPN | }({g}<<(HHXS+12))| (h<<LHXS)<<12$]
+|MSI address = (Base PPN \| (g<<(HHXS+12)) \| (h<<LHXS)<<12
 |===
-
-
-
 
 Here, latexmath:[<<k$] and latexmath:[>>k$] represent shifting left
 and right by latexmath:[$k$] bits, an ampersand (&) represents bitwise
@@ -1238,9 +1238,9 @@ together with the Base PPN and LHXS values from and , the other fields
 
 [%autowidth,float="center",align="center",cols="<",grid=none,frame=none]
 |===
-|latexmath:[$g = ({machine-level hart index\z{>>}LHXW}){ \z{\&} }({2}^{\rm HHXW}-{1})$]
-|latexmath:[$h = {machine-level hart index \z{\&} }({2}^{\rm LHXW}-{1})$] +
-|latexmath:[$\mbox{MSI address} = \bigl(\,{Base PPN \z{|} }(g{\z{<<}}({HHXS}+{12})){ \z{|} }(h{\z{<<}LHXS}){ \z{|} Guest Index}\,\bigr){\z{<<}12}$]
+|g = (machine-level hart index>>LHXW) & (2^HHXW^) - 1
+|h = machine-level hart index & (2^LHXW^) - 1
+|MSI address = (Base PPN \| (g<<(HHXS + 12) \| (h<<LHXS) \| Guest Index)<<12
 |===
 
 Represented in the terms of
