@@ -1,7 +1,7 @@
 [[ch:intro]]
 == Introduction
 
-This document specifies the Advanced Interrupt Architecture for ,
+This document specifies the Advanced Interrupt Architecture for,
 consisting of: (a) an extension to the standard Privileged Architecture
 for harts specified in Volume II of The Instruction Set Manual; (b) two
 standard interrupt controllers for systems, an Advanced Platform-Level
@@ -295,6 +295,8 @@ originating hart need only execute a loop, sending an individual IPI to
 each destination hart. For IPIs to a single destination hart, see
 <<IPIs>>.
 
+[NOTE]
+====
 The effort that a source hart expends in sending individual IPIs to
 multiple destinations will invariably be dwarfed by the combined effort
 at the receiving harts to handle those interrupts. Hence, providing an
@@ -309,11 +311,14 @@ We do not exclude the future possibility of an optional hardware
 mechanism for multicast IPI, but only if a significant advantage can be
 demonstrated in real use. As of 2020, Linux has been observed not to
 make use of multicast IPI hardware even on systems that have it.
+====
 
 In the rare event that a single interrupt from an I/O device needs to be
 communicated to multiple harts, the interrupt must be sent to a single
 hart which can then signal the other harts by IPIs.
 
+[NOTE]
+====
 We contend that the need to communicate an I/O interrupt to multiple
 harts is sufficiently rare that standardizing hardware support for
 multicast cannot be justified in this case.
@@ -351,6 +356,7 @@ claim, the interrupt trap becomes wasted effort.
 For the reasons already given, the Advanced PLIC supports sending each
 signaled interrupt to only a single hart chosen by software, not to
 multiple harts.
+====
 
 === ISA extensions Smaia and Ssaia
 
