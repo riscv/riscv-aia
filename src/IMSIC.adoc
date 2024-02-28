@@ -526,7 +526,6 @@ A read of a `*topei` CSR returns zero either if no interrupt is both pending in 
 |===
 |bits 26:16| Interrupt identity
 |bits 10:0 | Interrupt delivery from the interrupt file is enabled
-|0x40000000 = | Interrupt priority (same as identity)
 |===
 
 All other bit positions are zeros.
