@@ -49,7 +49,7 @@ registers are currently allocated to values listed above.
 |0x314 |MRW |32 |`mieh` |Upper 32 bits of
 |0x318 |MRW |32 |`mvienh` |Upper 32 bits of `mvienh` (only with S-mode)
 |0x319 |MRW |32 |`mviph` |Upper 32 bits of `mviph` (only with S-mode)
-|0x354 |MRW |32 |`miph` |Upper 32 bits of
+|0x354 |MRW |32 |`miph` |Upper 32 bits of `miph`
 |===
 
 Values of `miselect` with the most-significant bit set (bit
