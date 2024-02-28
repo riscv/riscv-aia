@@ -356,6 +356,7 @@ claim, the interrupt trap becomes wasted effort.
 For the reasons already given, the Advanced PLIC supports sending each
 signaled interrupt to only a single hart chosen by software, not to
 multiple harts.
+====
 
 === ISA extensions Smaia and Ssaia
 
