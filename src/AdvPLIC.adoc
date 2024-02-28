@@ -371,7 +371,7 @@ The registers of the first 16 KiB of an interrupt domain's control
 region (all but the IDC structures) are documented individually below.
 IDC structures are documented later, in
 <<AdvPLIC-directMode>>, "Interrupt delivery directly by
-the APLIC.""
+the APLIC."
 
 [[AdvPLIC-reg-domaincfg]]
 ==== Domain configuration (`domaincfg`)
