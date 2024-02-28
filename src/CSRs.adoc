@@ -281,6 +281,7 @@ If extension Smstateen is implemented together with the Advanced
 Interrupt Architecture (AIA), three bits of state-enable register `mstateen0` control access to AIA-added state from privilege modes less privileged
 than M-mode:
 
+----
 bit 60 CSRs `siselect`, `sireg`, `vsiselect`, and `vsireg`
 bit 59 all other state added by the AIA and not controlled by bits 60
 and 58
