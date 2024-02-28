@@ -323,7 +323,7 @@ defined also in hypervisor CSR `hstateen0` but concern only the state potentiall
 ----
 bit 60 CSRs and (really `viselect` and `vsireg`) +
 bit 59 CSRs `siph` and `sieh` (RV32 only) and `stopi` (really `vsiph`, `vsieh`, and `vstopi`) +
-bit 58 all state of IMSIC guest interrupt files, including CSR `stopei`(really `vstopei`)
+bit 58 all state of IMSIC guest interrupt files, including CSR `stopei`(really `vstopei`) +
 ----
 
 If one of these bits is zero in `hstateen0`, and the same bit is one in `mstateen0`, then an attempt to access the corresponding state from VS or VU-mode raises a virtual instruction exception. (But note that, for high-half CSRs `siph` and `sieh`, this applies only when XLEN = 32. When XLEN > 32, an attempt to access `siph` or `seph` raises an illegal instruction exception as usual, not a virtual instruction exception.)
