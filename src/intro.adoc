@@ -311,6 +311,7 @@ We do not exclude the future possibility of an optional hardware
 mechanism for multicast IPI, but only if a significant advantage can be
 demonstrated in real use. As of 2020, Linux has been observed not to
 make use of multicast IPI hardware even on systems that have it.
+====
 
 In the rare event that a single interrupt from an I/O device needs to be
 communicated to multiple harts, the interrupt must be sent to a single
