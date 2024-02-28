@@ -223,7 +223,7 @@ Like `siselect` and `sireg`, the widths of `vsiselect` and `vsireg` are always t
 
 |0x214 |HRW |32 |`vsieh` |Upper 32 bits of `vsie`
 
-|0x254 |HRW |32 |`vsiph` |Upper 32 bits of
+|0x254 |HRW |32 |`vsiph` |Upper 32 bits of `vsip`
 |===
 
 The space of registers selectable by `vsiselect` is more limited than for machine and supervisor levels:
