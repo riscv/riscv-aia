@@ -353,7 +353,7 @@ latexmath:[${2}^{k+D}$] respectively, latexmath:[$A$] and
 latexmath:[$B$] should be chosen so
 
 latexmath:[$\left(({2}^{j}-{1})\times{2}^{E}\right)$]
-& latexmath:[$A \,=\, 0$] and
+& latexmath:[$A \,=\, 0$] and +
 latexmath:[$\left(({2}^{j}-{1})\times{2}^{E}\right)$]
 & latexmath:[$B \,=\, 0$]
 
