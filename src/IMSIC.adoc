@@ -507,7 +507,7 @@ interrupt identity latexmath:[$i$] within that range, the enable bit for
 interrupt latexmath:[$i$] is bit latexmath:[$(i\bmod{64})$] of ``eie``latexmath:[$k$].
 
 Bit positions in a valid ``eie``latexmath:[$k$] register that don't correspond
-to a supported interrupt identity (such as bit 0 of `eie0``) are read-only
+to a supported interrupt identity (such as bit 0 of `eie0`) are read-only
 zeros.
 
 ===  Top external interrupt CSRs (`mtopei`, `stopei`, `vstopei`) 
