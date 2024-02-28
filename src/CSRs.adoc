@@ -115,7 +115,7 @@ interrupts instead of machine-level interrupts. The allocated values for
 `siselect` in the range 0 to 0xFF to are once again these:
 
 ----
-0x00-0x2F reserved
+0x00-0x2F reserved +
 0x30-0x3F major interrupt priorities
 0x40-0x6F reserved
 0x70-0xFF external interrupts (only with an IMSIC)
