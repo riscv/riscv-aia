@@ -322,7 +322,7 @@ defined also in hypervisor CSR `hstateen0` but concern only the state potentiall
 
 ----
 bit 60 CSRs and (really `viselect` and `vsireg`) +
-bit 59 CSRs `siph` and `sieh` (RV32 only) and `stopi` (really `vsiph`, `vsieh`, and `vstopi`)
+bit 59 CSRs `siph` and `sieh` (RV32 only) and `stopi` (really `vsiph`, `vsieh`, and `vstopi`) +
 bit 58 all state of IMSIC guest interrupt files, including CSR `stopei`(really `vstopei`)
 ----
 
