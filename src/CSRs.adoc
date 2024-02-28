@@ -25,7 +25,7 @@ register is currently accessible through alias CSR `mireg`. `miselect` is a *WAR
 ----
 
 `miselect` may also support values outside the range 0x00-0``xFF``, though no standard
-registers are currently allocated to values above .
+registers are currently allocated to values listed above.
 
 [[CSRs-M]]
 .Machine-level CSRs added or widened by the Advanced Interrupt Architecture.
