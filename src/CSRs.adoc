@@ -211,7 +211,7 @@ Like `siselect` and `sireg`, the widths of `vsiselect` and `vsireg` are always t
 
 5+|Hypervisor and VS-Level High-Half CSRs (RV32 only)
 
-|0x613 |HRW |32 |`hidelegh` |Upper 32 bits of
+|0x613 |HRW |32 |`hidelegh` |Upper 32 bits of `hideleg`
 
 |0x618 |HRW |32 |`hvienh` |Upper 32 bits of `hvien`
 
