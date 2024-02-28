@@ -228,6 +228,7 @@ Like `siselect` and `sireg`, the widths of `vsiselect` and `vsireg` are always t
 
 The space of registers selectable by `vsiselect` is more limited than for machine and supervisor levels:
 
+----
 0x000-0x02F reserved
 0x030-0x03F inaccessible
 0x040-0x06F reserved
