@@ -14,11 +14,11 @@
 :url-riscv: http://riscv.org
 :doctype: book
 //:colophon:
-:pdf-theme: ../src/docs-resources/themes/riscv-pdf.yml
-:pdf-fontsdir: ../src/docs-resources/fonts/
+:pdf-theme: docs-resources/themes/riscv-pdf.yml
+:pdf-fontsdir: docs-resources/fonts/
 //:preface-title: Preamble
 //:appendix-caption: Appendix
-:imagesdir: ../src/docs-resources/images
+:imagesdir: ../docs-resources/images
 :title-logo-image: image:risc-v_logo.png[pdfwidth=3.25in,align=center]
 //:page-background-image: image:draft.png[opacity=20%]
 //:title-page-background-image: none
@@ -27,7 +27,7 @@
 // Settings:
 :experimental:
 :reproducible:
-:imagesoutdir: ../src/docs-resources/images
+:imagesoutdir: docs-resources/images
 //:bibtex-file: ../src/resources/riscv-spec.bib
 //:bibtex-order: alphabetical
 //:bibtex-style: apa
