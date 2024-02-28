@@ -17,6 +17,7 @@ upper 32 bits of registers `mideleg`, `mie`, `mvien`, `mvip`, and `mip`. The Adv
 CSRs `miselect` and `mireg` provide a window for accessing multiple registers beyond the CSRs in <<CSRs-M>>. The value of `miselect` determines which
 register is currently accessible through alias CSR `mireg`. `miselect` is a *WARL* register, and it must support a minimum range of values depending on the implemented features. When an IMSIC is not implemented, `miselect` must be able to hold at least any 6-bit value in the range 0 to 0``x3F``. When an IMSIC is implemented, `miselect` must be able to hold any 8-bit value in the range 0 to 0``xFF``. Values for `miselect` in the range 0 to 0``xFF`` are currently assigned in subranges as follows:
 
+----
 ``0x00-0x2F`` reserved
 ``0x30-0x3F`` major interrupt priorities
 ``0x40-0x6F`` reserved
