@@ -123,6 +123,7 @@ interrupts instead of machine-level interrupts. The allocated values for
 For maximum compatibility, it is recommended that `siselect` support at least a
 9-bit range, 0 to
 0x1FF, regardless of whether an IMSIC exists.
+
 [NOTE]
 ====
 Because the VS CSR `vsiselect` (<<CSRs-hypervisor>>) always has at
