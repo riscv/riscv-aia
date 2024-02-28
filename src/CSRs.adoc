@@ -216,7 +216,7 @@ Like `siselect` and `sireg`, the widths of `vsiselect` and `vsireg` are always t
 
 |0x655 |HRW |32 |`hviph` |Upper 32 bits of `hvip`
 
-|0x656 |HRW |32 |`hviprio1h` |Upper 32 bits of
+|0x656 |HRW |32 |`hviprio1h` |Upper 32 bits of `hviprio1`
 
 |0x657 |HRW |32 |`hviprio2h` |Upper 32 bits of
 
