@@ -316,6 +316,8 @@ In the rare event that a single interrupt from an I/O device needs to be
 communicated to multiple harts, the interrupt must be sent to a single
 hart which can then signal the other harts by IPIs.
 
+[NOTE]
+====
 We contend that the need to communicate an I/O interrupt to multiple
 harts is sufficiently rare that standardizing hardware support for
 multicast cannot be justified in this case.
