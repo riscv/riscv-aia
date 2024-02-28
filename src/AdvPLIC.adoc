@@ -514,7 +514,7 @@ source is delegated to a child domain (D = 1) or it is not delegated
 inactive in an interrupt domain, the corresponding interrupt-pending and
 interrupt-enable bits within the domain are read-only zeros, and
 register `target[latexmath:[$i$]]` is also read-only zero. If source latexmath:[$i$] is changed
-from inactive to an active mode, the interrupt source 's pending and
+from inactive to an active mode, the interrupt source's pending and
 enable bits remain zeros, unless set automatically for a reason
 specified later in this section or in
 <<AdvPLIC-pendingBits>>, and the defined subfields of `target[latexmath:[$i$]]` obtain UNSPECIFIED values.
