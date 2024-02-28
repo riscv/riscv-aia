@@ -1,7 +1,7 @@
 [[ch:intro]]
 == Introduction
 
-This document specifies the Advanced Interrupt Architecture for ,
+This document specifies the Advanced Interrupt Architecture for,
 consisting of: (a) an extension to the standard Privileged Architecture
 for harts specified in Volume II of The Instruction Set Manual; (b) two
 standard interrupt controllers for systems, an Advanced Platform-Level
