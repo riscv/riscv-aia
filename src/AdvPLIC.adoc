@@ -1209,7 +1209,6 @@ determined by `mmsiaddrcfg` and `mmsiaddrcfgh`, then the address for an outgoing
 source latexmath:[$i$] is computed from those registers and from the
 Hart Index field of register as follows:
 
-<<<
 
 [%autowidth,float="center",align="center",cols="<",grid=none,frame=none]
 |===
