@@ -22,6 +22,7 @@ register is currently accessible through alias CSR `mireg`. `miselect` is a *WAR
 ``0x30-0x3F`` major interrupt priorities
 ``0x40-0x6F`` reserved
 ``0x70–0xFF`` external interrupts (only with an IMSIC)
+----
 
 `miselect` may also support values outside the range 0x00-0``xFF``, though no standard
 registers are currently allocated to values above .
