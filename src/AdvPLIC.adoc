@@ -537,6 +537,7 @@ level-sensitive, define
 
 _rectified input value_ = (incoming wire value) XOR (source is
 inverted).
+----
 
 For a source that is inactive or Detached, the _rectified input value_
 is zero.
