@@ -47,7 +47,7 @@ registers are currently allocated to values listed above.
 5+|Machine-Level High-Half CSRs (RV32 only)
 |0x313 |MRW |32 |`midelegh` |Upper 32 bits of of `midelegh` (only with S-mode)
 |0x314 |MRW |32 |`mieh` |Upper 32 bits of
-|0x318 |MRW |32 |`mvienh` |Upper 32 bits of (only with S-mode)
+|0x318 |MRW |32 |`mvienh` |Upper 32 bits of `mvienh` (only with S-mode)
 |0x319 |MRW |32 |`mviph` |Upper 32 bits of (only with S-mode)
 |0x354 |MRW |32 |`miph` |Upper 32 bits of
 |===
