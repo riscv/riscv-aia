@@ -105,7 +105,7 @@ machine-level counterparts.
 |0x15C |SRW |SXLEN |`stopei` |Supervisor top external interrupt (only with an IMSIC)
 |0xDB0 |SRO |SXLEN |`stopi` |Supervisor top interrupt
 5+|Supervisor-Level High-Half CSRs (RV32 only)
-|0x114 |SRW |32 |`sieh` |Upper 32 bits of
+|0x114 |SRW |32 |`sieh` |Upper 32 bits of `sie`
 |0x154 |SRW |32 |`siph` |Upper 32 bits of
 |===
 
