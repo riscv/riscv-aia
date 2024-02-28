@@ -119,6 +119,7 @@ interrupts instead of machine-level interrupts. The allocated values for
 0x30-0x3F major interrupt priorities
 0x40-0x6F reserved
 0x70-0xFF external interrupts (only with an IMSIC)
+----
 
 For maximum compatibility, it is recommended that `siselect` support at least a
 9-bit range, 0 to
