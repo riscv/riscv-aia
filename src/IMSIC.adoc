@@ -372,7 +372,7 @@ integer between 0 and latexmath:[${{2}^{j}-1}$] inclusive, then
 within the address ranges,
 
 latexmath:[$g\times{2}^{E}+A$] through
-latexmath:[$g\times{2}^{E}+A+{2}^{k+C}-{1}$], and
+latexmath:[$g\times{2}^{E}+A+{2}^{k+C}-{1}$], and +
 latexmath:[$g\times{2}^{E}+B$] through
 latexmath:[$g\times{2}^{E}+B+{2}^{k+D}-{1}$],
 
