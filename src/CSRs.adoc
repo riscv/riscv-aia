@@ -18,10 +18,10 @@ CSRs `miselect` and `mireg` provide a window for accessing multiple registers be
 register is currently accessible through alias CSR `mireg`. `miselect` is a *WARL* register, and it must support a minimum range of values depending on the implemented features. When an IMSIC is not implemented, `miselect` must be able to hold at least any 6-bit value in the range 0 to 0``x3F``. When an IMSIC is implemented, `miselect` must be able to hold any 8-bit value in the range 0 to 0``xFF``. Values for `miselect` in the range 0 to 0``xFF`` are currently assigned in subranges as follows:
 
 ----
-``0x00-0x2F`` reserved
-``0x30-0x3F`` major interrupt priorities
-``0x40-0x6F`` reserved
-``0x70–0xFF`` external interrupts (only with an IMSIC)
+``0x00-0x2F`` reserved +
+``0x30-0x3F`` major interrupt priorities +
+``0x40-0x6F`` reserved +
+``0x70–0xFF`` external interrupts (only with an IMSIC) +
 ----
 
 `miselect` may also support values outside the range 0x00-0``xFF``, though no standard
@@ -115,10 +115,10 @@ interrupts instead of machine-level interrupts. The allocated values for
 `siselect` in the range 0 to 0xFF to are once again these:
 
 ----
-0x00-0x2F reserved
-0x30-0x3F major interrupt priorities
-0x40-0x6F reserved
-0x70-0xFF external interrupts (only with an IMSIC)
+0x00-0x2F reserved +
+0x30-0x3F major interrupt priorities +
+0x40-0x6F reserved +
+0x70-0xFF external interrupts (only with an IMSIC) +
 ----
 
 For maximum compatibility, it is recommended that `siselect` support at least a
@@ -229,11 +229,11 @@ Like `siselect` and `sireg`, the widths of `vsiselect` and `vsireg` are always t
 The space of registers selectable by `vsiselect` is more limited than for machine and supervisor levels:
 
 ----
-0x000-0x02F reserved
-0x030-0x03F inaccessible
-0x040-0x06F reserved
-0x070-0x0FF external interrupts (IMSIC only), or inaccessible
-0x100-0x1FF reserved
+0x000-0x02F reserved +
+0x030-0x03F inaccessible +
+0x040-0x06F reserved +
+0x070-0x0FF external interrupts (IMSIC only), or inaccessible +
+0x100-0x1FF reserved +
 ----
 
 For alias CSRs `sireg` and `vsireg`, the hypervisor extension's usual rules for when to raise a virtual instruction exception (based on whether an instruction is _HS-qualified_) are not applicable. The rules given in this section for `sireg` and `vsireg` apply instead, unless overridden by the requirements of <<CSRs-stateen>>, which take precedence over this section
@@ -282,10 +282,10 @@ Interrupt Architecture (AIA), three bits of state-enable register `mstateen0` co
 than M-mode:
 
 ----
-bit 60 CSRs `siselect`, `sireg`, `vsiselect`, and `vsireg`
+bit 60 CSRs `siselect`, `sireg`, `vsiselect`, and `vsireg` +
 bit 59 all other state added by the AIA and not controlled by bits 60
 and 58
-bit 58 all IMSIC state, including CSRs `stopei` and `vstopei`
+bit 58 all IMSIC state, including CSRs `stopei` and `vstopei` +
 ----
 
 If one of these bits is zero in `mstateen0`, an attempt to access the corresponding state from a privilege mode less privileged than M-mode results in an illegal instruction trap. As always, the state-enable CSRs do not affect
@@ -321,9 +321,9 @@ If the hypervisor extension is implemented, the same three bits are
 defined also in hypervisor CSR `hstateen0` but concern only the state potentially accessible to a virtual machine executing in privilege modes VS and VU:
 
 ----
-bit 60 CSRs and (really `viselect` and `vsireg`)
-bit 59 CSRs `siph` and `sieh` (RV32 only) and `stopi` (really `vsiph`, `vsieh`, and `vstopi`)
-bit 58 all state of IMSIC guest interrupt files, including CSR `stopei`(really `vstopei`)
+bit 60 CSRs and (really `viselect` and `vsireg`) +
+bit 59 CSRs `siph` and `sieh` (RV32 only) and `stopi` (really `vsiph`, `vsieh`, and `vstopi`) +
+bit 58 all state of IMSIC guest interrupt files, including CSR `stopei`(really `vstopei`) +
 ----
 
 If one of these bits is zero in `hstateen0`, and the same bit is one in `mstateen0`, then an attempt to access the corresponding state from VS or VU-mode raises a virtual instruction exception. (But note that, for high-half CSRs `siph` and `sieh`, this applies only when XLEN = 32. When XLEN > 32, an attempt to access `siph` or `seph` raises an illegal instruction exception as usual, not a virtual instruction exception.)
