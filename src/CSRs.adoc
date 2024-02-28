@@ -320,6 +320,7 @@ VU-mode to directly access `vsireg`, and for all attempts from VU-mode to access
 If the hypervisor extension is implemented, the same three bits are
 defined also in hypervisor CSR `hstateen0` but concern only the state potentially accessible to a virtual machine executing in privilege modes VS and VU:
 
+----
 bit 60 CSRs and (really `viselect` and `vsireg`)
 bit 59 CSRs `siph` and `sieh` (RV32 only) and `stopi` (really `vsiph`, `vsieh`, and `vstopi`)
 bit 58 all state of IMSIC guest interrupt files, including CSR `stopei`(really `vstopei`)
