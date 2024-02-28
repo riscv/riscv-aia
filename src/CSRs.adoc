@@ -234,6 +234,7 @@ The space of registers selectable by `vsiselect` is more limited than for machin
 0x040-0x06F reserved
 0x070-0x0FF external interrupts (IMSIC only), or inaccessible
 0x100-0x1FF reserved
+----
 
 For alias CSRs `sireg` and `vsireg`, the hypervisor extension's usual rules for when to raise a virtual instruction exception (based on whether an instruction is _HS-qualified_) are not applicable. The rules given in this section for `sireg` and `vsireg` apply instead, unless overridden by the requirements of <<CSRs-stateen>>, which take precedence over this section
 when extension Smstateen is also implemented.
