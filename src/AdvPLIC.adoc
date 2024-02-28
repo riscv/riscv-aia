@@ -535,6 +535,7 @@ said to be _inverted_.
 For an interrupt source that is configured as edge-sensitive or
 level-sensitive, define
 
+----
 _rectified input value_ = (incoming wire value) XOR (source is
 inverted).
 ----
