@@ -295,6 +295,8 @@ originating hart need only execute a loop, sending an individual IPI to
 each destination hart. For IPIs to a single destination hart, see
 <<IPIs>>.
 
+[NOTE]
+====
 The effort that a source hart expends in sending individual IPIs to
 multiple destinations will invariably be dwarfed by the combined effort
 at the receiving harts to handle those interrupts. Hence, providing an
