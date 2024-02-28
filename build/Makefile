@@ -23,7 +23,8 @@ TARGETS := aia aia-html aia-latex
 all: $(TARGETS)
 
 # Asciidoctor options
-ASCIIDOCTOR_OPTS := --attribute=mathematical-format=svg \
+ASCIIDOCTOR_OPTS := -a --compress \
+					--attribute=mathematical-format=svg \
 					--attribute=pdf-fontsdir=../src/docs-resources/fonts \
 					--attribute=pdf-style=../src/docs-resources/themes/riscv-pdf.yml \
                     --failure-level=ERROR \
