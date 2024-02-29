@@ -352,16 +352,13 @@ multiples of latexmath:[${2}^{k+C}$] and
 latexmath:[${2}^{k+D}$] respectively, latexmath:[$A$] and
 latexmath:[$B$] should be chosen so
 
-latexmath:[$\left(({2}^{j}-{1})\times{2}^{E}\right)$]
-& latexmath:[$A \,=\, 0$] and
-latexmath:[$\left(({2}^{j}-{1})\times{2}^{E}\right)$]
-& latexmath:[$B \,=\, 0$]
+((2^j^-1) X 2^E^) & A = 0 and ((2^j^-1) X 2^E^) & B = 0
+
+//latexmath:[$((2^j-1)\times{2}^{E})$] & latexmath:[$A \,=\, 0$] and latexmath:[$\left(({2}^{j}-{1})\times{2}^{E}\right)$] & latexmath:[$B \,=\, 0$]
 
 where an ampersand (&) represents bitwise logical AND. This ensures that
 
-latexmath:[$g\times{2}^{E}+A+h\times{2}^{C}$] always equals
-latexmath:[$(g\times{2}^{E})$] latexmath:[$A$]
-latexmath:[$(h\times{2}^{C})$], and
+latexmath:[$g\times{2}^{E}+A+h\times{2}^{C}$] always equals latexmath:[$\(g\times{2}^{E})$] latexmath:[$A$] latexmath:[$(h\times{2}^{C})$], and
 latexmath:[$g\times{2}^{E}+B+h\times{2}^{D}$] always equals
 latexmath:[$(g\times{2}^{E})$] latexmath:[$B$]
 latexmath:[$(h\times{2}^{D})$]. 
@@ -378,7 +375,7 @@ latexmath:[$g\times{2}^{E}+B+{2}^{k+D}-{1}$],
 
 pages not occupied by an interrupt file should be read-only zeros.
 
-See also Section <<AdvPLIC-MSIAddrs>> for the
+See also <<AdvPLIC-MSIAddrs>> for the
 default algorithms an Advanced PLIC may use to determine the destination
 addresses of outgoing MSIs, which should be the addresses of IMSIC
 interrupt files.
