@@ -642,7 +642,6 @@ The supervisor-level `iprio` array accessed via `siselect` and `sireg` affects t
 ||Interrupts with default priority above supervisor external interrupts |Supervisor external interrupts |Interrupts with default priority below supervisor external  interrupts|Priority +
 order|Priority number in supervisor-level `iprio` array |Priority number from interrupt controller (APLIC or IMSIC) |Priority number in supervisor-level `iprio` array 
 |===
-[[TableintrPrios-S]]
 [%header,float="center",align="center",cols="^,^,^,^"]
 |===
 |Highest|0 ||
