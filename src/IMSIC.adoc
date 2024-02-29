@@ -369,7 +369,7 @@ integer between 0 and latexmath:[${{2}^{j}-1}$] inclusive, then
 within the address ranges,
 
 latexmath:[$g\times{2}^{E}+A$] through
-latexmath:[$g\times{2}^{E}+A+{2}^{k+C}-{1}$], and
+latexmath:[$g\times{2}^{E}+A+{2}^{k+C}-{1}$], and +
 latexmath:[$g\times{2}^{E}+B$] through
 latexmath:[$g\times{2}^{E}+B+{2}^{k+D}-{1}$],
 
@@ -504,7 +504,7 @@ interrupt identity latexmath:[$i$] within that range, the enable bit for
 interrupt latexmath:[$i$] is bit latexmath:[$(i\bmod{64})$] of ``eie``latexmath:[$k$].
 
 Bit positions in a valid ``eie``latexmath:[$k$] register that don't correspond
-to a supported interrupt identity (such as bit 0 of `eie0``) are read-only
+to a supported interrupt identity (such as bit 0 of `eie0`) are read-only
 zeros.
 
 ===  Top external interrupt CSRs (`mtopei`, `stopei`, `vstopei`) 
@@ -522,8 +522,7 @@ A read of a `*topei` CSR returns zero either if no interrupt is both pending in 
 [%autowidth,float="center",align="center",cols=">,<",grid=none,frame=none]
 |===
 |bits 26:16| Interrupt identity
-|bits 10:0 | Interrupt delivery from the interrupt file is enabled
-|0x40000000 = | Interrupt priority (same as identity)
+|bits 10:0 | Interrupt priority (same as identity)
 |===
 
 All other bit positions are zeros.

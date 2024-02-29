@@ -635,16 +635,13 @@ but may simply be all read-only zeros.
 
 The supervisor-level `iprio` array accessed via `siselect` and `sireg` affects the prioritization of interrupts only when they trap to S-mode. When an interrupt's priority number in the array is zero (either read-only zero or set to zero), its priority is the default order from <<majorIntrs>>. Setting an interrupt's priority number instead to a nonzero value latexmath:[$p$] gives that interrupt nominally the same priority as a supervisor-level external interrupt with priority number latexmath:[$p$]. For an interrupt that defaults to a higher priority than supervisor external interrupts, setting its priority number to a nonzero value lowers its priority. For an interrupt that defaults to a lower priority than supervisor external interrupts, setting its priority number to a nonzero value raises its priority. When two interrupt causes have been assigned the same nominal priority, ties are broken by the default priority order. <<TableintrPrios-S>> summarizes the effect of priority numbers on interrupt priority.
 
-[%header,float="center",align="center",cols="^,^,^,^"]
-|===
-||Interrupts with default priority above supervisor external interrupts |Supervisor external interrupts |Interrupts with default priority below supervisor external  interrupts|Priority +
-order|Priority number in supervisor-level `iprio` array |Priority number from interrupt controller (APLIC or IMSIC) |Priority number in supervisor-level `iprio` array 
-|===
 [[TableintrPrios-S]]
 .Effect of the supervisor-level iprio array on the priorities of interrupts taken in S-mode. For interrupts with the same priority number, the default order of <<majorIntrs>> prevails.
 [%header,float="center",align="center",cols="^,^,^,^"]
 |===
-|Highest|0 ||
+||Interrupts with default priority above supervisor external interrupts |Supervisor external interrupts |Interrupts with default priority below supervisor external  interrupts|Priority +
+order|Priority number in supervisor-level `iprio` array |Priority number from interrupt controller (APLIC or IMSIC) |Priority number in supervisor-level `iprio` array 
+|Highest|||0
 ||1 +
 2 +
 ... +
@@ -737,4 +734,8 @@ According to the RISC-V Privileged Architecture, instruction execution must resu
 
 An interrupt is pending at machine level if register `mtopi` is not zero. If S-mode is implemented, an interrupt is pending at supervisor level if `stopi` is not zero. And if the hypervisor extension is implemented, an interrupt is pending at VS level if (<<vstopi>>) is not zero.
 
+[NOTE]
+====
 The AIA's rule for WFI gives the same behavior as the Privileged Architecture’s rule when `mvien`= 0 and, if the hypervisor extension is implemented, also `hvien` = 0 and `hvictl`.VTI = 0, thus disabling all virtual interrupts not visible in `mip`. (The AIA's hypervisor registers are covered in the next chapter, "Interrupts for Virtual Machines (VS Level)".)
+====
+
