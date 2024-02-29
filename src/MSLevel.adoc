@@ -734,4 +734,8 @@ According to the RISC-V Privileged Architecture, instruction execution must resu
 
 An interrupt is pending at machine level if register `mtopi` is not zero. If S-mode is implemented, an interrupt is pending at supervisor level if `stopi` is not zero. And if the hypervisor extension is implemented, an interrupt is pending at VS level if (<<vstopi>>) is not zero.
 
+[NOTE]
+====
 The AIA's rule for WFI gives the same behavior as the Privileged Architecture’s rule when `mvien`= 0 and, if the hypervisor extension is implemented, also `hvien` = 0 and `hvictl`.VTI = 0, thus disabling all virtual interrupts not visible in `mip`. (The AIA's hypervisor registers are covered in the next chapter, "Interrupts for Virtual Machines (VS Level)".)
+====
+
