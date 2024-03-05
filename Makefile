@@ -66,4 +66,3 @@ clean:
 		echo "Removing riscv-interrupts.html"; \
 		rm -f riscv-interrupts.html; \
 	fi
-	done
