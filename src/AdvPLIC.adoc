@@ -1295,7 +1295,7 @@ register, harts may continue to see MSIs arrive from the APLIC from the
 time before the write, for an unspecified amount of time.
 
 It is sometimes necessary to know when no more of these late MSIs can
-arrive. For example, if a hart will be turned off (``powered down''),
+arrive. For example, if a hart will be turned off ("powered down"),
 all interrupts directed to it must be redirected to other harts, which
 may involve reconfiguring one or more APLICs. Even after the APLICs are
 reconfigured, the hart still cannot be safely turned off until it is
