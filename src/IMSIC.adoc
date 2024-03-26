@@ -490,7 +490,7 @@ When the current XLEN = 32, register ``eie``latexmath:[$k$] contains the enable
 bits for interrupts with identity numbers latexmath:[$k\times{32}$]
 through latexmath:[${k\times{32} + {31}}$]. For an implemented
 interrupt identity latexmath:[$i$] within that range, the enable bit for
-interrupt latexmath:[$i$] is bit latexmath:[$(i\bmod{32})$] of ``eie``latexmath:[$k$].
+interrupt latexmath:[$i$] is bit (latexmath:[i\bmod{32}]) of ``eie``latexmath:[$k$].
 
 When the current XLEN = 64, the odd-numbered registers `eie1`, `eie3`, … `eie63` do not
 exist. In that case, if the `*iselect` CSR is an odd value in the range `0xC1`–`0xFF`, an
@@ -501,7 +501,7 @@ instruction exception. For even latexmath:[$k$], register
 numbers latexmath:[$k\times{32}$] through
 latexmath:[${k\times{32} + {63}}$]. For an implemented
 interrupt identity latexmath:[$i$] within that range, the enable bit for
-interrupt latexmath:[$i$] is bit latexmath:[$(i\bmod{64})$] of ``eie``latexmath:[$k$].
+interrupt latexmath:[$i$] is bit (latexmath:[i\bmod{64}]) of ``eie``latexmath:[$k$].
 
 Bit positions in a valid ``eie``latexmath:[$k$] register that don't correspond
 to a supported interrupt identity (such as bit 0 of `eie0`) are read-only
