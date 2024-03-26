@@ -358,10 +358,10 @@ latexmath:[$B$] should be chosen so
 
 where an ampersand (&) represents bitwise logical AND. This ensures that
 
-latexmath:[$g\times{2}^{E}+A+h\times{2}^{C}$] always equals latexmath:[$\(g\times{2}^{E})$] latexmath:[$A$] latexmath:[$(h\times{2}^{C})$], and
-latexmath:[$g\times{2}^{E}+B+h\times{2}^{D}$] always equals
-latexmath:[$(g\times{2}^{E})$] latexmath:[$B$]
-latexmath:[$(h\times{2}^{D})$]. 
+latexmath:[g\times{2}^{E}+A+h\times{2}^{C}] always equals 
+(latexmath:[\g\times{2}^{E}]) | latexmath:[A] | (latexmath:[h\times{2}^{C}]), and +
+latexmath:[g\times{2}^{E}+B+h\times{2}^{D}] always equals (latexmath:[g\times{2}^{E}]) | latexmath:[B] | 
+(latexmath:[h\times{2}^{D}]). 
 
 Infilling with read-only-zero pages is expected only within each group,
 not between separate groups. Specifically, if latexmath:[$g$] is any
