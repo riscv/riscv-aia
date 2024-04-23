@@ -1,6 +1,6 @@
 == Preface
 
-This document describes an Advanced Interrupt Architecture for systems.
+This document describes an Advanced Interrupt Architecture for RISC-V systems.
 This specification was ratified by the International Association in June
 of 2023.
 
@@ -23,13 +23,13 @@ non-ISA.
 
 === Changes for the ratified version 1.0
 
-Resolved some inconsistencies in Chapter #ch:CSRs[[ch:CSRs]] about when
+Resolved some inconsistencies in <<CSRs>> about when
 to raise a virtual instruction exception versus an illegal instruction
 exception.
 
 === Changes for RC6 (Ratification Candidate 6)
 
-Resolved some inconsistencies in Chapter #ch:CSRs[[ch:CSRs]] about when
+Resolved some inconsistencies in <<CSRs>> about when
 to raise a virtual instruction exception versus an illegal instruction
 exception.
 
@@ -37,41 +37,39 @@ exception.
 
 Better aligned the rules for indirectly accessed registers with the
 hypervisor extension and with forthcoming extension Smcsrind/Sscsrind.
-In particular, when has a reserved value, attempts to access from a
+In particular, when `vsiselect` has a reserved value, attempts to access `sireg` from a
 virtual machine (VS or VU-mode) should preferably raise an illegal
 instruction exception instead of a virtual instruction exception.
 
-Added clarification about the term _IOMMU_ used in
-Chapter #ch:IOMMU[[ch:IOMMU]].
+Added clarification about the term _IOMMU_ used in <<IOMMU>>.
 
 Added clarification about MSI write replaced by MRIF update and notice
 MSI sent after the update.
 
 === Changes for RC4
 
-For alignment with other forthcoming ISA extensions, the widths of the
-indirect-access CSRs, , , , , , and , were changed to all be the current
+For alignment with other forthcoming RISC-V ISA extensions, the widths of the
+indirect-access CSRs, `miselect`, `mireg`, `siselect`, `sireg`, `vsiselect`, and `vsireg` were changed to all be the current
 XLEN rather than being tied to their respective privilege levels
-(previously MXLEN for and , SXLEN for and , and VSXLEN for and ).
+(previously MXLEN for `miselect` and `mireg`, SXLEN for `siselect` and `sireg`, and VSXLEN for `vsiselect` and `vsireg`).
 
 Changed the description (but not the actual function) of _high-half_
-CSRs and their partner CSRs to match the latest Privileged ISA
-specification. (An example of a high-half CSR is , and its partner here
-is .)
+CSRs and their partner CSRs to match the latest RISC-V Privileged ISA
+specification. (An example of a high-half CSR is `miph`, and its partner here
+is `mip`.)
 
 === Changes for RC3
 
 Removed the still-draft Duo-PLIC chapter to a separate document.
 
 Allocated major interrupts 35 and 43 for signaling RAS events
-(Section #sec:majorIntrs[[sec:majorIntrs]]).
+(<<majorIntrs>>).
 
-In Section #sec:virtIntrs-S[[sec:virtIntrs-S]] added the options for
+In <<virtIntrs-S>> added the options for
 bits 1 and 9 to be writable in CSR , and specified the effects of
 setting each of these bits.
 
-Upgraded Chapter #ch:IOMMU[[ch:IOMMU]] (``IOMMU Support'') to the
-_frozen_ state.
+Upgraded <<IOMMU>> ("IOMMU Support") to the _frozen_ state.
 
 === Changes for RC2
 
@@ -79,6 +77,6 @@ Clarified that field IID of CSR must support all unsigned integer values
 of the number of bits implemented for that field, and that writes to
 always set IID in the most straightforward way.
 
-A comment was added to Chapter #ch:IPIs[[ch:IPIs]] warning about the
+A comment was added to <<IPIs>> warning about the
 possible need for FENCE instructions when IPIs are sent to other harts
 by writing MSIs to those harts’ IMSICs.
