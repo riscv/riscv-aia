@@ -28,7 +28,7 @@ interrupts by a PLIC, APLIC, or IMSIC.
 === Defined major interrupts and default priorities
 
 <<TablemajorIntrs>> lists all the major interrupts
-currently defined for harts that conform to this Advanced Interrupt
+currently defined for RISC-V harts that conform to this Advanced Interrupt
 Architecture (AIA). Besides the major interrupts specified by the
 RISC-V Privileged Architecture, the AIA adds interrupt numbers 35 and 43 as
 local interrupts for low- and high-priority _RAS events_.
@@ -155,7 +155,7 @@ of the sequence. This proposed default priority order is arranged so
 that interrupts 0-31 can potentially be an adequate subset on their own
 for 32-bit RISC-V systems.
 
-In actualitmajorIntrsy, future RISC-V extensions may or may not stick to this plan for
+In actuality, future RISC-V extensions may or may not stick to this plan for
 the default priority order of interrupts they define.
 
 '''
@@ -165,9 +165,12 @@ In addition to the existing major interrupts of
 are tentatively proposed, listed in order of decreasing default
 priority:
 
- 23 Bus or system error
- 45 Per-core high-power or over-temperature event
- 17 Debug/trace interrupt
+[%autowidth,align="center",float="center",cols="^,<",frame=none,grid=none]
+|===
+|23 | Bus or system error
+|45 | Per-core high-power or over-temperature event
+|17 | Debug/trace interrupt
+|===
 
 These local interrupts are expected to be specified by other RISC-V extensions.
 Be aware, this list is not final and may change as the relevant
@@ -365,7 +368,7 @@ order|Priority number in machine-level `iprio` array
 |===
 
 Implementing the priority configurability of this section requires that
-a RIC-V hart's external interrupt controller communicate to the hart not only
+a RISC-V hart's external interrupt controller communicate to the hart not only
 the existence of a pending-and-enabled external interrupt but also the
 interrupt's priority number. Typically this implies that the width of
 the connection for signaling an external interrupt to the hart is not
