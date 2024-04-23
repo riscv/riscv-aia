@@ -1,10 +1,10 @@
 [[ch:intro]]
 == Introduction
 
-This document specifies the Advanced Interrupt Architecture for,
+This document specifies the Advanced Interrupt Architecture for RISC-V,
 consisting of: (a) an extension to the standard Privileged Architecture
-for harts specified in Volume II of The Instruction Set Manual; (b) two
-standard interrupt controllers for systems, an Advanced Platform-Level
+for RISC-V harts specified in Volume II of The RISC-V Instruction Set Manual; (b) two
+standard interrupt controllers for RISC-V systems, an Advanced Platform-Level
 Interrupt Controller (APLIC) and an Incoming Message-Signaled Interrupt
 Controller (IMSIC); and (c) requirements on other system components
 concerning interrupts.
@@ -18,37 +18,45 @@ reader is only interested in the specification itself.
 
 === Goals
 
-The Advanced Interrupt Architecture has these goals:
+The RISC-V Advanced Interrupt Architecture has these goals:
 
-* Build upon the interrupt-handling functionality of the Privileged
+* Build upon the interrupt-handling functionality of the RISC-V Privileged
 Architecture, minimizing the replacement of existing functionality.
-* Provide facilities for systems to work directly with message-signaled
+
+* Provide facilities for RISC-V systems to work directly with message-signaled
 interrupts (MSIs) as employed by PCI Express and other device standards,
 in addition to basic wired interrupts.
+
 * For wired interrupts, define a new Platform-Level Interrupt Controller
 (the Advanced PLIC, or APLIC) that has an independent control interface
-for each level of privilege (such as machine and supervisor levels), and
+for each level of privilege (such as RISC-V machine and supervisor levels), and
 that can convert wired interrupts into MSIs for systems supporting MSIs.
-* Expand the framework for local interrupts at a hart.
+
+* Expand the framework for local interrupts at a RISC-V hart.
+
 * Optionally allow software to configure the relative priorities of all
-sources of interrupts to a hart (including the standard timer and
+sources of interrupts to a RISC-V hart (including the standard timer and
 software interrupts, among others), instead of being limited just to the
 ability of a separate interrupt controller to prioritize external
 interrupts only.
+
 * When harts implement the Privileged Architecture’s hypervisor
 extension, provide sufficient assistance for virtualizing these same
 interrupt facilities for virtual machines.
+
 * With the help of an IOMMU (I/O memory management unit) for redirecting
 MSIs, maximize the opportunities and ability for a guest operating
 system running in a virtual machine to have direct control of devices
 with minimal involvement of a hypervisor.
+
 * Avoid having the interrupt hardware be a limiter on the number of
 virtual machines.
+
 * Achieve all of the above with the best possible compromises between
 speed, efficiency, and flexibility of implementation.
 
 This initial version of the Advanced Interrupt Architecture is focused
-primarily on the needs of larger, high-performance systems. Support is
+primarily on the needs of larger, high-performance RISC-V systems. Support is
 not currently defined for the following interrupt-handling features that
 are useful for minimizing interrupt response times in so-called
 "real-time" systems but are less appropriate for high-speed processor
@@ -56,10 +64,8 @@ cores:
 
 * the option to give each interrupt source at a hart a separate trap entry
 address;
-
 * automatic stacking of register values on interrupt trap entry, and
 restoration on exit; and
-
 * automatic preemption (nesting) of interrupts at a hart, based on
 priority.
 
@@ -70,7 +76,7 @@ of this document.
 
 === Limits
 
-In its current version, the Advanced Interrupt Architecture can support
+In its current version, the RISC-V Advanced Interrupt Architecture can support RISC-V 
 symmetric multiprocessing (SMP) systems with up to 16,384 harts. If the
 harts are 64-bit (RV64) and implement the hypervisor extension, and if
 all features of the Advanced Interrupt Architecture are fully
@@ -86,7 +92,7 @@ Interrupt Architecture.
 
 [NOTE]
 ====
-We assume that any single computer (or any single node in a cluster or
+We assume that any single RISC-V computer (or any single node in a cluster or
 distributed system) with many thousands of physical harts will probably
 need an interrupt infrastructure adapted to the machine’s specific
 organization, which we do not attempt to predict.
@@ -111,7 +117,7 @@ organization, which we do not attempt to predict.
 
 === Overview of main components
 
-A system's overall architecture for signaling interrupts depends on
+A RISC-V system's overall architecture for signaling interrupts depends on
 whether it is built mainly for message-signaled interrupts (MSIs) or for
 more traditional wired interrupts. In systems with full support for
 MSIs, every hart has an _Incoming MSI Controller_ (IMSIC) that serves as
@@ -124,7 +130,7 @@ interrupts and simpler harts without IMSICs.
 
 ==== External interrupts without IMSICs
 
-When harts do not have Incoming MSI Controllers, external interrupts are
+When RISC-V harts do not have Incoming MSI Controllers, external interrupts are
 signaled to harts through dedicated wires. In that case, an _Advanced
 Platform-Level Interrupt Controller_ (APLIC) acts as a traditional
 central hub for interrupts, routing and prioritizing external interrupts
@@ -160,7 +166,7 @@ image::intrsWithIMSICs.png[]
 
 ==== External interrupts with IMSICs
 
-To be able to receive message-signaled interrupts (MSIs), each hart must
+To be able to receive message-signaled interrupts (MSIs), each RISC-V hart must
 have an Incoming MSI Controller (IMSIC) as shown in <<intrsWithIMSICs>>. Fundamentally, a message-signaled interrupt is simply a memory write to a specific address that hardware accepts as indicating an interrupt. To that end, every IMSIC is assigned one or more distinct addresses in the machine's address space, and when a write is made to one of those addresses in the expected format, the receiving IMSIC interprets the write as an external interrupt for the respective hart.
 
 Because all IMSICs have unique addresses in the machine's physical
@@ -178,14 +184,14 @@ the latter indicating which individual interrupts the hart is currently
 prepared to receive.
 
 IMSIC units are fully defined in <<IMSIC>>. The
-format of MSIs used by the Advanced Interrupt Architecture is described
+format of MSIs used by the RISC-V Advanced Interrupt Architecture is described
 in that chapter, <<MSIEncoding>>.
 
-When the harts in a system have IMSICs, the system will normally still
+When the harts in a RISC-V system have IMSICs, the system will normally still
 contain an APLIC, but its role is changed. Instead of signaling
 interrupts to harts directly by wires as in <<intrsWithoutIMSICs>>, an APLIC converts incoming wired interrupts into MSI writes that are sent to harts via their IMSIC units. Each MSI is sent to a single target hart according to the APLIC's configuration set by software.
 
-If harts implement the Privileged Architecture's hypervisor extension,
+If RISC-V harts implement the Privileged Architecture's hypervisor extension,
 IMSICs may have additional _guest interrupt files_ for delivering
 interrupts to virtual machines. Besides <<IMSIC>> on
 the IMSIC, see <<VSLevel>> which specifically
@@ -196,7 +202,7 @@ This topic is addressed in <<IOMMU>>, "IOMMU Support for MSIs to Virtual Machine
 
 ==== Other interrupts
 
-In addition to external interrupts from I/O devices, the Privileged
+In addition to external interrupts from I/O devices, the RISC-V Privileged
 Architecture specifies a few other major classes of interrupts for
 harts. The Privileged Architecture's timer interrupts remain supported
 in full, and software interrupts remain at least partly supported,
@@ -212,7 +218,7 @@ software interrupts, they do not pass through an APLIC or IMSIC.
 
 === Interrupt identities at a hart
 
-The Privileged Architecture gives every interrupt cause at a hart a
+The RISC-V Privileged Architecture gives every interrupt cause at a hart a
 distinct _major identity number_, which is the Exception Code
 automatically written to CSR or on an interrupt trap. Interrupt causes
 that are standardized by the Privileged Architecture have major
@@ -229,29 +235,53 @@ major interrupt identities with this extension.
 [%autowidth,float="center",align="center",cols="^,^,<",options="header",]
 |===
 |Major identity |Minor identity |
-|0 |– |_Reserved by Privileged Architecture_
-|1 |– |Supervisor software interrupt
-|2 |– |Virtual supervisor software interrupt
-|3 |– |Machine software interrupt
-|4 |– |_Reserved by Privileged Architecture_
-|5 |– |Supervisor timer interrupt
-|6 |– |Virtual supervisor timer interrupt
-|7 |– |Machine timer interrupt
-|8 |– |_Reserved by Privileged Architecture_
-|9 |Determined by |Supervisor external interrupt
-|10 | external interrupt |Virtual supervisor external interrupt
-|11 | controller |Machine external interrupt
-|12 |– |Supervisor guest external interrupt
-|13 |– |Counter overflow interrupt
-|14–15 |– |_Reserved by Privileged Architecture_
-|16–23 |– |_Reserved for standard local interrupts_
-|24–31 |– |_Designated for custom use_
-|32–34 |– |_Reserved for standard local interrupts_
-|35 |– |Low-priority RAS event interrupt
-|36–42 |– |_Reserved for standard local interrupts_
-|43 |– |High-priority RAS event interrupt
-|44–47 |– |_Reserved for standard local interrupts_
-|&#8805;48 |– |_Designated for custom use_
+|0 |- |_Reserved by Privileged Architecture_
+|1 +
+2 +
+3 |- +
+- +
+- |Supervisor software interrupt +
+Virtual supervisor software interrupt +
+Machine software interrupt
+|4 |- |_Reserved by Privileged Architecture_
+|5 +
+6 +
+7 |- +
+- +
+- |Supervisor timer interrupt +
+Virtual supervisor timer interrupt +
+Machine timer interrupt
+|8 |- |_Reserved by Privileged Architecture_
+|9 +
+10 +
+11 |Determined by +
+external interrupt +
+controller |Supervisor external interrupt +
+Virtual supervisor external interrupt +
+Machine external interrupt
+|12 +
+13 +
+14-15 |- +
+- +
+- |Supervisor guest external interrupt +
+Counter overflow interrupt +
+_Reserved by Privileged Architecture_
+|16-23 |- |_Reserved for standard local interrupts_
+|24-31 |- |_Designated for custom use_
+|32-34 +
+35 +
+36-42 +
+43 +
+44-47 |- +
+- +
+- +
+- +
+- |_Reserved for standard local interrupts_ +
+Low-priority RAS event interrupt +
+_Reserved for standard local interrupts_ +
+High-priority RAS event interrupt +
+_Reserved for standard local interrupts_
+|&#8805;48 |- |_Designated for custom use_
 |===
 
 Interrupts from most I/O devices are conveyed to a hart by the _external

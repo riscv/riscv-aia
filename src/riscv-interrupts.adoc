@@ -27,7 +27,7 @@
 // Settings:
 :experimental:
 :reproducible:
-:imagesoutdir: docs-resources/images
+:imagesoutdir: ../docs-resources/images
 //:bibtex-file: ../src/resources/riscv-spec.bib
 //:bibtex-order: alphabetical
 //:bibtex-style: apa
@@ -66,7 +66,7 @@ International License.
 
 <<<
 
-==Preface
+== Preface
 
 This document describes an Advanced Interrupt Architecture for RISC-V
 systems. This specification was ratified by the RISC-V International
