@@ -1,7 +1,7 @@
 [[CSRs]]
 == Control and Status Registers (CSRs) Added to Harts
 
-For each privilege level at which a hart can take interrupt traps, the
+For each privilege level at which a RISC-V hart can take interrupt traps, the
 Advanced Interrupt Architecture adds CSRs for interrupt control and
 handling.
 
@@ -17,39 +17,81 @@ upper 32 bits of registers `mideleg`, `mie`, `mvien`, `mvip`, and `mip`. The Adv
 CSRs `miselect` and `mireg` provide a window for accessing multiple registers beyond the CSRs in <<CSRs-M>>. The value of `miselect` determines which
 register is currently accessible through alias CSR `mireg`. `miselect` is a *WARL* register, and it must support a minimum range of values depending on the implemented features. When an IMSIC is not implemented, `miselect` must be able to hold at least any 6-bit value in the range 0 to 0``x3F``. When an IMSIC is implemented, `miselect` must be able to hold any 8-bit value in the range 0 to 0``xFF``. Values for `miselect` in the range 0 to 0``xFF`` are currently assigned in subranges as follows:
 
-----
-``0x00-0x2F`` reserved +
-``0x30-0x3F`` major interrupt priorities +
-``0x40-0x6F`` reserved +
-``0x70–0xFF`` external interrupts (only with an IMSIC) +
-----
+[%autowidth,align="center",float="center",cols=">,<",grid=none,frame=none]
+|===
+|`0x00-0x2F`| reserved
+|`0x30-0x3F`| major interrupt priorities
+|`0x40-0x6F`| reserved
+|`0x70-0xFF`| external interrupts (only with an IMSIC)
+|===
 
-`miselect` may also support values outside the range 0x00-0``xFF``, though no standard
-registers are currently allocated to values listed above.
+
+`miselect` may also support values outside the range `0x00-0xFF`, though no standard
+registers are currently allocated to values listed above `0xFF`.
 
 [[CSRs-M]]
 .Machine-level CSRs added or widened by the Advanced Interrupt Architecture.
-[float="center",align="center",cols="^,^,^,<,<",options="header"]
+[%autowidth,float="center",align="center",cols="^,^,^,<,<",options="header"]
 |===
-<|Number <|Privilege |Width <|Name <|Description
+|Number |Privilege |Width |Name |Description
 5+|Machine-Level Window to Indirectly Accessed Registers
-|0x350 |MRW |XLEN |`miselect` |Machine indirect register select
-|0x351 |MRW |XLEN |`mireg` |Machine indirect register alias
+|0x350 +
+0x351 |MRW +
+MRW |XLEN +
+XLEN |`miselect` +
+`mireg` |Machine indirect register select +
+Machine indirect register alias
 5+|Machine-Level Interrupts
-|0x304 |MRW |64 |`mie` |Machine interrupt-enable bits
-|0x344 |MRW |64 |`mip` |Machine interrupt-pending bits
-|0x35C |MRW |MXLEN |`mtopei` |Machine top external interrupt (only with an IMSIC)
-|0xFB0 |MRO |MXLEN |`mtopi` |Machine top interrupt
+|0x304 +
+0x344 +
+0x35C +
+0xFB0 |MRW +
+MRW +
+MRW +
+MRO |64 +
+64 +
+MXLEN +
+MXLEN |`mie` +
+`mip` +
+`mtopei` +
+`mtopi` |Machine interrupt-enable bits +
+Machine interrupt-pending bits +
+Machine top external interrupt (only with an IMSIC) +
+Machine top interrupt
 5+|Delegated and Virtual Interrupts for Supervisor Level
-|0x303 |MRW |64 |`mideleg` |Machine interrupt delegation
-|0x308 |MRW |64 |`mvien` |Machine virtual interrupt enables
-|0x309 |MRW |64 |`mvip` |Machine virtual interrupt-pending bits
+|0x303 +
+0x308 +
+0x309 |MRW +
+MRW +
+MRW |64 +
+64 +
+64 |`mideleg` +
+`mvien` +
+`mvip` |Machine interrupt delegation +
+Machine virtual interrupt enables +
+Machine virtual interrupt-pending bits
 5+|Machine-Level High-Half CSRs (RV32 only)
-|0x313 |MRW |32 |`midelegh` |Upper 32 bits of of `midelegh` (only with S-mode)
-|0x314 |MRW |32 |`mieh` |Upper 32 bits of `mieh`
-|0x318 |MRW |32 |`mvienh` |Upper 32 bits of `mvienh` (only with S-mode)
-|0x319 |MRW |32 |`mviph` |Upper 32 bits of `mviph` (only with S-mode)
-|0x354 |MRW |32 |`miph` |Upper 32 bits of `miph`
+|0x313 +
+0x314 +
+0x318 +
+0x319 +
+0x354|MRW +
+MRW +
+MRW +
+MRW +
+MRW |32 +
+32 +
+32 +
+32 +
+32 |`midelegh` +
+`mieh` +
+`mvienh` +
+`mviph` +
+`miph` |Upper 32 bits of of `midelegh` (only with S-mode) +
+Upper 32 bits of `mieh` +
+Upper 32 bits of `mvienh` (only with S-mode) +
+Upper 32 bits of `mviph` (only with S-mode) +
+Upper 32 bits of `miph`
 |===
 
 Values of `miselect` with the most-significant bit set (bit
