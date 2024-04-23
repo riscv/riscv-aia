@@ -307,14 +307,14 @@ their handling are covered mainly in <<MSLevel>>,
 
 Each signaled interrupt is delivered to only one hart at one privilege
 level, usually determined by software in one way or another. Unlike some
-other architectures, the Advanced Interrupt Architecture provides no
+other architectures, the RISC-V Advanced Interrupt Architecture provides no
 standard hardware mechanism for the broadcast or multicast of interrupts
 to multiple harts.
 
 For local interrupts, and for any "virtual" interrupts that software
 injects into lower privilege levels at a hart, the interrupts are
 entirely a local affair at the hart and are never visible to other
-harts. The Privileged Architecture's timer interrupts are also uniquely
+harts. The RISC-V Privileged Architecture's timer interrupts are also uniquely
 tied to individual harts. For other interrupts, received by a hart from
 sources outside the hart, each interrupt signal (whether delivered by
 wire or by an MSI) is configured by software to go to only a single
@@ -367,11 +367,10 @@ even on systems that have it.
 We remain open to the argument that hardware load balancing of interrupt
 handling may be beneficial for certain specialized markets, such as
 networking. However, the claims made so far in this regard do not
-justify requiring support for 1-of-latexmath:[$N$] delivery in all
-servers. With more evidence, some mechanism for 1-of-latexmath:[$N$]
+justify requiring support for 1-of-latexmath:[$N$] delivery in all RISC-V servers. With more evidence, some mechanism for 1-of-latexmath:[$N$]
 delivery might become a future option.
 
-The original Platform-Level Interrupt Controller (PLIC) for is
+The original Platform-Level Interrupt Controller (PLIC) for RISC-V is
 configurable so each interrupt source signals external interrupts to any
 subset of the harts, potentially all harts. When multiple harts receive
 an external interrupt from a single cause at the PLIC, the first hart to
