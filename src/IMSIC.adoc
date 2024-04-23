@@ -1,7 +1,7 @@
 [[IMSIC]]
 == Incoming MSI Controller (IMSIC)
 
-An Incoming MSI Controller (IMSIC) is an optional hardware component
+An Incoming MSI Controller (IMSIC) is an optional RISC-V hardware component
 that is closely coupled with a hart, one IMSIC per hart. An IMSIC
 receives and records incoming message-signaled interrupts (MSIs) for a
 hart, and signals to the hart when there are pending and enabled
@@ -9,7 +9,7 @@ interrupts to be serviced.
 
 An IMSIC has one or more memory-mapped registers in the machine's
 address space for receiving MSIs. Aside from those memory-mapped
-registers, software interacts with an IMSIC primarily through several RISC-V  CSRs at the attached hart.
+registers, software interacts with an IMSIC primarily through several RISC-V CSRs at the attached hart.
 
 [[IMSIC-intrFilesAndIdents]]
 === Interrupt files and interrupt identities
@@ -168,7 +168,7 @@ interrupt priorities being the reverse of the natural number order.
 === Reset and revealed state
 
 Upon reset of an IMSIC, all the state of its interrupt files becomes
-valid and consistent but otherwise , except possibly for the register of
+valid and consistent but otherwise UNSPECIFIED, except possibly for the `eidelivery` register of
 machine-level and supervisor-level interrupt files, as specified in
 <<IMSIC-reg-eidelivery>>.
 
