@@ -26,14 +26,13 @@ interrupts to harts, not MSIs.
 ====
 We intend eventually to provide a free example parameterized
 implementation of an APLIC, written in portable SystemVerilog, that we
-expect will be suitable for many systems without modification.
+expect will be suitable for many RISC-V systems without modification.
 
 '''
 
 A draft specification exists for a _Duo-PLIC_ that is
-software-configurable to act as either an original PLIC or an APLIC.
-However, at this time, it appears unlikely that the International
-Association will ever ratify the Duo-PLIC specification as a standard.
+software-configurable to act as either an original RISC-V PLIC or an APLIC.
+However, at this time, it appears unlikely that RISC-V International will ever ratify the Duo-PLIC specification as a standard.
 ====
 
 In a machine without IMSICs, every RISC-V hart accepts interrupts from exactly one PLIC or APLIC that is the _external interrupt controller_ for that
@@ -103,7 +102,7 @@ have no relevance outside the APLIC.
 === Interrupt domains
 
 An APLIC supports one or more _interrupt domains_, each associated with
-a subset of harts at one privilege level (machine or supervisor level).
+a subset of RISC-V harts at one privilege level (machine or supervisor level).
 The harts within an interrupt domain are those that the domain can
 interrupt at the corresponding privilege level. Each domain has its own
 memory-mapped control region in the machine’s address space that appears
@@ -112,7 +111,7 @@ interfaces together access a single combined interrupt controller.
 
 <<AdvPLIC-ex-1Domain>> through
 <<AdvPLIC-ex-3Domains>> depict some possible hierarchies of
-interrupt domains implemented by an APLIC in a system.
+interrupt domains implemented by an APLIC in a RISC-V system.
 
 The first figure represents a minimal system that has a single hart not
 supporting supervisor mode, with a single interrupt domain for machine
@@ -127,7 +126,7 @@ it receives, avoiding the need to call upon M-mode to exercise that
 control.
 
 [[AdvPLIC-ex-1Domain]]
-.Example of a system that has a single hart implementing only M-mode, with a single machine-level interrupt domain for that hart. 
+.Example of a RISC-V system that has a single hart implementing only M-mode, with a single machine-level interrupt domain for that hart. 
 image::AdvPLIC-ex-1Domain.png[ ]
 
 An APLIC's interrupt domains are arranged in a tree hierarchy, with the
@@ -496,7 +495,7 @@ supported for SM.
 
 [[TableAdvPLIC-sourcecfg-SM]]
 .Encoding of the SM (Source Mode) field of a sourcecfg register when bit D = 0
-[%autowidth,float="center",align="center",cols="^,^,<",options="header"]
+[%autowidth,float="center",align="center",cols="^,^,<",options="header",grid=none]
 |===
 |Value |Name |Description
 |0 |Inactive |Inactive in this domain (and not delegated)
@@ -535,10 +534,11 @@ said to be _inverted_.
 For an interrupt source that is configured as edge-sensitive or
 level-sensitive, define
 
-----
-_rectified input value_ = (incoming wire value) XOR (source is
+[%autowidth,float="center",align="center",cols="^",grid=none,frame=none]
+|===
+|_rectified input value_ = (incoming wire value) XOR (source is
 inverted).
-----
+|===
 
 For a source that is inactive or Detached, the _rectified input value_
 is zero.

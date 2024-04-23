@@ -66,8 +66,6 @@ International License.
 
 <<<
 
-== Preface
-
 This document describes an Advanced Interrupt Architecture for RISC-V
 systems. This specification was ratified by the RISC-V International
 Association in June of 2023.
