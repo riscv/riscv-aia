@@ -135,20 +135,40 @@ implements S-mode. The functions of these registers all match their
 machine-level counterparts.
 [[CSRs-S]]
 .Supervisor-level CSRs added or widened by the Advanced Interrupt Architecture.
-[cols="^,^,^,<,<",options="header"]
+[%autowidth,float="center",align="center",cols="^,^,^,<,<",options="header"]
 |===
-|Number |Privilege |Width <|Name |Description
+|Number |Privilege |Width |Name |Description
 5+|Supervisor-Level Window to Indirectly Accessed Registers
-|0x150 |SRW |XLEN |`siselect` |Supervisor indirect register select
-|0x151 |SRW |XLEN |`sireg` |Supervisor indirect register alias
+|0x150 +
+0x151 |SRW +
+SRW |XLEN +
+XLEN |`siselect` +
+`sireg` |Supervisor indirect register select +
+Supervisor indirect register alias
 5+|Supervisor-Level Interrupts
-|0x104 |SRW |64 |`sie` |Supervisor interrupt-enable bits
-|0x144 |SRW |64 |`sip` |Supervisor interrupt-pending bits
-|0x15C |SRW |SXLEN |`stopei` |Supervisor top external interrupt (only with an IMSIC)
-|0xDB0 |SRO |SXLEN |`stopi` |Supervisor top interrupt
+|0x104 +
+0x144 +
+0x15C +
+0xDB0 |SRW +
+SRW +
+SRW +
+SRO |64 +
+64 +
+SXLEN +
+SXLEN |`sie` +
+`sip` +
+`stopei` +
+`stopi` |Supervisor interrupt-enable bits +
+Supervisor interrupt-pending bits +
+Supervisor top external interrupt (only with an IMSIC) +
+Supervisor top interrupt
 5+|Supervisor-Level High-Half CSRs (RV32 only)
-|0x114 |SRW |32 |`sieh` |Upper 32 bits of `sie`
-|0x154 |SRW |32 |`siph` |Upper 32 bits of `sip`
+|0x114 +
+0x154 |SRW +
+SRW |32 +
+32|`sieh` +
+`siph` |Upper 32 bits of `sie` +
+Upper 32 bits of `sip`
 |===
 
 The space of registers accessible through the `siselect`/`sireg` window is separate from
@@ -156,16 +176,16 @@ but parallels that of machine level, being for supervisor-level
 interrupts instead of machine-level interrupts. The allocated values for
 `siselect` in the range 0 to 0xFF to are once again these:
 
-----
-0x00-0x2F reserved +
-0x30-0x3F major interrupt priorities +
-0x40-0x6F reserved +
-0x70-0xFF external interrupts (only with an IMSIC) +
-----
+[%autowidth,align="center",float="center",cols=">,<",grid=none,frame=none]
+|===
+|`0x00-0x2F` |reserved
+|`0x30-0x3F` |major interrupt priorities
+|`0x40-0x6F` |reserved
+|`0x70-0xFF` |external interrupts (only with an IMSIC)
+|===
 
 For maximum compatibility, it is recommended that `siselect` support at least a
-9-bit range, 0 to
-0x1FF, regardless of whether an IMSIC exists.
+9-bit range, `0` to `0x1FF`, regardless of whether an IMSIC exists.
 
 [NOTE]
 ====
@@ -181,7 +201,7 @@ If XLEN changes, the most-significant bit of `siselect` moves to the new positio
 retaining its value from before. An implementation is not required to
 support any custom values for `siselect`.
 
-When `siselect` is a number in a reserved range (currently  0x00-0x2F, 0x40-0x6F,or a number above 0xFF
+When `siselect` is a number in a reserved range (currently  `0x00-0x2F`, `0x40-0x6F`,or a number above `0xFF`
 not designated for custom use), or in the range 0x70-0xFF when there is no
 IMSIC, attempts to access 'sireg' should preferably raise an illegal instruction
 exception (unless executing in a virtual machine, covered in the next
@@ -198,9 +218,7 @@ Register `stopi` reports the highest-priority interrupt that is pending and
 enabled for supervisor level, as specified in
 <<stopi>>.
 
-If extension Sscsrind is also implemented, then when `siselect` has a value in the 0x30–0x3F or 0x70–0xFF range attempts to access alias CSRs `sireg2` through `sireg6` raise an illegal
-instruction exception (unless executing in a virtual machine, covered in
-the next section).
+If extension Sscsrind is also implemented, then when `siselect` has a value in the `0x30-0x3F` or `0x70-0xFF` range attempts to access alias CSRs `sireg2` through `sireg6` raise an illegal instruction exception (unless executing in a virtual machine, covered in the next section).
 
 === Hypervisor and VS CSRs
 
@@ -211,61 +229,104 @@ The new hypervisor CSRs in the table (`hvien`, `hvictl` , `hviprio1`, and `hvipr
 
 The new VS CSRs (`vsiselect`, `vsireg`, `vstopei`, and `vstopi`) all match supervisor CSRs, and substitute for those supervisor CSRs when executing in a virtual machine (in VS-mode or VU-mode).
 
-CSR `vsiselect` is required to support at least a 9-bit range of 0 to 0x1FF, whether or not an IMSIC is implemented. As with `siselect`, values of `vsiselect` with the most-significant bit set (bit XLEN - 1 = 1) are designated for custom use. If XLEN changes, the most-significant bit
+CSR `vsiselect` is required to support at least a 9-bit range of `0` to `0x1FF`, whether or not an IMSIC is implemented. As with `siselect`, values of `vsiselect` with the most-significant bit set (bit XLEN - 1 = 1) are designated for custom use. If XLEN changes, the most-significant bit
 of `vsiselect` moves to the new position, retaining its value from before.
 
 Like `siselect` and `sireg`, the widths of `vsiselect` and `vsireg` are always the current XLEN rather than VSXLEN. Hence, for example, if HSXLEN = 64 and VSXLEN = 32, then these registers are 64 bits when accessed by a hypervisor in HS-mode (running RV64 code) but 32 bits for a guest OS in VS-mode (RV32 code).
 
 [[CSRs-hypervisor]]
 .Hypervisor and VS CSRs added or widened by the Advanced Interrupt Architecture. (Parameter HSXLEN is just another name for SXLEN for hypervisor-extended S-mode).
-[float="center",align="center",cols="^,^,^,<,<",options="header"]
+[float="center",align="center",cols="^2,^2,^2,<2,<7",options="header"]
 |===
 |Number |Privilege |Width |Name |Description
 5+|Delegated and Virtual Interrupts, Interrupt Priorities, for VS Level
 
-|0x603 |HRW |64 |`hideleg` |Hypervisor interrupt delegation
-
-|0x608 |HRW |64 |`hvien` |Hypervisor virtual interrupt enables
-
-|0x609 |HRW |HSXLEN |`hvictl` |Hypervisor virtual interrupt control
-
-|0x645 |HRW |64 |`hvip` |Hypervisor virtual interrupt-pending bits
-
-|0x646 |HRW |64 |`hviprio1` |Hypervisor VS-level interrupt priorities
-
-|0x647 |HRW |64 |`hviprio2` |Hypervisor VS-level interrupt priorities
-
+|0x603 +
+0x608 +
+0x609 +
+0x645 +
+0x646 +
+0x647 |HRW +
+HRW +
+HRW +
+HRW +
+HRW +
+HRW|64 +
+64 +
+HSXLEN +
+64 +
+64 |`hideleg` +
+`hvien` +
+`hvictl` +
+`hvip` +
+`hviprio1` +
+`hviprio2` |Hypervisor interrupt delegation +
+Hypervisor virtual interrupt enables +
+Hypervisor virtual interrupt control +
+Hypervisor virtual interrupt-pending bits +
+Hypervisor VS-level interrupt priorities +
+Hypervisor VS-level interrupt priorities
 5+|VS-Level Window to Indirectly Accessed Registers
-
-|0x250 |HRW |XLEN |`vsiselect` |Virtual supervisor indirect register select
-
-|0x251 |HRW |XLEN |`vsireg` |Virtual supervisor indirect register alias
-
+|0x250 +
+0x251 |HRW +
+HRW |XLEN +
+XLEN |`vsiselect` +
+`vsireg` |Virtual supervisor indirect register select +
+Virtual supervisor indirect register alias
 5+|VS-Level Interrupts
-
-|0x204 |HRW |64 |`vsie` |Virtual supervisor interrupt-enable bits
-
-|0x244 |HRW |64 |`vsip` |Virtual supervisor interrupt-pending bits
-
-|0x25C |HRW |VSXLEN |`vstopei` |Virtual supervisor top external interrupt (only with an IMSIC)
-
-|0xEB0 |HRO |VSXLEN |`vstopi` |Virtual supervisor top interrupt
-
+|0x204 +
+0x244 +
+0x25C +
+&nbsp; +
+0xEB0 |HRW +
+HRW +
+HRW +
+&nbsp; +
+HRO |64 +
+64 +
+VSXLEN +
+&nbsp; +
+VSXLEN |`vsie` +
+`vsip` +
+`vstopei` +
+&nbsp; +
+`vstopi` |Virtual supervisor interrupt-enable bits +
+Virtual supervisor interrupt-pending bits +
+Virtual supervisor top external interrupt +
+ (only with an IMSIC) +
+Virtual supervisor top interrupt
 5+|Hypervisor and VS-Level High-Half CSRs (RV32 only)
-
-|0x613 |HRW |32 |`hidelegh` |Upper 32 bits of `hideleg`
-
-|0x618 |HRW |32 |`hvienh` |Upper 32 bits of `hvien`
-
-|0x655 |HRW |32 |`hviph` |Upper 32 bits of `hvip`
-
-|0x656 |HRW |32 |`hviprio1h` |Upper 32 bits of `hviprio1`
-
-|0x657 |HRW |32 |`hviprio2h` |Upper 32 bits of `hviprio2`
-
-|0x214 |HRW |32 |`vsieh` |Upper 32 bits of `vsie`
-
-|0x254 |HRW |32 |`vsiph` |Upper 32 bits of `vsip`
+|0x613 +
+0x618 +
+0x655 +
+0x656 +
+0x657 +
+0x214 +
+0x254 |HRW +
+HRW +
+HRW +
+HRW +
+HRW +
+HRW +
+HRW |32 +
+32 +
+32 +
+32 +
+32 +
+32 +
+32 |`hidelegh` +
+`hvienh` +
+`hviph` +
+`hviprio1h` +
+`hviprio2h` +
+`vsieh` +
+`vsiph` |Upper 32 bits of `hideleg` +
+Upper 32 bits of `hvien` +
+Upper 32 bits of `hvip` +
+Upper 32 bits of `hviprio1` +
+Upper 32 bits of `hviprio2` +
+Upper 32 bits of `vsie` +
+Upper 32 bits of `vsip`
 |===
 
 The space of registers selectable by `vsiselect` is more limited than for machine and supervisor levels:
