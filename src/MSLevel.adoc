@@ -601,9 +601,9 @@ Supervisor-level priorities for major interrupts 0-63 are optionally configurabl
 
 [%autowidth,float="center",align="center",cols="<m,<m",grid=none,frame=none]
 |===
-|0x30|iprio0
-|0x31|iprio1
-^|...^|...
+|0x30 |iprio0
+|0x31 |iprio1
+^|... ^|...
 |0x3F|iprio15
 |===
 
@@ -613,7 +613,7 @@ Each register controls the priorities of four interrupts, one 8-bit byte per int
 |===
 |0x30|iprio0
 |0x32|iprio2
-^|...^|...
+^|... ^|...
 |0x3E|iprio15
 |===
 
@@ -644,7 +644,7 @@ The supervisor-level `iprio` array accessed via `siselect` and `sireg` affects t
 |===
 ||Interrupts with default priority above supervisor external interrupts |Supervisor external interrupts |Interrupts with default priority below supervisor external  interrupts|Priority +
 order|Priority number in supervisor-level `iprio` array |Priority number from interrupt controller (APLIC or IMSIC) |Priority number in supervisor-level `iprio` array 
-|Highest|||0
+|Highest|0||
 ||1 +
 2 +
 ... +
