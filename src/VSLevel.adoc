@@ -413,8 +413,11 @@ Rank) determines the interrupt’s presumed default priority order
 relative to a (virtual) supervisor external interrupt (SEI), major
 identity 9, as follows:
 
- 0 = interrupt has higher default priority than an SEI
- 1 = interrupt has lower default priority than an SEI
+[%autowidth,float="center",align="center",cols="^",grid=none,frame=none]
+|===
+|0 = interrupt has higher default priority than an SEI
+|1 = interrupt has lower default priority than an SEI
+|===
 
 When `hvictl`.IID = 9, DPR is ignored.
 
@@ -423,8 +426,11 @@ When `hvictl`.IID = 9, DPR is ignored.
 
 Read-only CSR `vstopi` is VSXLEN bits wide and has the same format as `stopi`:
 
- bits 27:16 IID
- bits 7:0   IPRIO
+[%autowidth,float="center",align="center",cols="^",grid=none,frame=none]
+|===
+|bits 27:16 IID
+|bits 7:0   IPRIO
+|===
 
 `vstopi` returns information about the highest-priority interrupt for VS level,
 found from among these candidates (prefixed by + signs):
