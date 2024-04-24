@@ -34,7 +34,7 @@ and must be specified elsewhere.
 ====
 The RISC-V IOMMU Architecture Specification provides a detailed description of
 the IOMMU architecture, dividing translation and transaction processing
-functionality into blocks such as IOMMU, IO Bridge, etc. and describing
+functionality into blocks such as IOMMU, IO Bridge, etc. and describing
 how those blocks are integrated into a system.
 ====
 
@@ -59,14 +59,14 @@ unique device identifier, which the IOMMU uses to locate the appropriate
 device context within data structures supplied by software. For PCI, for
 example, the originating device may be identified by the unique triple
 of PCI bus number, device number, and function number.
-* An IOMMU optionally translates the addresses of a device’s memory
+* An IOMMU optionally translates the addresses of a device's memory
 accesses using address-translation data structures—typically page
 tables—specified by software via the corresponding device context. The
 smallest granularity of address translation implemented by all IOMMUs is
-not larger than a 4-KiB page, matching that of standard
+not larger than a 4-KiB page, matching that of standard RISC-V 
 address-translation page tables. (An IOMMU may in fact employ page
 tables in the same format as the page-based address translation defined
-by the Privileged Architecture, but this is not required.)
+by the RISC-V Privileged Architecture, but this is not required.)
 
 The Advanced Interrupt Architecture adds to device contexts these
 fields, as needed:
@@ -80,8 +80,7 @@ translation and/or conversion of MSIs from the device.
 The MSI address mask and address pattern are each unsigned integers with
 the same width as guest physical page numbers, i.e., 12 bits narrower
 than the maximum supported width of a guest physical address. Their use
-is explained in <<IOMMU-identIncomingMSIs>>,
-"Identification of page addresses of a VM's interrupt files.""
+is explained in <<IOMMU-identIncomingMSIs>>.
 
 A device context's MSI page table is separate from the usual
 address-translation data structures used to translate other memory
@@ -131,7 +130,7 @@ translation is controlled by the MSI page table configured in the
 appropriate device context at the IOMMU. Because every interrupt file,
 real or virtual, occupies a naturally aligned 4-KiB page of address
 space, the required address translation is from a virtual (guest) page
-address to a physical page address, the same as supported by regular
+address to a physical page address, the same as supported by regular RISC-V 
 page-based address translation.
 
 [[IOMMU-guestIntrFiles]]
@@ -262,7 +261,7 @@ The pairs of doublewords contain the interrupt-pending and
 interrupt-enable bits for external interrupt identities 1-2047, in this
 arrangement:
 
-[%autowidth,%headers,float="center",align="center",cols="^m,^m,<m"]
+[%autowidth,%headers,float="center",align="center",cols="^m,^m,<m",frame=none,grid=none]
 |===
 |offset |size |contents
 |0x000 |8 bytes |interrupt-pending bits for (minor) identities 1-63
@@ -678,7 +677,7 @@ actual MSI PTE, except that what would be the PTE's accessed (A), dirty
 (D), and user (U) bits are all zeros. An IOMMU needs to treat only these
 three bits differently for an MSI PTE versus a regular RV64 leaf PTE.
 
-The address computation used to select a PTE from a regular page table
+The address computation used to select a PTE from a regular RISC-V page table
 must be modified to select an MSI PTE's first doubleword from an MSI
 page table. However, the extraction of an interrupt file number from a
 guest physical address to obtain the index for accessing the MSI page
@@ -743,11 +742,11 @@ either interpreted as an MSI, resulting in an update of the destination
 MRIF, or is discarded.
 
 When the IMSIC interrupt files in the system implement memory-mapped
-register for receiving MSIs in big-endian byte order
+register `seteipnum_be` for receiving MSIs in big-endian byte order
 (<<IMSIC-memRegion>>), then an IOMMU
 must be able to store MSIs in both little-endian and big-endian byte
 orders to the destination MRIF. If the IMSIC interrupt files in the
-system do not implement register , an IOMMU should ordinarily store only
+system do not implement register `seteipnum_be`, an IOMMU should ordinarily store only
 little-endian MSIs to the destination MRIF. The data of an incoming MSI
 is assumed to be in little-endian byte order if bit 2 of the destination
 address is zero, and in big-endian byte order if bit 2 of the
@@ -773,6 +772,8 @@ the 11-bit NID value is zero-extended to 32 bits, and this value is
 written to the address NPPN<<12 (i.e., physical page number NPPN, page
 offset zero) in little-endian byte order.
 
+[NOTE]
+====
 While IOMMUs are expected typically to cache MSI PTEs that are
 configured in basic translate mode (M = 3), they might not cache PTEs
 configured in MRIF mode (M = 1). Two reasons together justify not
@@ -782,3 +783,4 @@ address translation; and second, by their nature, MSIs to MRIFs should
 occur less frequently. Hence, an IOMMU might perform MRIF-mode
 processing solely as an extension of cache-miss page table walks,
 leaving its address translation cache oblivious to MRIF-mode MSI PTEs.
+====
