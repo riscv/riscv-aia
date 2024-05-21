@@ -57,6 +57,11 @@ riscv-interrupts.html: $(SRCDIR)/riscv-interrupts.adoc
 	@echo "Building AIA HTML Specification"
 	asciidoctor $(ASCIIDOCTOR_OPTS) --out-file=$@ $<
 
+# Build with preinstalled docker container; first install it with:
+#   docker pull riscvintl/riscv-docs-base-container-image:latest
+docker:
+	docker run -it -v `pwd`:/build riscvintl/riscv-docs-base-container-image:latest /bin/sh -c 'make -$(MAKEFLAGS)'
+
 clean:
 	@if [ -f riscv-interrupts.pdf ]; then \
 		echo "Removing riscv-interrupts.pdf"; \
