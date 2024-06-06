@@ -27,9 +27,10 @@ interrupts to harts, not MSIs.
 We intend eventually to provide a free example parameterized
 implementation of an APLIC, written in portable SystemVerilog, that we
 expect will be suitable for many RISC-V systems without modification.
+====
 
-'''
-
+[NOTE]
+====
 A draft specification exists for a _Duo-PLIC_ that is
 software-configurable to act as either an original RISC-V PLIC or an APLIC.
 However, at this time, it appears unlikely that RISC-V International will ever ratify the Duo-PLIC specification as a standard.
@@ -428,7 +429,7 @@ with this fact, the read-only value in `domaincfg’s` most-significant byte, bi
 obtained: When interpreted in the correct byte order, bit 31 is one, and
 in the wrong order, bit 31 is zero. Second, if the value of BE is
 uncertain (prior to software initializing the interrupt domain,
-presumably), an 8-bit value latexmath:[$x$] can be safely written to `domaincfg` by writing (latexmath:[$x$]  24) latexmath:[$x$], where <<24 represents
+presumably), an 8-bit value latexmath:[$x$] can be safely written to `domaincfg` by writing (latexmath:[$x$]<<24)|latexmath:[$x$], where <<24 represents
 shifting left by 24 bits, and the vertical bar (|) represents bitwise
 logical OR. After `domaincfg` is written once, the value of BE should then be known,
 so subsequent writes should not need to repeat the same trick.
