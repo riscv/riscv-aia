@@ -12,57 +12,52 @@
 # This Makefile is designed to automate the process of building and packaging 
 # the documentation for RISC-V ISA Manuals. It supports multiple build targets 
 # for generating documentation in various formats (PDF, HTML).
+DOCS := \
+		riscv-interrupts.adoc
 
-# Build Targets
-TARGETS := aia aia-html
+SRC_DIR := src
+BUILD_DIR := build
 
-# Declare phony targets
-.PHONY: all $(TARGETS) clean
+DOCKER_RUN := docker run --rm -v ${PWD}:/build -w /build \
+riscvintl/riscv-docs-base-container-image:latest
 
-# Default target builds all
-all: $(TARGETS)
+HEADER_SOURCE := ${SRC_DIR}/riscv-interrupts.adoc
+PDF_RESULT := riscv-interrupts.pdf
 
-#ifneq ($(SKIP_DOCKER),true)
-#	DOCKER_CMD := docker run --rm -v ${PWD}:/build -w /build \
-#	riscvintl/riscv-docs-base-container-image:latest \
-#	/bin/sh -c
-#	DOCKER_QUOTE := "
-#endif
+ASCIIDOCTOR_PDF := asciidoctor-pdf
+OPTIONS := --trace \
+           -a compress \
+           -a mathematical-format=svg \
+           -a pdf-fontsdir=docs-resources/fonts \
+           -a pdf-theme=docs-resources/themes/riscv-pdf.yml \
+           --failure-level=ERROR
+REQUIRES := --require=asciidoctor-diagram
 
-# Asciidoctor options
-ASCIIDOCTOR_OPTS := -a --compress \
-					--attribute=mathematical-format=svg \
-                    --failure-level=ERROR \
-                    --require=asciidoctor-diagram \
-                    --require=asciidoctor-mathematical \
-                    --trace
+.PHONY: all build clean build-container build-no-container
 
-# Source directory
-SRCDIR := src
+all: build
 
+build: 
+	@echo "Checking if Docker is available..."
+	@if command -v docker >/dev/null 2>&1 ; then \
+		echo "Docker is available, building inside Docker container..."; \
+		$(MAKE) build-container; \
+	else \
+		echo "Docker is not available, building without Docker..."; \
+		$(MAKE) build-no-container; \
+	fi
 
-# AIA Specification AsciiDoc Build 
-aia: riscv-interrupts.pdf
+build-container:
+	@echo "Starting build inside Docker container..."
+	$(DOCKER_RUN) /bin/sh -c "$(ASCIIDOCTOR_PDF) $(OPTIONS) $(REQUIRES) --out-file=$(PDF_RESULT) $(HEADER_SOURCE)"
+	@echo "Build completed successfully inside Docker container."
 
-riscv-interrupts.pdf: $(SRCDIR)/riscv-interrupts.adoc $(SRCDIR)/*.adoc
-	@echo "Building AIA Specification"
-	rm -f $@.tmp
-	asciidoctor-pdf $(ASCIIDOCTOR_OPTS) --out-file=$@.tmp $<
-	mv $@.tmp $@
-
-# AIA Specification HTML build
-aia-html: riscv-interrupts.html
-
-riscv-interrupts.html: $(SRCDIR)/riscv-interrupts.adoc
-	@echo "Building AIA HTML Specification"
-	asciidoctor $(ASCIIDOCTOR_OPTS) --out-file=$@ $<
+build-no-container:
+	@echo "Starting build..."
+	$(ASCIIDOCTOR_PDF) $(OPTIONS) $(REQUIRES) --out-file=$(PDF_RESULT) $(HEADER_SOURCE)
+	@echo "Build completed successfully."
 
 clean:
-	@if [ -f riscv-interrupts.pdf ]; then \
-		echo "Removing riscv-interrupts.pdf"; \
-		rm -f riscv-interrupts.pdf; \
-	fi
-	@if [ -f riscv-interrupts.html ]; then \
-		echo "Removing riscv-interrupts.html"; \
-		rm -f riscv-interrupts.html; \
-	fi
+	@echo "Cleaning up generated files..."
+	rm -f $(PDF_RESULT)
+	@echo "Cleanup completed."
