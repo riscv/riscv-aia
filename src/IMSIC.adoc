@@ -389,16 +389,16 @@ machine-level CSRs interact with the IMSIC's machine-level interrupt
 file, while, if supervisor mode is implemented, the supervisor-level
 CSRs interact with the IMSIC's supervisor-level interrupt file. When an
 IMSIC has guest interrupt files, the VS CSRs interact with a single
-guest interrupt file, selected by the VGEIN field of CSR .
+guest interrupt file, selected by the VGEIN field of CSR `hstatus`.
 
 For machine level, the relevant CSRs are `miselect`, `mireg`, and `mtopei`. When supervisor mode is implemented, the set of supervisor-level CSRs matches those of machine level: `siselect`, `sireg`, and `stopei`. And when the hypervisor extension is implemented, there are three corresponding VS CSRs: `vsiselect`, `vsireg`, and `vstopei`.
 
-As explained in <<CSRs>>, registers `miselect` and `mireg` provide indirect access to additional machine-level registers. Likewise for supervisor-level `siselect` and `sireg`, and VS-level `vsiselect` and `vsireg` . In each case, a value of the `_*iselect_` _CSR_ (`miselect`, `siselect` , or `vsiselect)`) in the range 0x70-0xFF selects a register of the
+As explained in <<CSRs>>, registers `miselect` and `mireg` provide indirect access to additional machine-level registers. Likewise for supervisor-level `siselect` and `sireg`, and VS-level `vsiselect` and `vsireg` . In each case, a value of the **_*iselect_** _CSR_ (`miselect`, `siselect` , or `vsiselect)`) in the range 0x70-0xFF selects a register of the
 corresponding IMSIC interrupt file, either the machine-level interrupt
 file (`miselect`), the supervisor-level interrupt file (`siselect`), or a guest interrupt file (`vsiselect`).
 
 Interrupt files at each level act identically. For a given privilege
-level, values of the `*iselect` CSR in the range 0x70-0xFF select these registers of the corresponding interrupt file:
+level, values of the `*iselect` CSR in the range `0x70-0xFF` select these registers of the corresponding interrupt file:
 
 [%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
 |===
@@ -414,7 +414,7 @@ level, values of the `*iselect` CSR in the range 0x70-0xFF select these register
 |0xFF | `eie63`
 |===
 
-Register numbers 0x71 and 0x73-0x7F are reserved. When an `_*iselect_` _CSR_  has one of these values, reads from the matching `_*ireg_` _CSR_ (`mireg`, `sireg`, or `vsireg`) return zero, and writes to the `_*ieg_` _CSR_ are ignored. (For `vsiselect` and `vsireg`, all accesses depend on `hstatus`.VGEIN being the valid number of a guest interrupt file.)
+Register numbers 0x71 and 0x73-0x7F are reserved. When an `_*iselect_` _CSR_  has one of these values, reads from the matching `_*ireg_` _CSR_ (`mireg`, `sireg`, or `vsireg`) return zero, and writes to the `_*ireg_` _CSR_ are ignored. (For `vsiselect` and `vsireg`, all accesses depend on `hstatus`.VGEIN being the valid number of a guest interrupt file.)
 
 Registers `eip0` through `eip63` contain the pending bits for all implemented interrupt identities, and are collectively called the `_eip_` _array_. Registers `eie0` through `eie63` contain the enable bits for the same interrupt identities, and are collectively called the `_eie_` _array_.
 
