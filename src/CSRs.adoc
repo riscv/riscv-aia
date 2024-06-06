@@ -348,7 +348,7 @@ VU-mode to directly access `vsireg`, or attempts from VU-mode to access `sireg`.
 
 When `vsiselect` has a reserved value (including values above 0x1FF not designated for custom use), attempts from M-mode or HS-mode to access `vsireg`, or from VS-mode to access `sireg` (really `vsireg`), should preferably raise an illegal instruction exception.
 
-When `vsiselect` has the number of an _inaccessible_ register, attempts from M-mode or HS-mode to access `vsireg` raise an illegal instruction exception, and attempts from VS-mode to access `sireg` (really `vsireg`) raise a virtual instructionexception.
+When `vsiselect` has the number of an _inaccessible_ register, attempts from M-mode or HS-mode to access `vsireg` raise an illegal instruction exception, and attempts from VS-mode to access `sireg` (really `vsireg`) raise a virtual instruction exception.
 
 [NOTE]
 ====
