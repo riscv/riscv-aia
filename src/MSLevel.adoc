@@ -64,20 +64,22 @@ Local interrupt: counter overflow
 
 [[TablemajorIntrCategories]]
 .Categorization of current and future major interrupts.
-[%autowidth,float="center",align="center",cols="2^,3<"]
+[%autowidth,float="center",align="center",cols="2^,3<,3<"]
+
 |===
-|Major interrupt numbers ^|Category
+|Major interrupt numbers ^|Category|
 |0-12 +
-13-15|Not Local interrupts }  Assigned by the +
-Local interrupts }      Privileged Architecture
+13-15|Not Local interrupts +
+Local interrupts | Assigned by the +
+Privileged Architecture 
 <|16-23 +
 24-31 +
 32-47 +
-&#8805; 48
-|Local interrupts +
+&#8805; 48 |
+Local interrupts +
 _Deisgnated for custom use_ +
 Local interrupts +
-_Designated for custom use_
+_Designated for custom use_ |
 |===
 
 Of the major interrupts controlled by the Privileged Architecture
@@ -115,7 +117,10 @@ solely on external or custom interrupts.
 
 As always, platform standards may further constrain how a system reports
 events, whether RAS events or other.
+====
 
+[NOTE]
+====
 For the standard local interrupts not defined by the RISC-V Privileged
 Architecture (numbers 16-23 and 32-47), the current plan is to assign
 default priorities in the order shown in this table:
@@ -157,9 +162,10 @@ for 32-bit RISC-V systems.
 
 In actuality, future RISC-V extensions may or may not stick to this plan for
 the default priority order of interrupts they define.
+====
 
-'''
-
+[NOTE]
+====
 In addition to the existing major interrupts of
 <<TablemajorIntrs>>, the following local interrupts
 are tentatively proposed, listed in order of decreasing default
@@ -175,9 +181,10 @@ priority:
 These local interrupts are expected to be specified by other RISC-V extensions.
 Be aware, this list is not final and may change as the relevant
 extensions are developed and ratified.
+====
 
-'''
-
+[NOTE]
+====
 If a future version of the RISC-V Privileged Architecture defines interrupt 0,
 the Advanced Interrupt Architecture needs it to have a default priority
 lower than certain external interrupts. See <<mtopi>>
@@ -238,9 +245,9 @@ by a set of registers accessed through the `miselect` and `mireg` CSRs introduce
 
 Each register controls the priorities of four interrupts, with one 8-bit
 byte per interrupt. For a number latexmath:[$k$] in the range 0-15,
-register latexmath:[$k$] controls the priorities of interrupts
-latexmath:[$k\times{4}$] through
-latexmath:[${k\times{4}+{3}}$], formatted as follows:
+register `iprio`latexmath:[$k$] controls the priorities of interrupts
+latexmath:[k\times{4}] through
+latexmath:[{k\times{4}+{3}}], formatted as follows:
 
 [%autowidth,float="center",align="center",cols="<m,<m",grid=none,frame=none]
 |===
@@ -261,7 +268,7 @@ When XLEN = 64, only the even-numbered registers exist:
 |===
 
 Each register controls the priorities of eight interrupts. For
-even latexmath:[$k$] in the range 0-14, register latexmath:[$k$]
+even latexmath:[$k$] in the range 0-14, register `iprio`latexmath:[$k$]
 controls the priorities of interrupts latexmath:[$k\times{4}$]
 through latexmath:[${k\times{4}+{7}}$], formatted as follows:
 
@@ -366,13 +373,16 @@ order|Priority number in machine-level `iprio` array
 |Lowest|
 ||0
 |===
+====
 
+[NOTE]
+====
 Implementing the priority configurability of this section requires that
 a RISC-V hart's external interrupt controller communicate to the hart not only
 the existence of a pending-and-enabled external interrupt but also the
 interrupt's priority number. Typically this implies that the width of
 the connection for signaling an external interrupt to the hart is not
-just a single wire as usual but now latexmath:[${IPRIOLEN} + 1$]
+just a single wire as usual but now latexmath:[{IPRIOLEN} + 1$]
 wires.
 
 It is expected that many systems will forego priority configurability of
@@ -614,7 +624,7 @@ Each register controls the priorities of four interrupts, one 8-bit byte per int
 |0x30|iprio0
 |0x32|iprio2
 ^|... ^|...
-|0x3E|iprio15
+|0x3E|iprio14
 |===
 
 Each register controls the priorities of eight interrupts. If XLEN = 64 and `siselect` is an odd value in the range `0x31`-`ox3F`, attempting to access `sireg` raises an illegal instruction exception.
@@ -627,8 +637,9 @@ For a given interrupt number, if the corresponding bit in `sie` is read-only zer
 ====
 As always, platform standards may require that priorities be
 configurable for certain interrupt causes.
-
-'''
+====
+[NOTE]
+====
 It is expected that many higher-end systems will not support the ability
 to configure the priorities of major interrupts at supervisor level as
 described in this section. Linux in particular is not designed to take
@@ -637,6 +648,8 @@ but may simply be all read-only zeros.
 ====
 
 The supervisor-level `iprio` array accessed via `siselect` and `sireg` affects the prioritization of interrupts only when they trap to S-mode. When an interrupt's priority number in the array is zero (either read-only zero or set to zero), its priority is the default order from <<majorIntrs>>. Setting an interrupt's priority number instead to a nonzero value latexmath:[$p$] gives that interrupt nominally the same priority as a supervisor-level external interrupt with priority number latexmath:[$p$]. For an interrupt that defaults to a higher priority than supervisor external interrupts, setting its priority number to a nonzero value lowers its priority. For an interrupt that defaults to a lower priority than supervisor external interrupts, setting its priority number to a nonzero value raises its priority. When two interrupt causes have been assigned the same nominal priority, ties are broken by the default priority order. <<TableintrPrios-S>> summarizes the effect of priority numbers on interrupt priority.
+
+If supported, setting the priority number for VS-level external interrupts (bits 23:16 of `iprio2`) to a nonzero value latexmath:[p] has the effect of giving the entire category of VS external interrupts nominally  the same priority as a supervisor external interrupt with priority number latexmath:[$p$], when VS external interrupts trap to S-mode.
 
 [[TableintrPrios-S]]
 .Effect of the supervisor-level iprio array on the priorities of interrupts taken in S-mode. For interrupts with the same priority number, the default order of <<majorIntrs>> prevails.
@@ -664,7 +677,7 @@ order|Priority number in supervisor-level `iprio` array |Priority number from in
 |Lowest|||0
 |===
 
-If supported, setting the priority number for VS-level external interrupts (bits 23:16 of `iprio2`) to a nonzero value latexmath:[$p$] has the effect of giving the entire category of VS external interrupts nominally  the same priority as a supervisor external interrupt with priority number latexmath:[$p$], when VS external interrupts trap to S-mode.
+
 
 If the system has an original PLIC for backward compatibility with older software, reset should initialize the supervisor-level `iprio` array to all zeros.
 

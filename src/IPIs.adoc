@@ -65,8 +65,10 @@ bit in at the intended privilege level, S or VS.
 Similarly, SBI environment calls for sending IPIs can easily continue to
 be supported without clients being at all aware of a change in the
 underlying hardware for delivering IPIs between harts.
+====
 
-'''
+[NOTE]
+====
 When software sends IPIs by writing MSIs to the IMSICs of other harts,
 programmers should consider also the need to execute a FENCE instruction
 before each store instruction that writes such an MSI. In the absence of

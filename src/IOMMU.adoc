@@ -274,13 +274,13 @@ arrangement:
 |===
 
 In general, the pair of doublewords at address offsets
-latexmath:[$k\times{16}$] and
-latexmath:[${k\times{16}+{8}}$] for integer latexmath:[$k$]
+latexmath:[k\times{16}] and
+latexmath:[k\times16+8] for integer latexmath:[k]
 contain the interrupt-pending and interrupt-enable bits for external
-interrupt minor identities in the range latexmath:[$k\times{64}$]
-to latexmath:[$k\times{64}+{63}$]. For
-identity latexmath:[$i$] in this range, bit
-latexmath:[$(i\bmod{64})$] of the first (even) doubleword is the
+interrupt minor identities in the range latexmath:[k\times64]
+to latexmath:[k\times64+63]. For
+identity latexmath:[i] in this range, bit
+latexmath:[(i\bmod 64)] of the first (even) doubleword is the
 interrupt-pending bit, and the same bit of the second (odd) doubleword
 is the interrupt-enable bit.
 
@@ -304,16 +304,16 @@ doubleword and sending a notice MSI as usual.
 
 All MRIFs are the size to accommodate 2047 valid interrupt identities,
 the maximum allowed for an IMSIC interrupt file. If a system’s actual
-IMSICs have interrupt files that implement only latexmath:[$N$]
-interrupt identities, latexmath:[${N < {2047}}$], then the contents
-of MRIFs for identities greater than latexmath:[$N$] may be ignored by
+IMSICs have interrupt files that implement only latexmath:[N]
+interrupt identities, latexmath:[N < 2047], then the contents
+of MRIFs for identities greater than latexmath:[N] may be ignored by
 software. IOMMUs, however, treat every MRIF as though all interrupt
 identities in the range 0-2047 are valid, even as software ignores
-invalid identity 0 and all identities greater than latexmath:[$N$].
+invalid identity 0 and all identities greater than latexmath:[N].
 
 [NOTE]
 ====
-There is no need to specify to an IOMMU a desired size latexmath:[$N$]
+There is no need to specify to an IOMMU a desired size latexmath:[N]
 for an MRIF smaller than 2047 valid interrupt identities. The only use
 an IOMMU would make of this information would be to discard any MSIs
 indicating an interrupt identity greater than latexmath:[$N$]. If
@@ -518,7 +518,7 @@ them as needed for the real machine. (Recall
 
 MSIs originating from a single device that require conversion are
 expected to have been configured at the device by a single guest OS
-running within one virtual machine. Assuming the VM itself conforms to
+running within one RISC-V virtual machine. Assuming the VM itself conforms to
 the Advanced Interrupt Architecture, MSIs are sent to virtual harts
 within the VM by writing to the memory-mapped registers of the interrupt
 files of virtual IMSICs. Each of these virtual interrupt files occupies
@@ -607,7 +607,7 @@ may compute and use for reading an individual MSI PTE from the table is
 also UNSPECIFIED.
 
 Every 16-byte MSI PTE is interpreted as two 64-bit doublewords. If an
-IOMMU also references standard page tables, defined by the RISC-V Privileged
+IOMMU also references standard RISC-V page tables, defined by the RISC-V Privileged
 Architecture, for regular address translation, then the byte order for
 each of the two doublewords in memory, little-endian or big-endian,
 should be the same as the endianness of the regular RISC-V page tables
@@ -662,12 +662,12 @@ interrupt file of a real IMSIC in the machine.
 
 [NOTE]
 ====
-An IOMMU that also employs standard page tables for regular address
+An IOMMU that also employs standard RISC-V page tables for regular address
 translation can maximize the overlap between the handling of MSI PTEs
-and regular leaf PTEs as follows:
+and regular RISC-V leaf PTEs as follows:
 
 For RV64, the first doubleword of an MSI PTE in basic translate mode has
-the same encoding as a regular leaf PTE for Sv39, Sv48, Sv57, Sv39x4,
+the same encoding as a regular RISC-V leaf PTE for Sv39, Sv48, Sv57, Sv39x4,
 Sv48x4, or Sv57x4 page-based address translation, with PTE fields D, A,
 G, U, and X all zeros and W = R = 1. Hence, the MSI PTE's first
 doubleword appears the same as a regular PTE that grants read and write
@@ -756,7 +756,7 @@ If a naturally aligned 32-bit write is to guest physical
 address latexmath:[$A$] within a page covered by an MRIF-mode PTE, and
 if the write data is latexmath:[$D$] when interpreted in the byte order
 indicated by bit 2 of latexmath:[$A$], then the write is processed as
-follows: If either latexmath:[$A$]11:3 or latexmath:[$D$]31:11 is not
+follows: If either latexmath:[$A$][11:3] or latexmath:[$D$][31:11] is not
 zero, or if bit 2 of latexmath:[$A$] is one and big-endian MSIs are not
 supported, then the incoming write is accepted but discarded. Else, the
 original incoming write is recognized as an MSI and is replaced by one
