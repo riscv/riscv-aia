@@ -543,7 +543,7 @@ inverted).
 For a source that is inactive or Detached, the _rectified input value_
 is zero.
 
-Any write to a `sourcecfg` register might (or might not) cause the corresponding interrupt-pending bit to be set to one if the rectified input value is high (= 1) under the new source mode. A write to a `sourcescfg` register will not by itself cause a pending bit to be cleared except when the source is made inactive. (But see <<AdvPLIC-pendingBits>>.)
+Any write to a `sourcecfg` register might (or might not) cause the corresponding interrupt-pending bit to be set to one if the rectified input value is high (= 1) under the new source mode. A write to a `sourcecfg` register will not by itself cause a pending bit to be cleared except when the source is made inactive. (But see <<AdvPLIC-pendingBits>>.)
 
 [[AdvPLIC-reg-mmsiaddrcfg]]
 ====  Machine MSI address configuration (`mmsiaddrcfg` and `mmsiaddrcfgh`) 
@@ -689,14 +689,14 @@ When `smsiaddrcfg` and `smsiaddrcfgh` are writable (root domain only), all field
 implementation is free to choose what values are supported, just as for `mmsiaddrcfg` and `mmsiaddrcfgh`.
 
 If register `mmsiaddrcfgh` of the domain has bit L set to one, then `smsiaddrcfg` and `smsiaddrcfgh` are _locked_ as
-read-only alongside `mmsiaddrcfg` and `mmsiaddrcfgh`. When `mmsiaddrcfgh`.L = 1, if the readable values of `mmsiaddrcfg` and `mmsiaddrcfgh` are
+read-only alongside `mmsiaddrcfg` and `mmsiaddrcfgh`. When `mmsiaddrcfgh.L` = 1, if the readable values of `mmsiaddrcfg` and `mmsiaddrcfgh` are
 zero and `0x80000000` respectively—because their other fields are hidden—then `smsiaddrcfg` and `smsiaddrcfgh` are hidden also and read as zeros.
 
-For the root domain only, if `mmsiaddrcfgh`.L = 1 and the MSI-address-configuration
+For the root domain only, if `mmsiaddrcfgh.L` = 1 and the MSI-address-configuration
 fields are hidden (so `mmsiaddrcfgh` reads as `0x80000000` and registers `mmsiaddrcfg`, `smsiaddrcfg`, and `smsiaddrcfgh` all read as zeros),
 then whatever values `smsiaddrcfg` and `smsiaddrcfgh` had when `mmsiaddrcfgh`.L was first set are retained
 internally by the APLIC, though those values are no longer visible by
-reading the registers. Alternatively, if system reset initializes `mmsiaddrcfgh`.L = 1
+reading the registers. Alternatively, if system reset initializes `mmsiaddrcfgh.L` = 1
 in the root domain, and if all MSI-address-configuration fields never
 appear as anything other than zeros, then the APLIC implementation has
 some other, possibly nonstandard, means for determining the addresses of
@@ -857,7 +857,7 @@ Register `genmsi` has this format:
 
 All other register bits are reserved and read as zeros.
 
-The Busy bit is ordinarily zero (false), but a write to genmsi` causes Busy to become one (true), indicating an extempore MSI is pending. The Hart
+The Busy bit is ordinarily zero (false), but a write to `genmsi` causes Busy to become one (true), indicating an extempore MSI is pending. The Hart
 Index field specifies the destination hart, and EIID (External Interrupt
 Identity) specifies the data value for the MSI. Fields Hart Index and
 EIID have the same formats and behavior as in a `target` register, documented in the next subsection, <<AdvPLIC-reg-target>>. For a
@@ -957,7 +957,7 @@ If the interrupt domain's harts have IMSIC interrupt files that
 implement latexmath:[$N$] distinct interrupt identities
 (<<IMSIC-intrFilesAndIdents>>),
 then EIID is a latexmath:[$k$]-bit unsigned integer field, where
-latexmath:[$\lceil\log_{2}N\rceil \leq k \leq \mbox{11}$]. EIID is thus
+latexmath:[$\lceil\log_{2}N\rceil \leq k \leq {11}$]. EIID is thus
 able to hold at least values 0 through latexmath:[$N$]. A write to a `target`
 register sets the latexmath:[$k$] implemented bits of EIID equal to the
 least-significant latexmath:[$k$] bits of the 32-bit value written.
@@ -1021,7 +1021,7 @@ value. Even in MSI delivery mode, the pending bit for a level-sensitive
 source is never set (= 1) when the rectified input value is low.
 ====
 
-In addition to the rules above, a write to a register can cause the
+In addition to the rules above, a write to a `sourcecfg` register can cause the
 source’s interrupt-pending bit to be set to one, as specified in
 <<AdvPLIC-reg-sourcecfg>>.
 
@@ -1207,14 +1207,14 @@ system reset.
 For a machine-level interrupt domain, if MSI target addresses are
 determined by `mmsiaddrcfg` and `mmsiaddrcfgh`, then the address for an outgoing MSI for interrupt
 source latexmath:[$i$] is computed from those registers and from the
-Hart Index field of register as follows:
+Hart Index field of register `target[latexmath:[i]]` as follows:
 
 
 [%autowidth,float="center",align="center",cols="<",grid=none,frame=none]
 |===
-|latexmath:[$g = (Hart Index>>LHXW){\text{&}}({2}^{HHXW}-{1})$]
-|latexmath:[$h = {Hart Index \text{&} } ({2}^{LHXW}-1)$]
-|MSI address = (Base PPN \| (g<<(HHXS+12)) \| (h<<LHXS)<<12
+| g = (Hart Index>>LHXW) & (2^HHXW^ - 1)
+| h = Hart Index & (2^LHXW^ -1)
+| MSI address = (Base PPN \| (g<<(HHXS+12)) \| (h<<LHXS)<<12
 |===
 
 Here, latexmath:[<<k$] and latexmath:[>>k$] represent shifting left
@@ -1225,17 +1225,17 @@ followed for the arrangement of IMSIC interrupt files in the machine's
 address space, value latexmath:[$g$] is intended to be the number of a
 hart group (always zero if HHXW = 0), while latexmath:[$h$] is the
 number of the target hart within that group. Represented in the terms of
-<<IMSIC-systemMemRegions>>, HHXW = latexmath:[$j$], LHXW = latexmath:[$k$], HHXS = latexmath:[${E-24}$], LHXS = latexmath:[${C-12}$], and Base PPN = latexmath:[$A$]12.
+<<IMSIC-systemMemRegions>>, HHXW = latexmath:[$j$], LHXW = latexmath:[$k$], HHXS = latexmath:[${E-24}$], LHXS = latexmath:[${C-12}$], and Base PPN = latexmath:[$A$]>>12.
 
 For a supervisor-level domain, if MSI target addresses are determined by
-the root domain's configuration registers ( and others), then to
+the root domain's configuration registers (`smsiaddrcfg` and others), then to
 construct the address for an outgoing MSI for interrupt
-source latexmath:[$i$], the Hart Index from register must first be
+source latexmath:[$i$], the Hart Index from register `target[latexmath:[i]]` must first be
 converted into the index number that machine-level domains use for the
 same hart. (These numbers are often the same, but they may not be.) The
 address for the MSI is then computed using this machine-level hart index
-together with the Base PPN and LHXS values from and , the other fields
-(HHXW, LHXW, and HHXS) from , and the Guest Index from , as follows:
+together with the Base PPN and LHXS values from `smsiaddrcfg` and `smsiaddrcfgh`, the other fields
+(HHXW, LHXW, and HHXS) from , and the Guest Index from `target[latexmath:[i]]`, as follows:
 
 [%autowidth,float="center",align="center",cols="<",grid=none,frame=none]
 |===
@@ -1245,7 +1245,7 @@ together with the Base PPN and LHXS values from and , the other fields
 |===
 
 Represented in the terms of
-<<IMSIC-systemMemRegions>>, HHXW = latexmath:[$j$], LHXW = latexmath:[$k$], HHXS = latexmath:[${E-24}$], LHXS = latexmath:[${D-12}$], and Base PPN = latexmath:[$B$]12.
+<<IMSIC-systemMemRegions>>, HHXW = latexmath:[$j$], LHXW = latexmath:[$k$], HHXS = latexmath:[${E-24}$], LHXS = latexmath:[${D-12}$], and Base PPN = latexmath:[$B$]>>12.
 
 The data for an outgoing MSI write is taken from the EIID field of `target[latexmath:[$i$]]`, zero-extended to 32 bits. An MSI's 32-bit data is always written in
 little-endian byte order, regardless of the BE field of the domain's `domaincfg`
@@ -1280,7 +1280,7 @@ any new interrupt assertion will cause the pending bit to become set and
 a new MSI sent to the hart.
 
 A second option is for the interrupt service routine to write the
-APLIC's source identity number for the interrupt to the domain's `swtipnum`
+APLIC's source identity number for the interrupt to the domain's `setipnum`
 register just before exiting. This will cause the interrupt's pending
 bit to be set to one again if the source is still asserting an
 interrupt, but not if the source is not asserting an interrupt.
@@ -1301,7 +1301,7 @@ may involve reconfiguring one or more APLICs. Even after the APLICs are
 reconfigured, the hart still cannot be safely turned off until it is
 known no more MSIs are destined for it.
 
-The `genmsi` register (<<AdvPLIC-reg-genmsi>>]) exists to allow
+The `genmsi` register (<<AdvPLIC-reg-genmsi>>) exists to allow
 software to determine when all earlier MSIs have arrived at a hart. To
 use `genmsi` for this purpose, software can dedicate one external interrupt
 identity at each hart's IMSIC interrupt file solely for APLIC

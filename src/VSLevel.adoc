@@ -246,7 +246,7 @@ zero_
 |bits 47:40 | Priority number for interrupt 13, counter overflow
 interrupt 
 |bits 55:48 | Priority number for interrupt 14
-|bits 63:56 & Priority number for interrupt 15
+|bits 63:56 | Priority number for interrupt 15
 |===
 
 `hviprio2`:

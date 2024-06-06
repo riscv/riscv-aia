@@ -390,7 +390,7 @@ multiple harts.
 === ISA extensions Smaia and Ssaia
 
 The Advanced Interrupt Architecture (AIA) defines two names for
-extensions to the instruction set architecture (ISA), one for
+extensions to the RISC-V instruction set architecture (ISA), one for
 machine-level execution environments, and another for supervisor-level
 environments. For a machine-level environment, extension *Smaia*
 encompasses all added CSRs and all modifications to interrupt response
