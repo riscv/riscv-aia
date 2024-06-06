@@ -143,7 +143,7 @@ supervisor level at each hart. The APLIC is specified in
 
 Without IMSICs, the current Advanced Interrupt Architecture does not
 support the direct signaling of external interrupts to virtual machines,
-even when harts implement the Privileged Architecture's hypervisor
+even when RISC-V harts implement the Privileged Architecture's hypervisor
 extension. Instead, an interrupt must be sent to the relevant
 hypervisor, which can then choose to inject a virtual interrupt into the
 virtual machine.
@@ -215,7 +215,7 @@ refer to <<IPIs>>, "Interprocessor Interrupts (IPIs).""
 The Advanced Interrupt Architecture adds considerable support for _local
 interrupts_ at a hart, whereby a hart essentially interrupts itself in
 response to asynchronous events, usually errors. Local interrupts remain
-contained within a hart (or close to it), so like standard timer and
+contained within a hart (or close to it), so like standard RISC-V timer and
 software interrupts, they do not pass through an APLIC or IMSIC.
 
 === Interrupt identities at a hart
