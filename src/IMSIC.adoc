@@ -359,7 +359,7 @@ latexmath:[$B$] should be chosen so
 where an ampersand (&) represents bitwise logical AND. This ensures that
 
 latexmath:[g\times{2}^{E}+A+h\times{2}^{C}] always equals 
-(latexmath:[\g\times{2}^{E}]) | latexmath:[A] | (latexmath:[h\times{2}^{C}]), and +
+latexmath:[g\times{2}^{E}] | latexmath:[A] | (latexmath:[h\times{2}^{C}]), and +
 latexmath:[g\times{2}^{E}+B+h\times{2}^{D}] always equals (latexmath:[g\times{2}^{E}]) | latexmath:[B] | 
 (latexmath:[h\times{2}^{D}]). 
 
@@ -368,10 +368,10 @@ not between separate groups. Specifically, if latexmath:[$g$] is any
 integer between 0 and latexmath:[${{2}^{j}-1}$] inclusive, then
 within the address ranges,
 
-latexmath:[$g\times{2}^{E}+A$] through
-latexmath:[$g\times{2}^{E}+A+{2}^{k+C}-{1}$], and +
-latexmath:[$g\times{2}^{E}+B$] through
-latexmath:[$g\times{2}^{E}+B+{2}^{k+D}-{1}$],
+latexmath:[g\times2^E+A] through
+latexmath:[g\times2^E+A+2^{k+C}-1], and +
+latexmath:[g\times2^E+B] through
+latexmath:[g\times2^E+B+2^{k+D}-1],
 
 pages not occupied by an interrupt file should be read-only zeros.
 

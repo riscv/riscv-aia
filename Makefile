@@ -26,6 +26,7 @@ PDF_RESULT := riscv-interrupts.pdf
 
 ASCIIDOCTOR_PDF := asciidoctor-pdf
 OPTIONS := --trace \
+			--verbose \
            -a compress \
            -a mathematical-format=svg \
            -a pdf-fontsdir=docs-resources/fonts \
