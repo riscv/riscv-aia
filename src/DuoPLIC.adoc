@@ -1,0 +1,115 @@
+[[ch:DuoPLIC]]
+== Duo-PLIC
+
+*Warning! This chapter is only a draft, and might change significantly
+before being accepted as standard by the International Association. It
+remains possible that the Duo-PLIC specification will never become a
+ratified standard.*
+
+The Advanced PLIC of the previous chapter is not backward compatible
+with the original PLIC. To ease the transition of software from the
+original PLIC to the APLIC, a system may have a _Duo-PLIC_ that software
+can configure to act as either form of PLIC. A Duo-PLIC is an extension
+of an APLIC, having all the usual memory-mapped interfaces of an APLIC,
+plus, at some other memory addresses, the memory-mapped interface of an
+original PLIC too. When the Duo-PLIC has _compatibility mode_ enabled,
+interrupts from the Duo-PLIC to harts are controlled exclusively by the
+original PLIC side of the Duo-PLIC; and when compatibility mode is
+disabled, interrupts to harts are controlled exclusively by the APLIC
+side of the Duo-PLIC. A Duo-PLIC comes out of reset with compatibility
+mode enabled, so older software with no knowledge of an APLIC can see
+the Duo-PLIC as an original PLIC.
+
+When compatibility mode is enabled so a Duo-PLIC acts as an original
+PLIC, the Duo-PLIC supports only the direct delivery of interrupts to
+harts, not the forwarding of interrupts by MSIs. When compatibility mode
+is disabled and the Duo-PLIC acts as an APLIC, direct delivery mode is
+supported for all interrupt domains, and MSI delivery mode may
+optionally be supported. Hence, for each APLIC interrupt domain, field
+DM (Delivery Mode) of the register is either read-only zero or writable,
+but is not read-only one.
+
+In the memory-mapped control region for the APLIC root interrupt domain
+(only), a Duo-PLIC adds to the register a CM (Compatibility Mode) field
+in bit 6. The complete format of the root interrupt domain’s is thus:
+
+bits 31:24 & read-only +
+bit 8 & IE +
+bit 7 & read-only 0 +
+bit 6 & CM +
+bit 2 & DM () +
+bit 0 & BE () +
+
+All other register bits are reserved and read as zeros.
+
+Reset initializes the APLIC root domain’s register with CM = 1 and with
+all other writable bits zeros.
+
+When CM = 1 (compatibility mode enabled):
+
+* For each _context_ implemented by the original PLIC side of the
+Duo-PLIC, the output interrupt for that context becomes the interrupt
+signal delivered from the Duo-PLIC to the specific hart and privilege
+level specified by the implementation. Other than the CM field of the
+APLIC root domain’s register, the state of the APLIC side of the
+Duo-PLIC is irrelevant to the interrupts delivered to harts.
+* In the memory-mapped control region for each APLIC interrupt domain:
+** Fields IE and DM of the register are read-only zeros.
+** Field BE of the register has its usual function for the interrupt
+domain but has no effect on accesses to the registers of the original
+PLIC side of the Duo-PLIC.
+** If they exist, the registers that configure MSI addresses (, , , and
+) remain functional.
+** All other registers are read-only zeros. Writes to the registers are
+ignored.
+
+When CM = 0 (compatibility mode disabled):
+
+* Interrupts to harts are determined by the APLIC side of the Duo-PLIC,
+as specified in Chapter #ch:AdvPLIC[[ch:AdvPLIC]]. The state of the
+original PLIC side of the Duo-PLIC is irrelevant.
+* In the memory-mapped control region for the original PLIC side of the
+Duo-PLIC, all registers are read-only zeros. Writes to the registers are
+ignored.
+
+If the Duo-PLIC’s compatibility mode is changed from disabled to
+enabled, the registers of the original PLIC side of the Duo-PLIC obtain
+valid and consistent but otherwise values.
+
+If the Duo-PLIC’s compatibility mode is changed from enabled to
+disabled, the registers of the APLIC side of the Duo-PLIC obtain valid
+and consistent but otherwise values, except for the registers and, if
+they exist, the registers that configure MSI addresses (, , , and ), all
+of which retain their previous values. (The root domain’s gets the value
+written when changing field CM, of course.)
+
+The endianness of the memory-mapped registers of the original PLIC side
+of the Duo-PLIC is not affected by the BE field of any APLIC register.
+For most, maybe all versions of an original PLIC, the registers are
+always little-endian.
+
+The number of interrupt priority levels supported by the original PLIC
+side of a Duo-PLIC is the same as that of the APLIC side when in direct
+delivery mode. Hence, the number of integer bits to store a priority
+number, IPRIOLEN, is a constant for a Duo-PLIC (in the range 1 to 8 as
+usual), independent of whether compatibility mode is enabled or
+disabled.
+
+However, an original PLIC encodes priorities in the opposite order from
+an IMSIC or APLIC, with number 1 being interpreted as the lowest
+priority and larger numbers as higher priorities. When a Duo-PLIC is
+acting as an original PLIC and reports to a hart an interrupt priority
+number (see Chapter #ch:MSLevel[[ch:MSLevel]] concerning a hart’s
+handling of interrupt priorities), the number reported is negated to
+_normalize_ it to the convention of the Advanced Interrupt Architecture.
+If the original PLIC’s priority number for an interrupt
+is latexmath:[$p$], the normalized priority number communicated to the
+target hart is latexmath:[${\mbox{2}^\textrm{IPRIOLEN}-p}$].
+
+Negation of original PLIC priority numbers to normalize them matters
+only when a hart supports configurability of the priorities of major
+interrupts, an option added by the Advanced Interrupt Architecture. See
+Sections #sec:intrPrios-M[[sec:intrPrios-M]]
+and #sec:intrPrios-S[[sec:intrPrios-S]]. Software that is oblivious to
+the Advanced Interrupt Architecture should have no reason to see
+priority numbers being negated.
