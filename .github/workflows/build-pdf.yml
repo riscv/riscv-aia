@@ -1,4 +1,3 @@
----
 name: Create Specification Document
 
 # The workflow is triggered by pull request, push to main, and manual dispatch.
@@ -24,7 +23,7 @@ on:
         type: boolean
         default: true
       draft:
-        description: Create release as a draft?
+        description: 'Create release as a draft?'
         required: false
         type: boolean
         default: false
@@ -32,7 +31,6 @@ on:
   push:
     branches:
       - asciidoc
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -80,3 +78,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GHTOKEN }}
         if: github.event_name == 'workflow_dispatch'
         # This condition ensures this step only runs for workflow_dispatch events.
+
