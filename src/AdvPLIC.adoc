@@ -551,7 +551,7 @@ Any write to a `sourcecfg` register might (or might not) cause the corresponding
 
 For machine-level interrupt domains, registers `mmsiaddrcfg` and `mmsiaddrcfgh` may optionally provide parameters used to determine the addresses to write outgoing MSIs.
 
-If no interrupt domain of the APLIC supports MSI delivery mode (`comaincfg`.DM is read-only zero for all domains), these two registers are not implemented for any domain. Otherwise, they are implemented for the root domain, and
+If no interrupt domain of the APLIC supports MSI delivery mode (`domaincfg`.DM is read-only zero for all domains), these two registers are not implemented for any domain. Otherwise, they are implemented for the root domain, and
 may or may not be implemented for other machine-level domains. For
 domains not at machine level, they are never implemented. When a domain
 does not implement `mmsiaddrcfg` and `mmsiaddrcfgh`, the eight bytes at their locations are simply read-only zeros like other reserved bytes.
