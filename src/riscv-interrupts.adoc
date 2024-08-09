@@ -92,11 +92,6 @@ are non-ISA.
 Resolved some inconsistencies in <<CSRs>> about when to raise
 a virtual instruction exception versus an illegal instruction exception.
 
-*Changes for RC6 (Ratification Candidate 6)*
-
-Resolved some inconsistencies in <<CSRs>> about when to raise
-a virtual instruction exception versus an illegal instruction exception.
-
 *Changes for RC5*
 
 Better aligned the rules for indirectly accessed registers with the
