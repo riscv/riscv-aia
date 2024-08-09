@@ -378,7 +378,7 @@ CSRs) other than `sireg` or `vsireg`, usually raise not an illegal instruction e
 
 Instructions that read/write CSR `stopei` or `vstopei` are considered to be _HS-qualified_ unless all of following are true: the hart has an IMSIC, extension Smstateen is implemented, and bit 58 of `mstateen0` is zero. (See the next section, <<CSRs-stateen>>, about `mstateen0`.)
 
-For `sireg` and `vsireg`, see both the previous section, <<CSRs-hypervisor>>, and the next, <<CSRs-stateen>>, for when a virtual instruction exception is required instead of an illegal instruction exception.
+For `sireg` and `vsireg`, see both the previous section, <<hypervisor-vs-csrs>>, and the next, <<CSRs-stateen>>, for when a virtual instruction exception is required instead of an illegal instruction exception.
 
 [[CSRs-stateen]]
 === Access control by the state-enable CSRs
