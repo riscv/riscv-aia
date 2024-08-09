@@ -189,7 +189,7 @@ For maximum compatibility, it is recommended that `siselect` support at least a
 
 [NOTE]
 ====
-Because the VS CSR `vsiselect` (<<CSRs-hypervisor>>) always has at
+Because the VS CSR `vsiselect` (<<hypervisor-vs-csrs>>) always has at
 least 9 bits, and like other VS CSRs, `vsiselect` substitutes for `siselect` when executing in
 a virtual machine (VS-mode or VU-mode), implementing a smaller range for
 `siselect` allows software to discover it is not running in a virtual machine.
@@ -220,6 +220,7 @@ enabled for supervisor level, as specified in
 
 If extension Sscsrind is also implemented, then when `siselect` has a value in the `0x30-0x3F` or `0x70-0xFF` range attempts to access alias CSRs `sireg2` through `sireg6` raise an illegal instruction exception (unless executing in a virtual machine, covered in the next section).
 
+[[hypervisor-vs-csrs]]
 === Hypervisor and VS CSRs
 
 If a hart implements the Privileged Architecture's hypervisor extension,
