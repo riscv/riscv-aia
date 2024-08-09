@@ -222,7 +222,7 @@ software interrupts, they do not pass through an APLIC or IMSIC.
 
 The RISC-V Privileged Architecture gives every interrupt cause at a hart a
 distinct _major identity number_, which is the Exception Code
-automatically written to CSR or on an interrupt trap. Interrupt causes
+automatically written to CSR `mcause` or `scause` on an interrupt trap. Interrupt causes
 that are standardized by the Privileged Architecture have major
 identities in the range 0-15, while numbers 16 and higher are officially
 available for platform standards or for custom use. The Advanced
