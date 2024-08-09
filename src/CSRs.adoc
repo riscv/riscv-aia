@@ -87,11 +87,11 @@ MRW |32 +
 `mieh` +
 `mvienh` +
 `mviph` +
-`miph` |Upper 32 bits of of `midelegh` (only with S-mode) +
-Upper 32 bits of `mieh` +
-Upper 32 bits of `mvienh` (only with S-mode) +
-Upper 32 bits of `mviph` (only with S-mode) +
-Upper 32 bits of `miph`
+`miph` |Upper 32 bits of `mideleg` (only with S-mode) +
+Upper 32 bits of `mie` +
+Upper 32 bits of `mvien` (only with S-mode) +
+Upper 32 bits of `mvip` (only with S-mode) +
+Upper 32 bits of `mip`
 |===
 
 Values of `miselect` with the most-significant bit set (bit
