@@ -452,13 +452,13 @@ Reset initializes `eidelivery` to 0x40000000 if that value is supported; otherwi
 ==== External interrupt enable threshold register (`eithreshold`)
 
 `eithreshold` is a *WLRL* register that determines the minimum interrupt priority (maximum interrupt identity number) allowing an interrupt to be signaled from this interrupt file to the attached hart. If latexmath:[$N$] is the maximum implemented interrupt identity number for this interrupt file,
-must be capable of holding all values between 0 and latexmath:[$N$],
+`eithreshold` must be capable of holding all values between 0 and latexmath:[$N$],
 inclusive.
 
 When `eithreshold` is a nonzero value latexmath:[$P$], interrupt identities
 latexmath:[$P$] and higher do not contribute to signaling interrupts, as
 though those identities were not enabled, regardless of the settings of
-their corresponding interrupt-enable bits in the array. When `eithreshold` is zero, all enabled interrupt identities contribute to signaling interrupts from
+their corresponding interrupt-enable bits in the `eie` array. When `eithreshold` is zero, all enabled interrupt identities contribute to signaling interrupts from
 the interrupt file.
 
 ==== External interrupt-pending registers (`eip0`-`eip63`)
@@ -582,7 +582,7 @@ written roughly as follows:
 |save processor registers
 |`i`=read CSR `mtopei` or `stopei`, and write simultaneously to claim the interrupt
 |`i`= `i>>16`
-|call the interrupt handler for external interrupt (minor identity)
+|call the interrupt handler for external interrupt `i` (minor identity)
 |restore processor registers 
 |return from trap
 |===
