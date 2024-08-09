@@ -218,7 +218,7 @@ Register `stopi` reports the highest-priority interrupt that is pending and
 enabled for supervisor level, as specified in
 <<stopi>>.
 
-If extension Sscsrind is also implemented, then when `siselect` has a value in the `0x30-0x3F` or `0x70-0xFF` range attempts to access alias CSRs `sireg2` through `sireg6` raise an illegal instruction exception (unless executing in a virtual machine, covered in the next section).
+If extension Sscsrind is also implemented, then when `siselect` has a value in the range `0x30-0x3F` or `0x70-0xFF`, attempts to access alias CSRs `sireg2` through `sireg6` raise an illegal instruction exception (unless executing in a virtual machine, covered in the next section).
 
 [[hypervisor-vs-csrs]]
 === Hypervisor and VS CSRs
