@@ -149,7 +149,7 @@ interrupts exclusively for hart 0, beyond the reach of the four
 application harts, even at machine level.
 
 [[AdvPLIC-ex-2Domains]]
-.An example system with four harts implement M-mode and S-mode, with two APLIC interrupt domains, one each for machine and supervisor levels. 
+.An example system with four harts that implement M-mode and S-mode, with two APLIC interrupt domains, one each for machine and supervisor levels. 
 image::AdvPLIC-ex-2Domains.png[]
 
 [[AdvPLIC-ex-3Domains]]
