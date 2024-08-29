@@ -1197,8 +1197,8 @@ To forward interrupts by MSIs, an APLIC must know the MSI target address
 for each hart. For any given system, these addresses are fixed and
 should be hardwired into the APLIC if possible. However, some APLIC
 implementations may require that software supply the MSI target
-addresses. In that case, the root domain's registers `mmsiaddrcfg`, `mmsiaddrcfgh`, `smsiaddrcfg`, and `smsiaddrcfgh` <<AdvPLIC-reg-mmsiaddrcfg>>
-and <<AdvPLIC-reg-smsiaddrcfg>> may be used to configure the
+addresses. In that case, the root domain's registers `mmsiaddrcfg`, `mmsiaddrcfgh`, `smsiaddrcfg`, and `smsiaddrcfgh` (<<AdvPLIC-reg-mmsiaddrcfg>>
+and <<AdvPLIC-reg-smsiaddrcfg>>) may be used to configure the
 MSI addresses for all interrupt domains. Alternatively MSI addresses may
 be configured by some custom means outside this standard. If MSI target
 addresses must be configured by software, this should be done only from
@@ -1215,7 +1215,7 @@ Hart Index field of register `target[latexmath:[i]]` as follows:
 |===
 | g = (Hart Index>>LHXW) & (2^HHXW^ - 1)
 | h = Hart Index & (2^LHXW^ -1)
-| MSI address = (Base PPN \| (g<<(HHXS+12)) \| (h<<LHXS)<<12
+| MSI address = ( Base PPN \| (g<<(HHXS+12)) \| (h<<LHXS) )<<12
 |===
 
 Here, latexmath:[<<k$] and latexmath:[>>k$] represent shifting left
@@ -1236,13 +1236,13 @@ converted into the index number that machine-level domains use for the
 same hart. (These numbers are often the same, but they may not be.) The
 address for the MSI is then computed using this machine-level hart index
 together with the Base PPN and LHXS values from `smsiaddrcfg` and `smsiaddrcfgh`, the other fields
-(HHXW, LHXW, and HHXS) from , and the Guest Index from `target[latexmath:[i]]`, as follows:
+(HHXW, LHXW, and HHXS) from `mmsiaddrcfgh`, and the Guest Index from `target[latexmath:[i]]`, as follows:
 
 [%autowidth,float="center",align="center",cols="<",grid=none,frame=none]
 |===
-|g = (machine-level hart index>>LHXW) & (2^HHXW^) - 1
-|h = machine-level hart index & (2^LHXW^) - 1
-|MSI address = (Base PPN \| (g<<(HHXS + 12) \| (h<<LHXS) \| Guest Index)<<12
+|g = (machine-level hart index>>LHXW) & (2^HHXW^ - 1)
+|h = machine-level hart index & (2^LHXW^ - 1)
+|MSI address = (Base PPN \| (g<<(HHXS + 12)) \| (h<<LHXS) \| Guest Index)<<12
 |===
 
 Represented in the terms of
