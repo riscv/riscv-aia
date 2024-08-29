@@ -966,9 +966,9 @@ least-significant latexmath:[$k$] bits of the 32-bit value written.
 === Reset
 
 Upon reset of an APLIC, all its state becomes valid and consistent but
-otherwise UNSPECIFIED, except for the domaincfg register of each interrupt domain:
+otherwise UNSPECIFIED, except for:
 
-* the register of each interrupt domain (<<AdvPLIC-reg-domaincfg>>);
+* the domaincfg register of each interrupt domain (<<AdvPLIC-reg-domaincfg>>);
 * possibly the MSI address configuration registers of machine-level interrupt domains (<<AdvPLIC-reg-mmsiaddrcfg>> and <<AdvPLIC-reg-smsiaddrcfg>>); and
 * the Busy bit of each interrupt domain's `genmsi` register, if it exists (<<AdvPLIC-reg-genmsi>>).
 
@@ -1107,7 +1107,7 @@ highest-priority pending-and-enabled interrupt targeted to this hart
 that also exceeds the priority threshold specified by `ithreshold`, if not zero.
 
 A read of `topi` returns zero either if no interrupt that is targeted to this
-hart is both pending and enabled, or if is not zero and no
+hart is both pending and enabled, or if `ithreshold` is not zero and no
 pending-and-enabled interrupt targeted to this hart has a priority
 number less than the value of `ithreshold`. Otherwise, the value returned from a read of `topi` has this format:
 
