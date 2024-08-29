@@ -432,7 +432,7 @@ highest-priority interrupt, and field IPRIO indicates its priority.
 
 If all bytes of the machine-level `iprio` array are read-only zeros, a
 simplified implementation of field IPRIO is allowed in which its value
-is always 1 whenever is not zero.
+is always 1 whenever `mtopi` is not zero.
 
 Otherwise, when `mtopi` is not zero, if the priority number for the reported
 interrupt is in the range 1 to 255, IPRIO is simply that number. If the
@@ -481,13 +481,12 @@ if (mstatus.MPIE == 1) {
         i = read CSR mtopi
         if (i == 0) exit loop
         i = i>>16
-        call the interrupt handler for major interrupt
+        call the interrupt handler for major interrupt i
     }
 }
 restore processor registers
 return from trap
 ----
-
 (This example can be further optimized, but with an increase in complexity.)
 
 [[virtIntrs-S]]
@@ -594,7 +593,7 @@ access CSR `stopei`, or to access `sireg` when `siselect` has a value in the ran
 When the hypervisor extension is implemented, if a bit is zero in the
 same position in both `mideleg` and `mvien`, then that bit is read-only zero in `hideleg` (in addition to being read-only zero in `sip`, `sie`, `hip`, and `hie`). But if a bit for one of interrupts 13-63 is a one in either `mideleg` or `mvien`, then the same bit in `hideleg` may be writable or may be read-only zero, depending on the implementation. No bits in `hideleg` are ever read-only ones. The RISC-V Privileged Architecture further constrains bits 12:0 of `hideleg`.
 
-When supervisor mode is implemented, the minimal required implementation of `mvien` and `mvip` has all bits being read-only zeros except for `mvip` bits 1 and 9, and sometimes bit 5, each of which is an alias of an existing writable bit in `mip`. (Although, as noted, it is strongly recommended that bit 9 of `mvien` also be writable.) When supervisor mode is not implemented, registers `mvien` and `svip` do not exist.
+When supervisor mode is implemented, the minimal required implementation of `mvien` and `mvip` has all bits being read-only zeros except for `mvip` bits 1 and 9, and sometimes bit 5, each of which is an alias of an existing writable bit in `mip`. (Although, as noted, it is strongly recommended that bit 9 of `mvien` also be writable.) When supervisor mode is not implemented, registers `mvien` and `mvip` do not exist.
 
 [[intrs-S]]
 === Interrupts at supervisor level
