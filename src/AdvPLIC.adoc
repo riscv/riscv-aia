@@ -966,11 +966,11 @@ least-significant latexmath:[$k$] bits of the 32-bit value written.
 === Reset
 
 Upon reset of an APLIC, all its state becomes valid and consistent but
-otherwise , except for:
+otherwise UNSPECIFIED, except for the domaincfg register of each interrupt domain:
 
 * the register of each interrupt domain (<<AdvPLIC-reg-domaincfg>>);
 * possibly the MSI address configuration registers of machine-level interrupt domains (<<AdvPLIC-reg-mmsiaddrcfg>> and <<AdvPLIC-reg-smsiaddrcfg>>); and
-* the Busy bit of each interrupt domain's `genmsi` register, if it exists <<AdvPLIC-reg-genmsi>>).
+* the Busy bit of each interrupt domain's `genmsi` register, if it exists (<<AdvPLIC-reg-genmsi>>).
 
 [[AdvPLIC-pendingBits]]
 === Precise effects on interrupt-pending bits
