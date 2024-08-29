@@ -825,7 +825,7 @@ For systems that are big-endian-only, with `domaincfg`.BE hardwired to one, `set
 
 ====  Set interrupt-pending bit by number, big-endian (`setipnum_be`) 
 
-Register `setipnym_be` acts identically to `setipnum` except that byte order is always big-endian, as though field BE (Big-Endian) of register `domaincfg` is one.
+Register `setipnum_be` acts identically to `setipnum` except that byte order is always big-endian, as though field BE (Big-Endian) of register `domaincfg` is one.
 
 For systems that are little-endian-only, with `domaincfg`.BE hardwired to zero, `setipnum_be` need not be implemented, in which case the four bytes at this offset are simply read-only zeros like other reserved bytes.
 
