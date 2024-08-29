@@ -77,7 +77,7 @@ Privileged Architecture
 32-47 +
 &#8805; 48 |
 Local interrupts +
-_Deisgnated for custom use_ +
+_Designated for custom use_ +
 Local interrupts +
 _Designated for custom use_ |
 |===
