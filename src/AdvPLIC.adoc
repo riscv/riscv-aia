@@ -294,10 +294,10 @@ registers. The first 16 KiB contains the registers listed in
 |… | | … |
 |`0x1C7C` |4 bytes |`setip[31]` |
 |`0x1CDC` |4 bytes |`setipnum` |
-|`0x1D00` |4 bytes |`in clrip[0]` |
-|`0x1D04` |4 bytes |`in clrip[1]` |
+|`0x1D00` |4 bytes |`in_clrip[0]` |
+|`0x1D04` |4 bytes |`in_clrip[1]` |
 |… | | … |
-|`0x1D7C` |4 bytes |`in clrip[31]` |
+|`0x1D7C` |4 bytes |`in_clrip[31]` |
 |`0x1DDC` |4 bytes |`clripnum` |
 |`0x1E00` |4 bytes |`setie[0]` |
 |`0x1E04` |4 bytes |`setie[1]` |
@@ -307,10 +307,10 @@ registers. The first 16 KiB contains the registers listed in
 |`0x1F00` |4 bytes |`clrie[0]` |
 |`0x1F04` |4 bytes |`clrie[1]` |
 |… | | … |
-|`0x1F7C` |4 bytes |`setie[31]` |
+|`0x1F7C` |4 bytes |`clrie[31]` |
 |`0x1FDC` |4 bytes |`clrienum` |
-|`0x2000` |4 bytes |`setipnum le` |
-|`0x2004` |4 bytes |`setipnum be` |
+|`0x2000` |4 bytes |`setipnum_le` |
+|`0x2004` |4 bytes |`setipnum_be` |
 |`0x3000` |4 bytes |`genmsi` |
 |`0x3004` |4 bytes |`target[1]` |
 |`0x3008` |4 bytes |`target[2]` |
