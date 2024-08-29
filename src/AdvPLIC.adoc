@@ -764,7 +764,7 @@ be cleared by writing to an `in_clrip` register.
 ==== Clear interrupt-pending bit by number (`clripnum`)
 
 If latexmath:[$i$] is an active interrupt source number in the domain,
-writing 32-bit value latexmath:[$i$] to register causes the pending bit
+writing 32-bit value latexmath:[$i$] to register `clripnum` causes the pending bit
 for source latexmath:[$i$] to be cleared if possible. See
 <<AdvPLIC-pendingBits>> for exactly when a pending bit may
 be cleared by writing to `clripnum`.
