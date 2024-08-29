@@ -1174,13 +1174,13 @@ written roughly as follows:
 |save processor registers
 |i = read register `claimi` from the hart's IDC structure at the APLIC
 |i = i>>16
-|call the interrupt handler for external interrupt (minor identity)
+|call the interrupt handler for external interrupt latexmath:[$i$] (minor identity)
 |restore processor registers
 |return from trap
 |===
 
 To account for spurious interrupts, this pseudocode assumes there is an
-interrupt handler for "external interrupt 0 which does nothing.
+interrupt handler for "external interrupt 0" which does nothing.
 
 === Interrupt forwarding by MSIs
 
