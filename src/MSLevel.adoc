@@ -338,6 +338,7 @@ When a hart has an IMSIC supporting more than 255 minor identities for
 external interrupts, the only non-default priorities that can be
 configured for other interrupts are those corresponding to external
 interrupt identities 1-255, not those of identities 256 or higher.
+====
 
 [%header,float="center",align="center",cols="^,^,^,^"]
 |===
@@ -373,7 +374,6 @@ order|Priority number in machine-level `iprio` array
 |Lowest|
 ||0
 |===
-====
 
 [NOTE]
 ====
