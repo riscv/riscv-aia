@@ -651,7 +651,7 @@ zero. For this reason, it is likely that only a complete system reset
 affects these registers, and any other resets do not.
 
 [[AdvPLIC-reg-smsiaddrcfg]]
-====  Supervisor MSI address configuration (`(smsiaddrcfg` and `smsiaddrcfgh`) 
+====  Supervisor MSI address configuration (`smsiaddrcfg` and `smsiaddrcfgh`) 
 
 For machine-level interrupt domains, registers `smsiaddrcfg` and `smsiaddrcfgh` may optionally
 provide parameters used by supervisor-level domains to determine the
