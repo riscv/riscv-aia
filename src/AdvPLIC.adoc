@@ -475,7 +475,7 @@ cannot be set to one in any `sourcecfg` register for that domain. For such a lea
 domain, attempting to write a `sourcecfg` register with a value that has bit 10 = 1 causes the entire register to be set to zero instead.
 
 When interrupt source latexmath:[$i$] is not delegated to a child
-domain `sourcecfg[latexmath:[$i$]]`, has this format:
+domain, `sourcecfg[latexmath:[$i$]]` has this format:
 
 [%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
 |===
