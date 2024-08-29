@@ -551,7 +551,7 @@ Any write to a `sourcecfg` register might (or might not) cause the corresponding
 
 For machine-level interrupt domains, registers `mmsiaddrcfg` and `mmsiaddrcfgh` may optionally provide parameters used to determine the addresses to write outgoing MSIs.
 
-If no interrupt domain of the APLIC supports MSI delivery mode (`comaincfg`.DM is read-only zero for all domains), these two registers are not implemented for any domain. Otherwise, they are implemented for the root domain, and
+If no interrupt domain of the APLIC supports MSI delivery mode (`domaincfg`.DM is read-only zero for all domains), these two registers are not implemented for any domain. Otherwise, they are implemented for the root domain, and
 may or may not be implemented for other machine-level domains. For
 domains not at machine level, they are never implemented. When a domain
 does not implement `mmsiaddrcfg` and `mmsiaddrcfgh`, the eight bytes at their locations are simply read-only zeros like other reserved bytes.
@@ -559,7 +559,7 @@ does not implement `mmsiaddrcfg` and `mmsiaddrcfgh`, the eight bytes at their lo
 Registers `mmsiaddrcfg` and `mmsiaddrcfgh` are potentially writable only for the root domain. For all
 other machine-level domains that implement them, they are read-only.
 
-When implemented `mmsiaddrcfg`, has this format:
+When implemented, `mmsiaddrcfg` has this format:
 [%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
 |===
 |bits 31:0 |Low Base PPN (*WARL*)
@@ -568,7 +568,7 @@ When implemented `mmsiaddrcfg`, has this format:
 and `mmsiaddrcfgh` has this format:
 [%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
 |===
-|bits 31:0 |L
+|bit 31 |L
 |bits 28:24 |HHXS (*WARL*)
 |bits 22:20 |LHXS (*WARL*)
 |bits 18:16 |HHXW (*WARL*)
@@ -596,7 +596,7 @@ are ignored, making the registers effectively read-only. When L = 1, the
 other fields in `mmsiaddrcfg` and `mmsiaddrcfgh` may optionally all read as zeros. In that case, if
 these other fields were given nonzero values when L was first set in the
 root domain, their values are retained internally by the APLIC but
-become no longer visible by reading and .
+become no longer visible by reading `mmsiaddrcfg` and `mmsiaddrcfgh`.
 
 Setting `mmsiaddrcfgh`.L to one also locks registers `smsiaddrcfg` and `smsiaddrcfgh` described in the next
 subsection, if those registers are implemented as well.
@@ -644,7 +644,7 @@ implemented simply as read-only with values zero and `0x80000000`, and a separat
 
 If an APLIC supports additional forms of reset besides system reset, it
 is implementation-defined (or possibly platform-defined) how these other
-resets may affect `mmsiaddrcfg` and `mmsiaddrcfgh` (as well `smsiaddrcfg` as and `smsiaddrcfgh`) in the root domain. However, it
+resets may affect `mmsiaddrcfg` and `mmsiaddrcfgh` (as well as `smsiaddrcfg` and `smsiaddrcfgh`) in the root domain. However, it
 must not be possible for insufficiently privileged software to use a
 localized reset to unlock these registers by changing bit L back to
 zero. For this reason, it is likely that only a complete system reset
