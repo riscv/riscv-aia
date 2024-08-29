@@ -284,7 +284,7 @@ through latexmath:[${k\times{4}+{7}}$], formatted as follows:
 |bits 63:56 |Priority number for interrupt latexmath:[$k\times{4}+{7}$]
 |===
 
-When XLEN = 64 and `miselect` is an odd value in the range `0x31`-`ox3F`, attempting to access `mireg` raises an illegal instruction exception.
+When XLEN = 64 and `miselect` is an odd value in the range `0x31`-`0x3F`, attempting to access `mireg` raises an illegal instruction exception.
 
 The valid registers `iprio0`-`iprio15` are known collectively as the `_iprio_` _array_ for machine level.
 
