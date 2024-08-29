@@ -747,7 +747,7 @@ The RISC-V Privileged Architecture specifies that instruction WFI (Wait for Inte
 
 According to the RISC-V Privileged Architecture, instruction execution must resume from a WFI whenever any interrupt is both pending and enabled in CSRs `mip` and `mie`, ignoring any delegation indicated by `mideleg`. With the AIA, this succinct rule is no longer appropriate, due to the mechanisms the AIA adds for virtual interrupts. Instead, execution must resume from a WFI whenever an interrupt is pending at any privilege level (regardless of whether the interrupt privilege level is higher or lower than the hart's current privilege mode).
 
-An interrupt is pending at machine level if register `mtopi` is not zero. If S-mode is implemented, an interrupt is pending at supervisor level if `stopi` is not zero. And if the hypervisor extension is implemented, an interrupt is pending at VS level if (<<vstopi>>) is not zero.
+An interrupt is pending at machine level if register `mtopi` is not zero. If S-mode is implemented, an interrupt is pending at supervisor level if `stopi` is not zero. And if the hypervisor extension is implemented, an interrupt is pending at VS level if `vstopi` (<<vstopi>>) is not zero.
 
 [NOTE]
 ====
