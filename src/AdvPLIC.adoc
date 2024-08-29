@@ -813,7 +813,7 @@ A read of a `clrie` register always returns zero.
 If latexmath:[$i$] is an active interrupt source number in the domain,
 writing 32-bit value latexmath:[$i$] to register `clrienum` causes the enable bit for source latexmath:[$i$] to be cleared.
 
-A write to `clrienum` is ignored if the value written is not an active interrupt source number in the domain. A read  `clrienum` always returns zero.
+A write to `clrienum` is ignored if the value written is not an active interrupt source number in the domain. A read of `clrienum` always returns zero.
 
 ====  Set interrupt-pending bit by number, little-endian (`setipnum_le`) 
 
