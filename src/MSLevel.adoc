@@ -715,7 +715,7 @@ The value of `stopi` is not affected by the global interrupt enable SIE in CSR `
 The RISC-V Privileged Architecture ensures that, when the value of `stopi` is not zero, a trap is taken to S-mode for the interrupt indicated by field IID if either the current privilege mode is S and `sstatus`.SIE is one, or the current privilege mode has less privilege than S-mode. The trap itself does not cause the value of `stopi` to change.
 
 The following pseudocode shows how a supervisor-level trap handler might
-read to avoid redundant restoring and saving of processor registers when
+read `stopi` to avoid redundant restoring and saving of processor registers when
 an interrupt arrives during the handling of another trap (either a
 synchronous exception or an earlier interrupt):
 
@@ -732,7 +732,7 @@ if (sstatus.SPIE == 1) {
         i = read CSR stopi
         if (i == 0) exit loop
         i = i>>16
-        call the interrupt handler for major interrupt
+        call the interrupt handler for major interrupt i
     }
 }
 restore processor registers
