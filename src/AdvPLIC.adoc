@@ -715,7 +715,7 @@ of the same registers from the root domain.
 
 ====  Set interrupt-pending bits (`setip[0]`-`setip[31]`) 
 
-Reading or  `setip[latexmath:[$k$]]` register reads or potentially modifies the pending
+Reading or writing `setip[latexmath:[$k$]]` register reads or potentially modifies the pending
 bits for interrupt sources latexmath:[$k\times{32}$] through
 latexmath:[$k\times{32}+{31}$]. For an implemented interrupt
 source latexmath:[$i$] within that range, the pending bit for
