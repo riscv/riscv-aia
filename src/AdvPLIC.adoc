@@ -819,7 +819,7 @@ A write to `clrienum` is ignored if the value written is not an active interrupt
 
 Register `setipnum_le` acts identically to `setipnum` except that byte order is always little-endian, as though field BE (Big-Endian) of register `domaincfg` is zero.
 
-For systems that are big-endian-only, with `domaincfg`.BE hardwired to one, `setipnum_be` need not be implemented, in which case the four bytes at this offset simply read-only zeros like other reserved bytes.
+For systems that are big-endian-only, with `domaincfg`.BE hardwired to one, `setipnum_le` need not be implemented, in which case the four bytes at this offset are simply read-only zeros like other reserved bytes.
 
 `setipnum_le` may be used as a write port for MSIs.
 
