@@ -337,7 +337,7 @@ memory-resident interrupt files, it can store to an MRIF MSIs of the
 same endianness that the machine's IMSICs accept. All IMSIC interrupt
 files are required to accept MSIs in little-endian byte order written to
 memory-mapped register `seteipnum_le` (<<IMSIC-memRegion>>). IMSIC interrupt
-files may also accept MSIs in big-endian byte order if register `setipnum_be` is
+files may also accept MSIs in big-endian byte order if register `seteipnum_be` is
 implemented alongside `seteipnum_le`.
 
 If the interrupt identity indicated by an MSI's data (when interpreted
