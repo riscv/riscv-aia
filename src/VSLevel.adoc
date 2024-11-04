@@ -197,7 +197,7 @@ in <<intrs-S>>, interrupt priorities for
 supervisor level are configured by the `iprio` array accessed indirectly through
 CSRs `siselect` and `sireg`. The `siselect` addresses for the `iprio` array registers are `0x30`-`0x3F`.
 
-VS level has its own `vsiseelect` and `vsireg`, but unlike supervisor level, there are no
+VS level has its own `vsiselect` and `vsireg`, but unlike supervisor level, there are no
 registers at `vsiselect` addresses `0x30`-`0x3F`. When `vsiselect` has a value in the range `0x30`-`0x3F`, an attempt
 from VS-mode to access `sireg` (really `vsireg`) causes a virtual instruction exception.
 To give a virtual hart the illusion of an array of `iprio` registers accessed
