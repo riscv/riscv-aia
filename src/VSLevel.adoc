@@ -422,7 +422,7 @@ identity 9, as follows:
 When `hvictl`.IID = 9, DPR is ignored.
 
 [[vstopi]]
-==== Virtual supervisor top interrupt CSR ()
+==== Virtual supervisor top interrupt CSR (`vstopi`)
 
 Read-only CSR `vstopi` is VSXLEN bits wide and has the same format as `stopi`:
 
