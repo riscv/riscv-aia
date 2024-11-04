@@ -354,7 +354,7 @@ by the facilities described thus far, but only with more active
 involvement of the hypervisor. A hypervisor must use `hvictl` for any of the
 following:
 
-* asserting for VS level a major interrupt not supported by `hvvien` and `hvip`;
+* asserting for VS level a major interrupt not supported by `hvien` and `hvip`;
 * implementing configurability of priorities at VS level for major
 interrupts beyond those supported by `hviprio1` and `hviprio2`; or
 * emulating an external interrupt controller for a virtual hart without
