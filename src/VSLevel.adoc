@@ -307,7 +307,7 @@ and `mvip` do for supervisor level, as explained in
 <<virtIntrs-S>>.
 
 Each bit of registers `hvien` and `hvip` corresponds with an interrupt number in the
-range 0-63. Bits 12:0 of `hvip` are reserved and must be read-only zeros, while
+range 0-63. Bits 12:0 of `hvien` are reserved and must be read-only zeros, while
 bits 12:0 of `hvip` are defined by the RISC-V Privileged Architecture. Specifically,
 bits 10, 6, and 2 of `hvip` are writable bits that correspond to VS-level
 external interrupts (VSEIP), VS-level timer interrupts (VSTIP), and
