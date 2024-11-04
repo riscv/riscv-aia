@@ -35,7 +35,7 @@ always indicated by the VGEIN field of CSR `hstatus`. When VGEIN is not the vali
 number of a guest interrupt file, the current virtual hart has no guest
 interrupt file to act as its supervisor-level interrupt file.
 
-When `hstatus`.VGEIN is the valid number of a guest interrupt file, values of `viselect` in
+When `hstatus`.VGEIN is the valid number of a guest interrupt file, values of `vsiselect` in
 the range `0x70`-`0xFF` select registers of this guest interrupt file, just as
 values of `siselect` in the same range select registers of the IMSIC's true
 supervisor-level interrupt file. The registers of an interrupt file that
