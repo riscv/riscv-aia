@@ -331,7 +331,7 @@ are both zero. The combined effects of `hideleg` and `hvien` on `vsip` and `vsie
 |===
 
 For interrupt numbers 13-63, a bit in `vsie` is writable if and only if the
-corresponding bit is set in either `hideleg` or `hiven`. When an interrupt is delegated
+corresponding bit is set in either `hideleg` or `hvien`. When an interrupt is delegated
 by `hideleg`, the writable bit in `vsie` is an alias of the corresponding bit in `sie`; else
 it is an independent writable bit. The Privileged Architecture specifies
 when bits 12:0 of `vsie` are aliases of bits in `hie`. As usual, bits that are not
