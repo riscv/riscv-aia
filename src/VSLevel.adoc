@@ -1,0 +1,502 @@
+[[VSLevel]]
+== Interrupts for Virtual Machines (VS Level)
+
+When the hypervisor extension is implemented, a hart's set of possible
+privilege modes includes the _virtual supervisor_ (VS) and _virtual
+user_ (VU) modes for hosting virtual harts. The Advanced Interrupt
+Architecture adds to the hypervisor extension new interrupt facilities
+aligned with those described earlier for supervisor-level interrupts.
+
+As introduced in <<CSRs>>, several hypervisor and VS
+CSRs are added: `hvien`, `hvictl`, `hviprio1`, `hviprio2`, `vsiselect`, `vsireg`, `vstopei`, and `vstopi`. (And for RV32, the following
+high-half CSRs are also added: `hidelegh`, `hvienh`, `hviph`, `hviprio1h`, `hviprio2h`, `vsiph` and `vsieh`.) As always, when
+executing in VS-mode or VU-mode, the VS CSRs substitute for the
+corresponding supervisor CSRs.
+
+To give software that runs in a virtual machine the appearance of
+executing on a real machine that implements the Advanced Interrupt
+Architecture at supervisor level, responsibility is shared between
+hypervisor software and the hardware facilities described in this
+chapter. While some behaviors can be handled directly by hardware,
+others require significant emulation by the hypervisor, sometimes with
+hardware assistance.
+
+=== VS-level external interrupts with a guest interrupt file
+
+When a hart implements the hypervisor extension, it is recommended that
+the hart also have an IMSIC with guest interrupt files. Assuming guest
+interrupt files are available, each can be assigned to a virtual hart at
+the physical hart to act as the supervisor-level interrupt file for that
+virtual hart. If there are latexmath:[$N$] guest interrupt files, then
+latexmath:[$N$] virtual harts at that physical hart may each have a
+physical guest interrupt file to serve as its (virtual) supervisor-level
+interrupt file. The guest interrupt file for the current virtual hart is
+always indicated by the VGEIN field of CSR `hstatus`. When VGEIN is not the valid
+number of a guest interrupt file, the current virtual hart has no guest
+interrupt file to act as its supervisor-level interrupt file.
+
+When `hstatus`.VGEIN is the valid number of a guest interrupt file, values of `vsiselect` in
+the range `0x70`-`0xFF` select registers of this guest interrupt file, just as
+values of `siselect` in the same range select registers of the IMSIC's true
+supervisor-level interrupt file. The registers of an interrupt file that
+are accessed indirectly through `vsiselect` and `vsireg` are documented in
+<<IMSIC>> on the IMSIC, along with IMSIC-only CSR `vstopei`.
+Because all IMSIC interrupt files act identically, the guest interrupt
+file that a virtual hart accesses through CSRs `siselect`, `sireg`, and `stopei` is
+indistinguishable from a true supervisor-level interrupt file as seen
+from S-mode (or HS-mode).
+
+In addition to an IMSIC at each hart, a virtual machine may also need to
+see a PLIC or APLIC. However, unlike an IMSIC's ability to provide
+physical guest interrupt files for virtual harts, a PLIC or APLIC must
+be emulated for a virtual machine by the hypervisor.
+
+[NOTE]
+====
+The Advanced Interrupt Architecture does not currently include hardware
+assistance for virtualizing an APLIC. For small numbers of harts, such
+hardware would be substantially larger than that required to implement
+guest interrupt files for an IMSIC. It is assumed that most
+high-performance I/O can be done through devices that can send MSIs
+directly to guest interrupt files (such as devices attached through a
+PCI Express interconnect). For the types of devices whose interrupts
+must go through a (virtual) APLIC, the overhead cost of emulating the
+APLIC is expected to be less significant.
+====
+
+When a virtual hart appears to have an IMSIC because a guest interrupt
+file is assigned to it, all external interrupts, real or emulated,
+destined for the virtual hart must go through this perceived IMSIC. A
+hypervisor can easily inject an emulated external interrupt into the
+guest interrupt file selected by `hstatus`.VGEIN by setting a bit in the
+interrupt-pending array indirectly accessed through `vsiselect` and `vsireg`. When a virtual
+hart has a guest interrupt file, a hypervisor is not normally expected
+to set bit VSEIP in CSR `hvip`.
+
+In the special case that an emulated APLIC for a virtual machine has a
+wired interrupt source that equates to an actual interrupt source of a
+real APLIC, if software running in this virtual machine configures its
+virtual APLIC to forward interrupts from that source as MSIs to a
+specific virtual hart, the hypervisor can configure the real APLIC to
+forward the actual interrupts directly as MSIs to the virtual hart’s
+guest interrupt file. In this way, although the hypervisor must trap and
+emulate the virtual machine’s memory accesses that configure the
+forwarding of interrupts at the virtual APLIC, the interrupts themselves
+can be converted automatically into real MSIs for the guest interrupt
+file, without the hypervisor being invoked for each arriving interrupt.
+
+==== Direct control of a device by a guest OS
+
+To ensure proper support for interrupts, two conditions must be met
+before a hypervisor may allow a guest OS running in a virtual machine to
+directly control a physical device that sends MSIs: First, each virtual
+hart must have a guest interrupt file assigned to it, giving each its
+own apparent IMSIC within the virtual machine. Second, interrupts from
+the device must be signaled by wire through an APLIC that can translate
+these interrupts into MSIs, or the system must have an IOMMU that can
+translate the addresses of MSI memory writes made by the device itself.
+
+If a guest OS directly controls a device capable of sending MSIs, it
+will naturally configure MSIs at the device with the guest physical
+addresses the OS sees for the IMSICs of its virtual harts, not knowing
+that these addresses are only virtual. When the device performs a memory
+write for an MSI, the destination address of this write must be
+translated by the IOMMU from the guest physical address assigned by the
+guest OS into the true physical address of the target guest interrupt
+file, using a translation table supplied by the hypervisor.
+
+By design, the translation an IOMMU must do for device MSIs is
+fundamentally no different than the address translation the IOMMU
+already must perform for other memory accesses from the same device,
+converting guest physical addresses into true physical addresses.
+Because each virtual hart is assigned a dedicated, physical guest
+interrupt file that is indistinguishable from a true supervisor-level
+interrupt file, no translation is needed for the data of an MSI write,
+which specifies the interrupt's identity number in the target interrupt
+file.
+
+[[virtHartMigration]]
+==== Migrating a virtual hart to a different guest interrupt file
+
+When it is necessary to move a virtual hart from one physical hart to
+another, if the virtual hart uses a guest interrupt file, the specific
+guest interrupt file assigned to it must change from the one in use at
+the old physical hart to a different one at the new physical hart.
+Because each guest interrupt file is physically tied to a single
+physical hart, a virtual hart cannot bring its guest interrupt file with
+it when it moves.
+
+The process of migrating a virtual hart from one guest interrupt file to
+another is more complex than moving most other state held by the virtual
+hart. After the destination guest interrupt file has been chosen at the
+new physical hart, the following steps are recommended:
+
+. At the old interrupt file, save to memory the values of registers `eidelivery` and
+`eithreshold`, and set `eidelivery` = 0.
+. At the new interrupt file, set `eidelivery` = 0, and zero all implemented
+interrupt-pending bits (the `eip` array).
+. Modify the relevant translation tables at all IOMMUs so that MSIs for
+this virtual interrupt file are now sent to the new physical interrupt
+file. Likewise, if any interrupts at an APLIC are forwarded by MSIs to
+the old interrupt file, reconfigure the APLIC to send them to the new
+interrupt file. As needed, synchronize with all IOMMUs and APLICs to
+ensure that no straggler MSIs will arrive at the old interrupt file
+after this step. Synchronizing with an APLIC can be accomplished using
+the algorithm of <<AdvPLIC-MSISync>>.
+. At the old interrupt file, dump to memory all implemented
+interrupt-pending and interrupt-enable bits (the `eip` and `eie` arrays). After this
+step is done, the old interrupt file is no longer in use.
+. At the new interrupt file, logically OR the interrupt-pending bits
+that were saved in step 4 into the new interrupt file, using instruction
+CSRS to write to the `eip` array. Also, load the interrupt-enable bits that
+were saved in step 4 into the `eie` array.
+. At the new interrupt file, load registers `eithreshold` and `eidelivery` with the values that
+were saved in step 1.
+
+Resuming execution of the virtual hart at the new physical hart is not
+recommended until the entire interrupt file has been fully migrated.
+
+[NOTE]
+====
+Resuming execution of the virtual hart before the interrupt file is
+fully migrated could allow software running in the virtual machine to
+see multiple MSIs arriving from a single device in an order that should
+not happen. While this would rarely matter in practice, it runs the risk
+of wedging a device driver that depends (perhaps inadvertently) on a
+valid ordering of events.
+====
+
+=== VS-level external interrupts without a guest interrupt file
+
+Although it is recommended that harts implementing the hypervisor
+extension also have IMSICs with guest interrupt files, this is not a
+requirement. Even assuming guest interrupt files exist, it may happen
+that there are more virtual harts at a physical hart than guest
+interrupt files, leaving some virtual harts without one. In either case,
+a hypervisor must emulate an external interrupt controller for a virtual
+hart without the benefit of a guest interrupt file allocated to the
+virtual hart.
+
+When emulating an external interrupt controller for a virtual hart, if
+configurable interrupt priority is not supported for the virtual hart
+other than for external interrupts, then external interrupts may be
+asserted to VS level simply by setting bit VSEIP in `hvip`, as defined by the
+RISC-V Privileged Architecture. However, to emulate both an external interrupt
+controller and priority configurability for non-external interrupts, a
+hypervisor must make use of CSR `hvictl` (Hypervisor Virtual Interrupt Control),
+described later in the next section.
+
+=== Interrupts at VS level
+
+==== Configuring priorities of major interrupts at VS level
+
+Like for supervisor level, the Advanced Interrupt Architecture
+optionally allows major VS-level interrupts to be configured by software
+to intermix in priority with VS-level external interrupts. As documented
+in <<intrs-S>>, interrupt priorities for
+supervisor level are configured by the `iprio` array accessed indirectly through
+CSRs `siselect` and `sireg`. The `siselect` addresses for the `iprio` array registers are `0x30`-`0x3F`.
+
+VS level has its own `vsiselect` and `vsireg`, but unlike supervisor level, there are no
+registers at `vsiselect` addresses `0x30`-`0x3F`. When `vsiselect` has a value in the range `0x30`-`0x3F`, an attempt
+from VS-mode to access `sireg` (really `vsireg`) causes a virtual instruction exception.
+To give a virtual hart the illusion of an array of `iprio` registers accessed
+through `siselect` and `sireg`, a hypervisor must emulate the VS-level `iprio` array when accesses
+to `sireg` from VS-mode cause virtual instruction traps.
+
+Instead of a physical VS-level `iprio` array, a separate hardware mechanism is
+provided for configuring the priorities of a subset of interrupts for VS
+level, using hypervisor CSRs `hviprio1` and `hviprio2`. The subset of major interrupt numbers
+whose priority may be configured in hardware are these:
+
+[%autowidth,float="center",align="center",cols="^,<",grid=none,frame=none]
+|===
+|1 |Supervisor software interrupt
+|5 |Supervisor timer interrupt
+|13|Counter overflow interrupt
+|14-23|_Reserved for standard local interrupts_
+|===
+
+For interrupts directed to VS level, software-configurable priorities
+are not supported in hardware for standard local interrupts in the range
+32-48.
+
+[NOTE]
+====
+For custom interrupts, priority configurability may be supported in
+hardware by custom CSRs, expanding upon `hviprio1` and `hviprio2` for standard interrupts.
+====
+
+Registers `hviprio1` and `hviprio2` have these formats:
+
+`hviprio1`:
+
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
+|===
+|bits 7:0 | _Reserved for priority number for interrupt 0; reads as
+zero_
+|bits 15:8 | Priority number for interrupt 1, supervisor software
+interrupt +
+|bits 23:16 | _Reserved for priority number for interrupt 4; reads as
+zero_
+|bits 31:24 | Priority number for interrupt 5, supervisor timer
+interrupt
+|bits 39:32 | _Reserved for priority number for interrupt 8; reads as
+zero_ 
+|bits 47:40 | Priority number for interrupt 13, counter overflow
+interrupt 
+|bits 55:48 | Priority number for interrupt 14
+|bits 63:56 | Priority number for interrupt 15
+|===
+
+`hviprio2`:
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
+|===
+|bits 7:0 | Priority number for interrupt 16
+|bits 15:8 | Priority number for interrupt 17
+|bits 23:16 | Priority number for interrupt 18
+|bits 31:24 | Priority number for interrupt 19
+|bits 39:32 | Priority number for interrupt 20
+|bits 47:40 | Priority number for interrupt 21
+|bits 55:48 | Priority number for interrupt 22
+|bits 63:56 | Priority number for interrupt 23
+|===
+
+Each priority number in `hviprio1` and `hviprio2` is a *WARL* unsigned integer field that is either
+read-only zero or implements a minimum of IPRIOLEN bits or 6 bits,
+whichever is larger, and preferably all 8 bits. Implementations may
+freely choose which priority number fields are read-only zeros, but all
+other fields must implement the same number of integer bits. A minimal
+implementation of these CSRs has them both be read-only zeros.
+
+A hypervisor can choose to employ registers `hviprio1` and `hviprio2` when emulating the
+(virtual) supervisor-level `iprio` array accessed indirectly through `siselect` and `sireg` (really
+`vsiselect` and `vsireg`) for a virtual hart. For interrupts not in the subset supported by
+`hviprio1` and `hviprio2`, the priority number bytes in the emulated `iprio` array can be read-only
+zeros.
+
+[NOTE]
+====
+Providing hardware support for configurable priority for only a subset
+of major interrupts at VS level is a compromise. The utility of being
+able to control interrupt priorities at VS level is arguably illusory
+when all traps to M-mode and HS-mode—both interrupts and synchronous
+exceptions—have absolute priority, and when each virtual hart may also
+be competing for resources against other virtual harts well beyond its
+control. Nevertheless, priority configurability has been made possible
+for the most likely subset of interrupts, while minimizing the number of
+added CSRs that must be swapped on a virtual hart switch.
+
+Major interrupts outside the priority-configurable subset can still be
+directed to VS level, but their priority will simply be the default
+order defined in <<majorIntrs>>.
+====
+
+If a hypervisor really must emulate configurability of priority for
+interrupts beyond the subset supported by `hviprio1` and `hviprio2`, it can do so with extra
+effort by setting bit VTI of CSR `hvictl`, described in the next subsection.
+
+==== Virtual interrupts for VS level
+
+Assuming a virtual hart does not need configurable priority for major
+interrupts beyond the subset supported in hardware by `hviprio1` and `hviprio2`, a hypervisor
+can assert interrupts to the virtual hart using CSRs `hvien` (Hypervisor
+Virtual-Interrupt-Enable) and `hvip` (Hypervisor Virtual-Interrupt-Pending
+bits). These CSRs affect interrupts for VS level much the same way that `mvien`
+and `mvip` do for supervisor level, as explained in
+<<virtIntrs-S>>.
+
+Each bit of registers `hvien` and `hvip` corresponds with an interrupt number in the
+range 0-63. Bits 12:0 of `hvien` are reserved and must be read-only zeros, while
+bits 12:0 of `hvip` are defined by the RISC-V Privileged Architecture. Specifically,
+bits 10, 6, and 2 of `hvip` are writable bits that correspond to VS-level
+external interrupts (VSEIP), VS-level timer interrupts (VSTIP), and
+VS-level software interrupts (VSSIP), respectively.
+
+The following applies only to the CSR bits for interrupt numbers 13-63:
+When a bit in `hideleg` is one, then the same bit position in `vsip` is an alias for the
+corresponding bit in `sip`. Else, when a bit in `hideleg` is zero and the matching bit
+in `hvien` is one, the same bit position in `vsip` is an alias for the corresponding
+bit in `hvip`. A bit in `vsip` is read-only zero when the corresponding bits in `hideleg` and `hvien`
+are both zero. The combined effects of `hideleg` and `hvien` on `vsip` and `vsie` are summarized in <<intrFilteringForVS>>.
+
+[[intrFilteringForVS]]
+.The effects of `hideleg` and `hvien` on `vsip` and `vsie` for major interrupts 13-63.
+[%autowidth,float="center",align="center",cols="^,^,^,^",options="header"]
+|===
+|`hideleg`[latexmath:[$n$]] |`hvien`[latexmath:[$n$]] |`vsip`[latexmath:[$n$]] |`vsie`[latexmath:[$n$]]
+|0 |0 |Read-only 0 |Read-only 0
+|0 |1 |Alias of `hvip`[latexmath:[$n$]] |Writable
+|1 |- |Alias of `sip`[latexmath:[$n$]] |Alias of `sie`[latexmath:[$n$]]
+|===
+
+For interrupt numbers 13-63, a bit in `vsie` is writable if and only if the
+corresponding bit is set in either `hideleg` or `hvien`. When an interrupt is delegated
+by `hideleg`, the writable bit in `vsie` is an alias of the corresponding bit in `sie`; else
+it is an independent writable bit. The Privileged Architecture specifies
+when bits 12:0 of `vsie` are aliases of bits in `hie`. As usual, bits that are not
+writable in `vsie` must be read-only zeros.
+
+If a bit of `hideleg` is zero and the corresponding bit in `hvien` is changed from zero to
+one, then the value of the matching bit in `vsie` becomes UNSPECIFIED. Likewise, if a bit
+of `hvien` is one and the corresponding bit in `hideleg` is changed from one to zero, the
+value of the matching bit in `vsie` again becomes UNSPECIFIED.
+
+For interrupt numbers 13-63, implementations may freely choose which
+bits of `hvien` are writable and which bits are read-only zero or one. If such a
+bit in `hvien` is read-only zero (preventing the virtual interrupt from being
+enabled), the same bit should be read-only zero in `hvip`. All other bits for
+interrupts 13-63 must be writable in `hvip`.
+
+CSR `hvictl` (Hypervisor Virtual Interrupt Control) provides further flexibility
+for injecting interrupts into VS level in situations not fully supported
+by the facilities described thus far, but only with more active
+involvement of the hypervisor. A hypervisor must use `hvictl` for any of the
+following:
+
+* asserting for VS level a major interrupt not supported by `hvien` and `hvip`;
+* implementing configurability of priorities at VS level for major
+interrupts beyond those supported by `hviprio1` and `hviprio2`; or
+* emulating an external interrupt controller for a virtual hart without
+the use of an IMSIC’s guest interrupt file, while also supporting
+configurable priorities both for external interrupts and for major
+interrupts to the virtual hart.
+
+The format of `hvictl` is:
+
+[%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
+|===
+|bit 30 |VTI
+|bits 27:16 |IID (*WARL*)
+|bit 9 |DPR
+|bit 8 |IPRIOM
+|bits 7:0 |IPRIO
+|===
+
+All other bits of `hvictl` are reserved and read as zeros.
+
+When bit VTI (Virtual Trap Interrupt control) = 1, attempts from VS-mode
+to explicitly access CSRs `sip` and `sie` (or, for RV32 only, `siph` and `sieh`) cause a virtual
+instruction exception. Furthermore, for any given CSR, if there is some
+circumstance in which a write to the register may cause a bit of `vsip` to
+change from one to zero, excluding bit 9 for external interrupts (SEIP),
+then when VTI = 1, a virtual instruction exception is raised also for
+any attempt by the guest to write this register. Both the value being
+written to the CSR and the value of `vsip` (before or after) are ignored for
+determining whether to raise the exception. (Hence a write would not
+actually need to change a bit of `vsip` from one to zero for the exception to
+be raised.) In particular, if register `vstimecmp` is implemented (from extension
+Sstc), then attempts from VS-mode to write to `stimecmp` (or, for RV32 only, `stimecmph`)
+cause a virtual instruction exception when VTI = 1.
+
+[NOTE]
+====
+For the standard local interrupts (major identities 13-23 and 32-47),
+and for software interrupts (SSI), the corresponding interrupt-pending
+bits in `vsip` are defined as "sticky," meaning a guest can clear them only
+by writing directly to `sip` (really `vsip`). Among the standard-defined interrupts,
+that leaves only timer interrupts (STI), which can potentially be
+cleared in `vsip` by writing a new value to `vstimecmp`.
+====
+
+All `hvictl` fields together can affect the value of CSR `vstopi` (Virtual Supervisor Top
+Interrupt) and therefore the interrupt identity reported in `vscause` when an
+interrupt traps to VS-mode. IID is a *WARL* unsigned integer field with at
+least 6 implemented bits, while IPRIO is always the full 8 bits. If
+latexmath:[$k$] bits are implemented for IID, then all values 0 through
+latexmath:[${2}^{k}-{1}$] are supported, and a write to `hvictl` sets
+IID equal to bits (latexmath:[${15}+k$]):16 of the value written.
+
+For a virtual interrupt specified for VS level by `hvictl`, if VTI = 1 and
+latexmath:[${IID} \neq {9}$], field DPR (Default Priority
+Rank) determines the interrupt’s presumed default priority order
+relative to a (virtual) supervisor external interrupt (SEI), major
+identity 9, as follows:
+
+[%autowidth,float="center",align="center",cols="^",grid=none,frame=none]
+|===
+|0 = interrupt has higher default priority than an SEI
+|1 = interrupt has lower default priority than an SEI
+|===
+
+When `hvictl`.IID = 9, DPR is ignored.
+
+[[vstopi]]
+==== Virtual supervisor top interrupt CSR (`vstopi`)
+
+Read-only CSR `vstopi` is VSXLEN bits wide and has the same format as `stopi`:
+
+[%autowidth,float="center",align="center",cols="^",grid=none,frame=none]
+|===
+|bits 27:16 IID
+|bits 7:0   IPRIO
+|===
+
+`vstopi` returns information about the highest-priority interrupt for VS level,
+found from among these candidates (prefixed by + signs):
+
+* if bit 9 is one in both `vsip` and `vsie`, `hstatus`.VGEIN is the valid number of a guest
+interrupt file, and `vstopei` is not zero:
+** + a supervisor external interrupt (code 9) with the priority number indicated by `vstopei`;
+* if bit 9 is one in both `vsip` and `vsie`, `hstatus`.VGEIN = 0, and `hvictl` fields IID = 9 and
+latexmath:[${IPRIO} \neq {0}$]:
+** + a supervisor external interrupt (code 9) with priority number `hvictl`.IPRIO;
+* if bit 9 is one in both `vsip` and `vsie`, and neither of the first two cases
+applies:
+** + a supervisor external interrupt (code 9) with priority number 256;
+* if `hvictl`.VTI = 0:
+** + the highest-priority pending-and-enabled major interrupt indicated by `vsip` and `vsie`
+other than a supervisor external interrupt (code 9), using the priority numbers assigned
+by `hviprio1` and `hviprio2`;
+* if `hvictl` fields VTI = 1 and latexmath:[${IID} \neq {9}$]:
+** + the major interrupt specified by `hvictl` fields IID, DPR, and IPRIO.
+
+In the list above, all "supervisor" external interrupts are virtual,
+directed to VS level, having major code 9 at VS level.
+
+[NOTE]
+====
+The list of candidate interrupts can be reduced to two finalists
+relatively easily by observing that the first three list items are
+mutually exclusive of one another, and the remaining two items are also
+mutually exclusive of one another.
+====
+
+[NOTE]
+====
+When `hvictl`.VTI = 1, the absence of an interrupt for VS level can be indicated
+only by setting `hvictl`.IID = 9. Software might want to use the pair IID = 9,
+IPRIO = 0 generally to represent _no interrupt_ in `hvictl`.
+====
+
+When no interrupt candidates satisfy the conditions of the list above,
+`vstopi` is zero. Else, `vstopi` fields IID and IPRIO are determined by the
+highest-priority interrupt from among the candidates. The usual priority
+order for supervisor level applies, as specified by
+<<TableintrPrios-S>>, except that priority
+numbers are taken from the candidate list above, not from the
+supervisor-level `iprio` array. Ties in nominal priority are broken as usual by
+the default priority order from
+<<TablemajorIntrs>>, unless `hvictl` fields VTI = 1 and
+latexmath:[${IID} \neq {9}$] (last item in the candidate list
+above), in which case default priority order is determined solely by
+`hvictl`.DPR. If bit IPRIOM (IPRIO Mode) of `hvictl` is zero, IPRIO in `vstopi` is 1; else, if the
+priority number for the highest-priority candidate is within the range 1
+to 255, IPRIO is that value; else, IPRIO is set to either 0 or 255 in
+the manner documented for `stopi` in <<stopi>>.
+
+==== Interrupt traps to VS-mode
+
+The Advanced Interrupt Architecture modifies the standard RISC-V Privileged
+Architecture such that an interrupt is pending at VS level if and only
+if `vstopi` is not zero. CSRs `vsip` and `vsie` do not by themselves determine whether a
+VS-level interrupt is pending, though they may do so indirectly through
+their effect on `vstopi`.
+
+Whenever `vstopi` is not zero, if either the current privilege mode is VS-mode
+and the SIE bit in CSR `vsstatus` is one, or the current privilege mode is VU-mode,
+a trap is taken to VS-mode for the interrupt indicated by field IID of `vstopi`.
+
+The Exception Code field of `vscause` must implement at least as many bits as
+needed to represent the largest value that field IID of `vstopi` can have for the
+given hart.
