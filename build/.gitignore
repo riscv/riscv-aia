@@ -1,0 +1,11 @@
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.pdf
+*.toc
+*.tmp
+*stem*
+../src/docs-resources/images/stem*
+../doc/build/*

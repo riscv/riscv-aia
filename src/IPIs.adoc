@@ -1,0 +1,86 @@
+[[IPIs]]
+== Interprocessor Interrupts (IPIs)
+
+By default, unless a platform has a different mechanism for
+interprocessor interrupts (IPIs), the RISC-V Privileged Architecture specifies
+that a machine with multiple harts must provide for each hart an
+implementation-defined memory address that can be written to signal a
+machine-level _software interrupt_ (major code 3) at that hart. IPIs at
+machine level can thus be sent to any hart as machine-level software
+interrupts.
+
+[NOTE]
+====
+A RISC-V software interrupt acts only as a minimal "doorbell" signal.
+Software at the receiving hart is responsible for recognizing an
+incoming software interrupt as an IPI and decoding its purpose further,
+usually making use of additional data stored by the sender in ordinary
+memory.
+====
+
+The same kind of mechanism (but with a different set of memory
+addresses) may or may not exist for signaling supervisor-level software
+interrupts (major code 1) at remote harts as well. If not directly
+supported in this way, a supervisor-level software interrupt is
+typically sent to another hart instead through an environment call from
+supervisor mode to machine mode. An operating system running in S-mode
+thus invokes a specific SBI function for delivering a software interrupt
+to another hart, causing machine-level software at the originating hart
+to send a machine-level IPI to the destination hart, where software then
+sets the supervisor-level software interrupt-pending bit (SSIP) in CSR `mip`.
+
+When harts have IMSICs, instead of using the Privileged Architecture's
+mechanism for signaling software interrupts at remote harts, an IPI can
+be sent to a hart by writing to the destination hart's IMSIC, the same
+as a regular message-signaled interrupt (MSI). In that case, an incoming
+IPI appears at the destination hart as an _external interrupt_ routed
+through the IMSIC, rather than as a software interrupt as before.
+However, so long as the same software (e.g. an operating system or
+machine monitor) is in control at both endpoints of an IPI, source and
+destination, there should be no reason for a destination hart to
+misinterpret the purpose of an incoming external interrupt that
+represents an IPI.
+
+If harts do not have IMSICs, then the method specified by the RISC-V Privileged
+Architecture is assumed to be used for IPIs, signaling software
+interrupts at destination harts. On the other hand, when harts have
+IMSICs, the machinery for triggering software interrupts at remote harts
+is redundant with the capabilities of the IMSICs, so it is downgraded
+from a requirement to an option, useful perhaps only to provide software
+compatibility across a range of RISC-V systems, with and without IMSICs. If a
+machine implements IMSICs and not the earlier software-interrupt
+mechanism, then the bits of CSRs `mip` and `mie` for machine-level software
+interrupts, MSIP and MSIE, are hardwired to zero in harts.
+
+[NOTE]
+====
+If a machine implements IMSICs but not the software-interrupt mechanism,
+the latter can still be fully emulated at supervisor level for S-mode or
+VS-mode, by trapping on writes to the special memory addresses that
+should signal supervisor-level software interrupts at remote harts. On
+such a trap, software can send a higher-level IPI via IMSIC to the
+destination hart, where the higher-level software then can set the SSIP
+bit in `sip` at the intended privilege level, S or VS.
+
+Similarly, SBI environment calls for sending IPIs can easily continue to
+be supported without clients being at all aware of a change in the
+underlying hardware for delivering IPIs between harts.
+====
+
+[NOTE]
+====
+When software sends IPIs by writing MSIs to the IMSICs of other harts,
+programmers should consider also the need to execute a FENCE instruction
+before each store instruction that writes such an MSI. In the absence of
+FENCEs, many systems guarantee to preserve the order of a hart's loads
+and stores only to/from individual devices, not among multiple devices,
+and not at all for accesses to main memory. With such a system, it must
+be remembered that each IMSIC is likely to be considered a separate
+device among the many. For example, if hart A wants to notify hart B
+that it has completed a task involving accesses to some I/O device,
+hart A may need to execute a FENCE before sending an MSI to B's IMSIC,
+to ensure that all of A's accesses to the device have actually completed
+before the MSI could arrive at B. Similarly, if hart A stores anything
+to memory that should be visible at hart B, a FENCE is likely needed
+before a subsequent store sending an MSI to B's IMSIC.
+====
