@@ -9,7 +9,7 @@ handling.
 
 <<CSRs-M>> lists both the CSRs added for machine
 level and existing machine-level CSRs whose size is changed by the
-Advanced Interrupt Architecture. Existing CSRs `mie`, `mip`, and `mideleg` are widended to 64 bits to support a total of 64 interrupt causes.
+Advanced Interrupt Architecture. Existing CSRs `mie`, `mip`, and `mideleg` are widened to 64 bits to support a total of 64 interrupt causes.
 
 For RV32, the _high-half_ CSRs listed in the table allow access to the
 upper 32 bits of registers `mideleg`, `mie`, `mvien`, `mvip`, and `mip`. The Advanced Interrupt Architecture requires that these high-half CSRs exist for RV32, but the bits they access may all be merely read-only zeros.
