@@ -4,8 +4,8 @@
 == Introduction
 
 This document specifies the Advanced Interrupt Architecture for RISC-V,
-consisting of: (a) an extension to the standard Privileged Architecture
-for RISC-V harts specified in Volume II of The RISC-V Instruction Set Manual; (b) two
+consisting of: (a) an extension to the standard RISC-V Privileged Architecture;
+(b) two
 standard interrupt controllers for RISC-V systems, an Advanced Platform-Level
 Interrupt Controller (APLIC) and an Incoming Message-Signaled Interrupt
 Controller (IMSIC); and (c) requirements on other system components
@@ -42,7 +42,7 @@ software interrupts, among others), instead of being limited just to the
 ability of a separate interrupt controller to prioritize external
 interrupts only.
 
-* When harts implement the Privileged Architecture’s hypervisor
+* When harts implement the Privileged Architecture’s H
 extension, provide sufficient assistance for virtualizing these same
 interrupt facilities for virtual machines.
 
@@ -80,7 +80,7 @@ of this document.
 
 In its current version, the RISC-V Advanced Interrupt Architecture can support RISC-V 
 symmetric multiprocessing (SMP) systems with up to 16,384 harts. If the
-harts are 64-bit (RV64) and implement the hypervisor extension, and if
+harts are 64-bit (RV64) and implement the H extension, and if
 all features of the Advanced Interrupt Architecture are fully
 implemented as well, then for each physical hart there may be up to 63
 active virtual harts and potentially thousands of additional idle
@@ -107,7 +107,7 @@ organization, which we do not attempt to predict.
 | |Maximum |Requirements
 |Physical harts |16,384 |
 
-|Active virtual harts having direct control of a device, per physical hart |31 for RV32, 63 for RV64 |RISC-V hypervisor extension; IMSICs with guest interrupt files; and an IOMMU
+|Active virtual harts having direct control of a device, per physical hart |31 for RV32, 63 for RV64 |RISC-V H extension; IMSICs with guest interrupt files; and an IOMMU
 
 |Idle (swapped-out) virtual harts having direct control of a device, per physical hart |potentially thousands |An IOMMU with support for memory-resident interrupt files
 
@@ -143,21 +143,11 @@ supervisor level at each hart. The APLIC is specified in
 
 Without IMSICs, the current Advanced Interrupt Architecture does not
 support the direct signaling of external interrupts to virtual machines,
-even when RISC-V harts implement the Privileged Architecture's hypervisor
+even when RISC-V harts implement the H
 extension. Instead, an interrupt must be sent to the relevant
 hypervisor, which can then choose to inject a virtual interrupt into the
 virtual machine.
 
-[NOTE]
-====
-If harts implement the hypervisor extension, it is a topic of ongoing
-study whether an APLIC should be allowed to route external interrupts to
-be the _guest external interrupts_ of the hypervisor extension,
-permitting the delivery of interrupts directly to virtual machines
-without the need for each signaled interrupt to be handled at the
-hypervisor level. For now, we assume that systems that need direct
-signaling of external interrupts to virtual machines will have IMSICs.
-====
 [[intrsWithoutIMSICs]]
 .Traditional delivery of wired interrupts to harts without support for MSIs.
 image::intrsWithoutIMSICs.png[]
@@ -193,7 +183,7 @@ When the harts in a RISC-V system have IMSICs, the system will normally still
 contain an APLIC, but its role is changed. Instead of signaling
 interrupts to harts directly by wires as in <<intrsWithoutIMSICs>>, an APLIC converts incoming wired interrupts into MSI writes that are sent to harts via their IMSIC units. Each MSI is sent to a single target hart according to the APLIC's configuration set by software.
 
-If RISC-V harts implement the Privileged Architecture's hypervisor extension,
+If RISC-V harts implement the H extension,
 IMSICs may have additional _guest interrupt files_ for delivering
 interrupts to virtual machines. Besides <<IMSIC>> on
 the IMSIC, see <<VSLevel>> which specifically
@@ -223,7 +213,7 @@ software interrupts, they do not pass through an APLIC or IMSIC.
 The RISC-V Privileged Architecture gives every interrupt cause at a hart a
 distinct _major identity number_, which is the Exception Code
 automatically written to CSR `mcause` or `scause` on an interrupt trap. Interrupt causes
-that are standardized by the Privileged Architecture have major
+that are standardized by the base Privileged Architecture have major
 identities in the range 0-15, while numbers 16 and higher are officially
 available for platform standards or for custom use. The Advanced
 Interrupt Architecture claims further authority over identity numbers in
@@ -233,11 +223,11 @@ major identities 48 and higher still free for custom use.
 major interrupt identities with this extension.
 
 [[interruptIdents]]
-.Major and minor identities for all interrupt causes at a hart. Major identities 0-15 are the purview of the RISC-V Privileged Architecture.
+.Major and minor identities for all interrupt causes at a hart. Major identities 0-15 are the purview of the base Privileged Architecture.
 [%autowidth,float="center",align="center",cols="^,^,<",options="header",]
 |===
 |Major identity |Minor identity |
-|0 |- |_Reserved by Privileged Architecture_
+|0 |- |_Reserved by base Privileged Architecture_
 |1 +
 2 +
 3 |- +
@@ -245,7 +235,7 @@ major interrupt identities with this extension.
 - |Supervisor software interrupt +
 Virtual supervisor software interrupt +
 Machine software interrupt
-|4 |- |_Reserved by Privileged Architecture_
+|4 |- |_Reserved by base Privileged Architecture_
 |5 +
 6 +
 7 |- +
@@ -253,7 +243,7 @@ Machine software interrupt
 - |Supervisor timer interrupt +
 Virtual supervisor timer interrupt +
 Machine timer interrupt
-|8 |- |_Reserved by Privileged Architecture_
+|8 |- |_Reserved by base Privileged Architecture_
 |9 +
 10 +
 11 |Determined by +
@@ -267,7 +257,7 @@ Machine external interrupt
 - +
 - |Supervisor guest external interrupt +
 Counter overflow interrupt +
-_Reserved by Privileged Architecture_
+_Reserved by base Privileged Architecture_
 |16-23 |- |_Reserved for standard local interrupts_
 |24-31 |- |_Designated for custom use_
 |32-34 +
@@ -314,7 +304,7 @@ standard hardware mechanism for the broadcast or multicast of interrupts
 to multiple harts.
 
 For local interrupts, and for any "virtual" interrupts that software
-injects into lower privilege levels at a hart, the interrupts are
+injects into less-privileged levels at a hart, the interrupts are
 entirely a local affair at the hart and are never visible to other
 harts. The RISC-V Privileged Architecture's timer interrupts are also uniquely
 tied to individual harts. For other interrupts, received by a hart from
@@ -410,12 +400,12 @@ writing to IMSICs.
 
 As revealed in subsequent chapters, the exact set of CSRs and behavior
 added by the AIA, and hence implied by Smaia or Ssaia, depends on the
-base ISA's XLEN (RV32 or RV64), on whether S-mode and the hypervisor
+base ISA's XLEN (RV32 or RV64), on whether S-mode and the H
 extension are implemented, and on whether the hart has an IMSIC. But
 individual AIA extension names are not provided for each possible valid
 subset. Rather, the different combinations are inferable from the
 intersection of features indicated (such as RV64I + S-mode + Smaia, but
-without the hypervisor extension).
+without the H extension).
 
 Software development tools like compilers and assemblers need not be
 concerned about whether an IMSIC exists but should just allow attempts
@@ -423,3 +413,17 @@ to access the IMSIC CSRs (described in <<CSRs>>
 and <<IMSIC>>) if Smaia or Ssaia is indicated. Without an
 actual IMSIC, such attempts may trap, but that is not a problem for the
 development tools.
+
+If extension Smaia/Ssaia is implemented, then anywhere that
+the AIA specification appears to conflict with the requirements
+of another implemented RISC-V extension, the AIA has priority,
+unless the other extension explicitly extends or overrides the AIA.
+
+[NOTE]
+====
+Extension Smcsrind/Sscsrind explicitly extends
+the AIA's facility for indirect CSR access provided by
+the `*iselect` and `*ireg` CSRs described in the next chapter.
+Hence, if Smcsrind/Sscsrind is also implemented, any perceived conflicts
+between it and the AIA should be resolved in favor of Smcsrind/Sscsrind.
+====

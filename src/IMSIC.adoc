@@ -16,7 +16,7 @@ registers, software interacts with an IMSIC primarily through several RISC-V CSR
 
 In a RISC-V system, MSIs are directed not just to a specific hart but to a
 specific privilege level of a specific hart, such as machine or
-supervisor level. Furthermore, when a hart implements the hypervisor
+supervisor level. Furthermore, when a hart implements the H
 extension, an IMSIC may optionally allow MSIs to be directed to a
 specific virtual hart at virtual supervisor level (VS level).
 
@@ -24,11 +24,11 @@ For each privilege level and each virtual hart to which MSIs may be
 directed at a hart, the hart's IMSIC contains a separate _interrupt
 file_. Assuming a hart implements supervisor mode, its IMSIC has at
 least two interrupt files, one for machine level and the other for
-supervisor level. When a hart also implements the hypervisor extension,
+supervisor level. When a hart also implements the H extension,
 its IMSIC may have additional interrupt files for virtual harts, called
 _guest interrupt files_. The number of guest interrupt files an IMSIC
 has for virtual harts is exactly _GEILEN_, the number of supported guest
-external interrupts, as defined for the hypervisor extension by the RISC-V  Privileged Architecture.
+external interrupts, as defined by the H extension.
 
 Each individual interrupt file consists mainly of two arrays of bits of
 the same size, one array for recording MSIs that have arrived but are
@@ -119,7 +119,7 @@ As the maximum interrupt identity number an IMSIC can support is 2047, a
 16-bit limit on MSI data values presents no problem.
 ====
 
-When the hypervisor extension is implemented and a device is being
+When the H extension is implemented and a device is being
 managed directly by a guest operating system, MSI addresses from the
 device are initially guest physical addresses, as they are configured at
 the device by the guest OS. These guest addresses must be translated by
@@ -154,7 +154,7 @@ An interrupt file's lowest identity numbers have been given the highest
 priorities, not the reverse order, because it is only for the
 highest-priority interrupts that priority order may need to be carefully
 managed, yet it is the low-numbered identities, 1 through 63 (or perhaps
-1 through 255), that are guaranteed to exist across all systems.
+1 through 127), that are guaranteed to exist across all systems.
 Consider, for example, that an interrupt file's highest-priority
 interrupt—presumably the most time-critical—is always identity number 1.
 If priority order were reversed, the highest-priority interrupt would
@@ -175,7 +175,7 @@ machine-level and supervisor-level interrupt files, as specified in
 If an IMSIC contains a supervisor-level interrupt file and software at
 the attached hart enables S-mode that was previously disabled (e.g. by
 changing bit S of CSR `misa` from zero to one), all state of the
-supervisor-level interrupt file is valid and consistent but otherwise UNSPECIFIED. Likewise, if an IMSIC contains guest interrupt files and software at the attached hart enables the hypervisor extension that was previously disabled (e.g. by changing bit H of `misa` from zero to one), all state of the IMSIC's guest interrupt files is valid and consistent but otherwise UNSPECIFIED.
+supervisor-level interrupt file is valid and consistent but otherwise UNSPECIFIED. Likewise, if an IMSIC contains guest interrupt files and software at the attached hart enables the H extension that was previously disabled (e.g. by changing bit H of `misa` from zero to one), all state of the IMSIC's guest interrupt files is valid and consistent but otherwise UNSPECIFIED.
 
 [[IMSIC-memRegion]]
 === Memory region for an interrupt file
@@ -277,7 +277,7 @@ non-machine-level interrupt files takes one PMP table entry per group.
 For the purpose of locating the memory pages of interrupt files in the
 address space, assume each hart (or each hart within a group) has a
 unique hart number that may or may not be related to the unique hart
-identifiers ("hart IDs") that the RISC-V Privileged Architecture
+identifiers ("hart IDs") that the Privileged Architecture
 assigns to harts. For convenient addressing, the memory pages of all
 machine-level interrupt files (or all those of a single group of harts)
 should be arranged so that the address of the machine-level interrupt
@@ -391,7 +391,7 @@ CSRs interact with the IMSIC's supervisor-level interrupt file. When an
 IMSIC has guest interrupt files, the VS CSRs interact with a single
 guest interrupt file, selected by the VGEIN field of CSR `hstatus`.
 
-For machine level, the relevant CSRs are `miselect`, `mireg`, and `mtopei`. When supervisor mode is implemented, the set of supervisor-level CSRs matches those of machine level: `siselect`, `sireg`, and `stopei`. And when the hypervisor extension is implemented, there are three corresponding VS CSRs: `vsiselect`, `vsireg`, and `vstopei`.
+For machine level, the relevant CSRs are `miselect`, `mireg`, and `mtopei`. When supervisor mode is implemented, the set of supervisor-level CSRs matches those of machine level: `siselect`, `sireg`, and `stopei`. And when the H extension is implemented, there are three corresponding VS CSRs: `vsiselect`, `vsireg`, and `vstopei`.
 
 As explained in <<CSRs>>, registers `miselect` and `mireg` provide indirect access to additional machine-level registers. Likewise for supervisor-level `siselect` and `sireg`, and VS-level `vsiselect` and `vsireg` . In each case, a value of the **_*iselect_** _CSR_ (`miselect`, `siselect` , or `vsiselect)`) in the range 0x70-0xFF selects a register of the
 corresponding IMSIC interrupt file, either the machine-level interrupt
@@ -448,6 +448,14 @@ Reset initializes `eidelivery` to 0x40000000 if that value is supported; otherwi
 ====
 `eidelivery` value 0x40000000 supports system software that is oblivious to IMSICs and assumes instead that the external interrupt controller is a PLIC or APLIC. Such software may exist either because it predates the existence of IMSICs or because bypassing IMSICs is believed to reduce programming effort.
 ====
+
+The `eidelivery` register affects only whether
+an external interrupt appears in a hart's `*ip` register
+(MEI or SEI in `mip` or `sip`, or a bit in `hgeip`) and what
+the source of such an interrupt may be (either the interrupt file
+or a separate external interrupt controller such as an APLIC).
+It has no effect on other state within the interrupt file,
+or on any `*topei` CSR (`mtopei`, `stopei`, or `vstopei`).
 
 ==== External interrupt enable threshold register (`eithreshold`)
 
@@ -511,7 +519,7 @@ zeros.
 
 CSR `mtopei` interacts directly with an IMSIC's machine-level interrupt file. If
 supervisor mode is implemented, CSR `stopei` interacts directly with the
-supervisor-level interrupt file. And if the hypervisor extension is
+supervisor-level interrupt file. And if the H extension is
 implemented and field VGEIN of `hstatus` is the number of an implemented guest
 interrupt file, `vstopei` interacts with the chosen guest interrupt file.
 
@@ -537,6 +545,9 @@ Advanced PLIC, which returns both an interrupt identity number and its
 priority in the same format as above, but with the two components being
 independent of one another.
 ====
+
+The value of a `*topei` CSR is not affected by an interrupt file's
+`eidelivery` register or by any of `mie`, `sie`, `hie`, `hgeie`, or `vsie`.
 
 A write to a `*topei` CSR _claims_ the reported interrupt identity by clearing
 its pending bit in the interrupt file. The value written is ignored;
@@ -573,6 +584,10 @@ and the interrupt signal from a supervisor-level interrupt file appears
 as bit SEIP in `mip` and `sip`. Interrupt signals from any guest interrupt files appear as the active bits in hypervisor CSR `hgeip`.
 
 When interrupt delivery is disabled by an interrupt file's `eidelivery` register (`eidelivery` = 0), the interrupt signal from the interrupt file is held de-asserted (false). When interrupt delivery from an interrupt file is enabled (`eidelivery` = 1), its interrupt signal is asserted if and only if the interrupt file has a pending-and-enabled interrupt that also exceeds the priority threshold specified by `eithreshold`, if not zero.
+
+Changes to the state of an interrupt file are guaranteed
+to be reflected in the relevant interrupt-pending bit in CSR
+`mip` or `hgeip` eventually, but not necessarily immediately.
 
 A trap handler solely for external interrupts via an IMSIC could be
 written roughly as follows:
