@@ -415,8 +415,8 @@ actual IMSIC, such attempts may trap, but that is not a problem for the
 development tools.
 
 If extension Smaia/Ssaia is implemented, then anywhere that
-the AIA specification appears to conflict with the requirements
-of another implemented RISC-V extension, the AIA has priority,
+the AIA specification has an irreconcilable conflict with the requirements
+of another implemented RISC-V extension, the AIA is intended to have priority,
 unless the other extension explicitly extends or overrides the AIA.
 
 [NOTE]
