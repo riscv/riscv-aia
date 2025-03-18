@@ -15,19 +15,15 @@ For RV32, the _high-half_ CSRs listed in the table allow access to the
 upper 32 bits of registers `mideleg`, `mie`, `mvien`, `mvip`, and `mip`. The Advanced Interrupt Architecture requires that these high-half CSRs exist for RV32, but the bits they access may all be merely read-only zeros.
 
 CSRs `miselect` and `mireg` provide a window for accessing multiple registers beyond the CSRs in <<CSRs-M>>. The value of `miselect` determines which
-register is currently accessible through alias CSR `mireg`. `miselect` is a *WARL* register, and it must support a minimum range of values depending on the implemented features. When an IMSIC is not implemented, `miselect` must be able to hold at least any 6-bit value in the range 0 to 0``x3F``. When an IMSIC is implemented, `miselect` must be able to hold any 8-bit value in the range 0 to 0``xFF``. Values for `miselect` in the range 0 to 0``xFF`` are currently assigned in subranges as follows:
+register is currently accessible through alias CSR `mireg`. `miselect` is a *WARL* register, and it must support a minimum range of values depending on the implemented features. When an IMSIC is not implemented, `miselect` must be able to hold at least any 6-bit value in the range 0 to 0``x3F``. When an IMSIC is implemented, `miselect` must be able to hold any 8-bit value in the range 0 to 0``xFF``.
+The Advanced Interrupt Architecture makes use
+of these subranges of values for `miselect`:
 
 [%autowidth,align="center",float="center",cols=">,<",grid=none,frame=none]
 |===
-|`0x00-0x2F`| reserved
 |`0x30-0x3F`| major interrupt priorities
-|`0x40-0x6F`| reserved
 |`0x70-0xFF`| external interrupts (only with an IMSIC)
 |===
-
-
-`miselect` may also support values outside the range `0x00-0xFF`, though no standard
-registers are currently allocated to values above `0xFF`.
 
 [[CSRs-M]]
 .Machine-level CSRs added or widened by the Advanced Interrupt Architecture.
@@ -101,13 +97,17 @@ most-significant bit of `miselect` moves to the new position, retaining its valu
 from before. An implementation is not required to support any custom
 values for `miselect`.
 
-When `miselect` is a number in a reserved range (currently 0x00-0x2F, 0x40-0x6F or a number above 0xFF
-not designated for custom use), attempts to access `mireg` will typically raise
-an illegal instruction exception.
+Other `miselect` values are reserved for other RISC-V extensions.
+
+[NOTE]
+====
+RISC-V extension Smcsrind generalizes the mechanism of
+indirect register access provided by `miselect` and `mireg`.
+====
 
 Normally, the range for external interrupts, 0x70-0xFF, is populated only when
 an IMSIC is implemented; else, attempts to access `mireg` when `miselect` is in this range
-also cause an illegal instruction exception. The contents of the
+cause an illegal instruction exception. The contents of the
 external-interrupts region are documented in
 <<IMSIC>> on the IMSIC.
 
@@ -173,14 +173,12 @@ Upper 32 bits of `sip`
 
 The space of registers accessible through the `siselect`/`sireg` window is separate from
 but parallels that of machine level, being for supervisor-level
-interrupts instead of machine-level interrupts. The allocated values for
-`siselect` in the range 0 to 0xFF are once again these:
+interrupts instead of machine-level interrupts.
+The subranges of values used for `siselect` are once again these:
 
 [%autowidth,align="center",float="center",cols=">,<",grid=none,frame=none]
 |===
-|`0x00-0x2F` |reserved
 |`0x30-0x3F` |major interrupt priorities
-|`0x40-0x6F` |reserved
 |`0x70-0xFF` |external interrupts (only with an IMSIC)
 |===
 
@@ -201,11 +199,15 @@ If XLEN changes, the most-significant bit of `siselect` moves to the new positio
 retaining its value from before. An implementation is not required to
 support any custom values for `siselect`.
 
-When `siselect` is a number in a reserved range (currently  `0x00-0x2F`, `0x40-0x6F`,or a number above `0xFF`
-not designated for custom use), or in the range 0x70-0xFF when there is no
-IMSIC, attempts to access 'sireg' should preferably raise an illegal instruction
-exception (unless executing in a virtual machine, covered in the next
-section).
+Other `siselect` values are reserved for other RISC-V extensions.
+
+[NOTE]
+====
+At supervisor level, extension Sscsrind generalizes the mechanism
+of indirect register access provided by `siselect` and `sireg`,
+as well as the parallel at VS-level provided by `vsiselect` and `vsireg`,
+described in the next subsection.
+====
 
 Note that the widths of 'siselect' and 'sireg' are always the current XLEN rather than
 SXLEN. Hence, for example, if MXLEN = 64 and SXLEN = 32, then these
@@ -223,7 +225,7 @@ If extension Sscsrind is also implemented, then when `siselect` has a value in t
 [[hypervisor-vs-csrs]]
 === Hypervisor and VS CSRs
 
-If a hart implements the Privileged Architecture's hypervisor extension,
+If a hart implements the H extension,
 then the hypervisor and VS CSRs listed in <<CSRs-hypervisor>> are also either added or widened to 64 bits.
 
 The new hypervisor CSRs in the table (`hvien`, `hvictl` , `hviprio1`, and `hviprio2`) augment `hvip` for injecting interrupts into VS level. The use of these registers is covered in <<VSLevel>> on interrupts for virtual machines.
@@ -335,20 +337,17 @@ The space of registers selectable by `vsiselect` is more limited than for machin
 
 [%autowidth,align="center",float="center",cols=">,<",grid=none,frame=none]
 |===
-|`0x000-0x02F`| reserved
 |`0x030-0x03F`| inaccessible
-|`0x040-0x06F`| reserved
 |`0x070-0x0FF`| external interrupts (IMSIC only), or inaccessible
-|`0x100-0x1FF`| reserved 
 |===
 
-For alias CSRs `sireg` and `vsireg`, the hypervisor extension's usual rules for when to raise a virtual instruction exception (based on whether an instruction is _HS-qualified_) are not applicable. The rules given in this section for `sireg` and `vsireg` apply instead, unless overridden by the requirements of <<CSRs-stateen>>, which take precedence over this section
+Other `vsiselect` values are reserved for other RISC-V extensions.
+
+For alias CSRs `sireg` and `vsireg`, the H extension's usual rules for when to raise a virtual instruction exception (based on whether an instruction is _HS-qualified_) are not applicable. The rules given in this section for `sireg` and `vsireg` apply instead, unless overridden by the requirements of <<CSRs-stateen>>, which take precedence over this section
 when extension Smstateen is also implemented.
 
 A virtual instruction exception is raised for attempts from VS-mode or
 VU-mode to directly access `vsireg`, or attempts from VU-mode to access `sireg`.
-
-When `vsiselect` has a reserved value (including values above 0x1FF not designated for custom use), attempts from M-mode or HS-mode to access `vsireg`, or from VS-mode to access `sireg` (really `vsireg`), should preferably raise an illegal instruction exception.
 
 When `vsiselect` has the number of an _inaccessible_ register, attempts from M-mode or HS-mode to access `vsireg` raise an illegal instruction exception, and attempts from VS-mode to access `sireg` (really `vsireg`) raise a virtual instruction exception.
 
@@ -356,7 +355,7 @@ When `vsiselect` has the number of an _inaccessible_ register, attempts from M-m
 ====
 Requiring a range of 0-0x1FF for `vsiselect`, even though most or all of the space is reserved or inaccessible, permits a hypervisor to emulate indirectly
 accessed registers in the implemented range, including registers that
-may be standardized in the future at locations 0x100-0x1FF.
+are not currently defined but may be standardized in the future.
 ====
 
 The indirectly accessed registers for external interrupts (numbers 0x70-0xFF)
@@ -371,10 +370,10 @@ If extension Sscsrind is also implemented, then when `vsiselect` has a value in 
 
 === Virtual instruction exceptions
 
-Following the default rules for the hypervisor extension, attempts from
+Following the default rules for the H extension, attempts from
 VS-mode to directly access a hypervisor or VS CSR other than `vsireg`, or from
 VU-mode to access any supervisor-level CSR (including hypervisor and VS
-CSRs) other than `sireg` or `vsireg`, usually raise not an illegal instruction exception but instead a virtual instruction exception. For details, see the RISC-V Privileged Architecture.
+CSRs) other than `sireg` or `vsireg`, usually raise not an illegal instruction exception but instead a virtual instruction exception. For details, see the H extension documentation.
 
 Instructions that read/write CSR `stopei` or `vstopei` are considered to be _HS-qualified_ unless all of following are true: the hart has an IMSIC, extension Smstateen is implemented, and bit 58 of `mstateen0` is zero. (See the next section, <<CSRs-stateen>>, about `mstateen0`.)
 
@@ -389,54 +388,54 @@ than M-mode:
 
 [%autowidth,align="center",float="center",cols="<",grid=none,frame=none]
 |===
-|bit 60 CSRs `siselect`, `sireg`, `vsiselect`, and `vsireg`
-|bit 59 all other state added by the AIA and not controlled by bits 60 and 58
-|bit 58 all IMSIC state, including CSRs `stopei` and `vstopei`
+|bit 60 CSRIND: CSRs `siselect`, `sireg`, `vsiselect`, and `vsireg`
+|bit 59 AIA: all other state added by the AIA and not controlled by bits CSRIND and IMSIC
+|bit 58 IMSIC: all IMSIC state, including CSRs `stopei` and `vstopei`
 |===
 
 If one of these bits is zero in `mstateen0`, an attempt to access the corresponding state from a privilege mode less privileged than M-mode results in an illegal instruction trap. As always, the state-enable CSRs do not affect
 the accessibility of any state when in M-mode, only in less privileged modes. For more explanation, see the documentation for extension Smstateen.
 
-Bit 59 controls access to AIA CSRs `siph`, `sieh`, `stopi`, `hidelegh`, `hvien`/`hvienh`, `hviph`, `hvictl`, `hviprio1`/`hviprio1h`, `hviprio2`/`hviprio2h`, `vsiph`, `vsieh`, and `vstopi`, as well as to the supervisor-level interrupt priorities accessed through `siselect` + `sireg` (the `iprio` array of <<intrPrios-S>>).
+The AIA bit controls access to AIA CSRs `siph`, `sieh`, `stopi`, `hidelegh`, `hvien`/`hvienh`, `hviph`, `hvictl`, `hviprio1`/`hviprio1h`, `hviprio2`/`hviprio2h`, `vsiph`, `vsieh`, and `vstopi`, as well as to the supervisor-level interrupt priorities accessed through `siselect` + `sireg` (the `iprio` array of <<intrPrios-S>>).
 
-Bit 58 is implemented in `mstateen0` only if the hart has an IMSIC. If the
-hypervisor extension is also implemented, this bit does not affect the
-behavior or accessibility of hypervisor CSRs `hgeip` and `hgeie`, or field VGEIN of `hstatus`. In particular, guest external interrupts from an IMSIC continue to be visible to HS-mode in `hgeip` even when bit 58 of `mstateen0` is zero.
+The IMSIC bit is implemented in `mstateen0` only if the hart has an IMSIC. If the
+H extension is also implemented, this bit does not affect the
+behavior or accessibility of hypervisor CSRs `hgeip` and `hgeie`, or field VGEIN of `hstatus`. In particular, guest external interrupts from an IMSIC continue to be visible to HS-mode in `hgeip` even when `mstateen0`.IMSIC is zero.
 
 [NOTE]
 ====
-An earlier, pre-ratification draft of Smstateen said that when bit 58 of `mstateen0` is zero, registers `hgeip` and `hgeie` and field VGEIN of `hstatus` are all read-only zeros. That effect is no longer correct.
+An earlier, pre-ratification draft of Smstateen said that when `mstateen0`.IMSIC is zero, registers `hgeip` and `hgeie` and field VGEIN of `hstatus` are all read-only zeros. That effect is no longer correct.
 ====
 
-If the hart does not have an IMSIC, bit 58 of `mstateen0` is read-only zero, but Smstateen has no effect on attempts to access the nonexistent IMSIC
+If the hart does not have an IMSIC, the IMSIC bit of `mstateen0` is read-only zero, but Smstateen has no effect on attempts to access the nonexistent IMSIC
 state.
 
 [NOTE]
 ====
 This means in particular that, when the hart does not have an IMSIC, the
-following raise a virtual instruction exception as described in <<CSRs-hypervisor>>, not an illegal instruction exception, despite that bit 58 of `mstateen0` is zero:
+following raise a virtual instruction exception as described in <<CSRs-hypervisor>>, not an illegal instruction exception, despite that `mstateen0`.IMSIC is zero:
 
 * attempts from VS-mode to access `sireg` (really `vsireg`) while `vsiselect` has a value in the range 0x70–0xFF; and
 * attempts from VS-mode to access `stopei` (really `vstopei`).
 ====
 
-If bit 60 of `mstateen0` is one, then regardless of any other `mstateen` bits (including bits 58 and 59 of `mstateen0`), a virtual instruction exception is raised as described in <<hypervisor-vs-csrs>> for all attempts from VS-mode or
-VU-mode to directly access `vsireg`, and for all attempts from VU-mode to access `sireg`. This behavior is overridden only when bit 60 of `mstateen0` is zero.
+If the CSRIND bit of `mstateen0` is one, then regardless of any other `mstateen` bits (including the AIA and IMSIC bits of `mstateen0`), a virtual instruction exception is raised as described in <<hypervisor-vs-csrs>> for all attempts from VS-mode or
+VU-mode to directly access `vsireg`, and for all attempts from VU-mode to access `sireg`. This behavior is overridden only when `mstateen0`.CSRIND is zero.
 
-If the hypervisor extension is implemented, the same three bits are
+If the H extension is implemented, the same three bits are
 defined also in hypervisor CSR `hstateen0` but concern only the state potentially accessible to a virtual machine executing in privilege modes VS and VU:
 
 [%autowidth,align="center",float="center",cols="<",grid=none,frame=none]
 |===
-|bit 60 CSRs `siselect` and `sireg` (really `vsiselect` and `vsireg`)
-|bit 59 CSRs `siph` and `sieh` (RV32 only) and `stopi` (really `vsiph`, `vsieh`, and `vstopi`)
-|bit 58 all state of IMSIC guest interrupt files, including CSR `stopei`(really `vstopei`)
+|bit 60 CSRIND: CSRs `siselect` and `sireg` (really `vsiselect` and `vsireg`)
+|bit 59 AIA: CSRs `siph` and `sieh` (RV32 only) and `stopi` (really `vsiph`, `vsieh`, and `vstopi`)
+|bit 58 IMSIC: all state of IMSIC guest interrupt files, including CSR `stopei`(really `vstopei`)
 |===
 
 If one of these bits is zero in `hstateen0`, and the same bit is one in `mstateen0`, then an attempt to access the corresponding state from VS or VU-mode raises a virtual instruction exception. (But note that, for high-half CSRs `siph` and `sieh`, this applies only when XLEN = 32. When XLEN > 32, an attempt to access `siph` or `sieh` raises an illegal instruction exception as usual, not a virtual instruction exception.)
 
-If bit 60 is one in `mstateen0` but is zero in `hstateen0`, then all attempts from VS or VU-mode to access `siselect` or `sireg` raise a virtual instruction exception, not an illegal instruction exception, regardless of the value of `vsiselect` or any other `mstateen` bits.
+If the CSRIND bit is one in `mstateen0` but is zero in `hstateen0`, then all attempts from VS or VU-mode to access `siselect` or `sireg` raise a virtual instruction exception, not an illegal instruction exception, regardless of the value of `vsiselect` or any other `mstateen` bits.
 
-Bit 58 is implemented in `hstateen0` only if the hart has an IMSIC. Furthermore, even with an IMSIC, bit 58 may (or may not) be read-only zero in `hstateen0` if the IMSIC has no _guest interrupt files_ for guest external interrupts (<<IMSIC>>). When this bit is zero (whether read-only zero or set to zero), a virtual machine is prevented from accessing the hart's IMSIC the same as when `hstatus.VGEIN` = 0.
+The IMSIC bit is implemented in `hstateen0` only if the hart has an IMSIC. Furthermore, even with an IMSIC, `hstateen0`.IMSIC may (or may not) be read-only zero if the IMSIC has no _guest interrupt files_ for guest external interrupts (<<IMSIC>>). When this bit is zero (whether read-only zero or set to zero), a virtual machine is prevented from accessing the hart's IMSIC the same as when `hstatus.VGEIN` = 0.
 
 Extension Ssstateen is defined as the supervisor-level view of Smstateen. Therefore, the combination of Ssaia and Ssstateen incorporates the bits defined above for `hstateen0` but not those for `mstateen0`, since machine-level CSRs are not visible to supervisor level.

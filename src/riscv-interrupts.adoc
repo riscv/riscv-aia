@@ -1,5 +1,5 @@
 //=  *The RISC-V Advanced Interrupt Architecture* +
-//Version 1.0
+//Version 20250312
 //Editor: John Hauser +
 //`jh.riscv@jhauser.us` +
 // +
@@ -66,7 +66,7 @@ International License.
 
 <<<
 
-This document describes an Advanced Interrupt Architecture for RISC-V
+This document describes an Advanced Interrupt Architecture (AIA) for RISC-V
 systems. This specification was ratified by the RISC-V International
 Association in June of 2023.
 
@@ -87,12 +87,44 @@ are non-ISA.
 |8. IOMMU Support for MSIs to Virtual Machines |No
 |===
 
+*Changes for version 20250312*
+
+Made the following clarifications to AIA 1.0:
+
+* Where there are irreconcilable conflicts between the AIA and other
+implemented RISC-V extensions, the AIA usually has priority by default.
+* Deference is given to extension
+Smcsrind/Sscsrind (indirectly accessed CSRs).
+* Names are given to the bits defined in `mstateen0` and `hstateen0`
+when extension Smstateen/Ssstateen is also implemented.
+* An IMSIC interrupt file's `eidelivery` register affects only
+whether an interrupt appears in a hart's `mip` or `hgeip` register.
+* IMSIC CSRs `mtopei`, `stopei`, and `vstopei` are not affected
+by the values of `mie`, `sie`, `hie`, `hgeie`, or `vsie`.
+* There may be a visible delay between a change of state of an IMSIC
+interrupt file and its effect on a bit in `mip`, `sip`, or `hgeip`.
+* An APLIC's `idelivery` registers and
+the IE bits of its `domaincfg` registers affect only whether
+pending-and-enabled interrupts are delivered to harts.
+* The default priority order for major interrupts is applicable
+only when multiple interrupts would trap to the same privilege mode.
+* The example pseudocode given for handling major interrupts at M-level
+and S-level has additional requirements not mentioned previously.
+* An interrupt priority number in the S-level `iprio` array
+may be writable (not read-only zero) if
+the correponding bit is writable in either `sie` or `hie`.
+* If a supervisor external interrupt (SEI) is injected from M-level
+when there is no actual interrupt from an external interrupt controller,
+the injected SEI is assigned an S-level priority number of 256.
+* CSR `hvictl` affects only `vstopi` and the trapping of
+some instructions, not `mip`, `sip`, `hip`, or `vsip`.
+
 *Changes for the ratified version 1.0*
 
 Resolved some inconsistencies in <<CSRs>> about when to raise
 a virtual instruction exception versus an illegal instruction exception.
 
-*Changes for RC5*
+*Changes for RC5 (Release Candidate 5)*
 
 Better aligned the rules for indirectly accessed registers with the
 hypervisor extension and with forthcoming extension Smcsrind/Sscsrind.

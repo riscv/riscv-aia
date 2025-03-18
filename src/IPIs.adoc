@@ -2,7 +2,7 @@
 == Interprocessor Interrupts (IPIs)
 
 By default, unless a platform has a different mechanism for
-interprocessor interrupts (IPIs), the RISC-V Privileged Architecture specifies
+interprocessor interrupts (IPIs), the base RISC-V Privileged Architecture specifies
 that a machine with multiple harts must provide for each hart an
 implementation-defined memory address that can be written to signal a
 machine-level _software interrupt_ (major code 3) at that hart. IPIs at
@@ -29,7 +29,7 @@ to another hart, causing machine-level software at the originating hart
 to send a machine-level IPI to the destination hart, where software then
 sets the supervisor-level software interrupt-pending bit (SSIP) in CSR `mip`.
 
-When harts have IMSICs, instead of using the Privileged Architecture's
+When harts have IMSICs, instead of using the base Privileged Architecture's
 mechanism for signaling software interrupts at remote harts, an IPI can
 be sent to a hart by writing to the destination hart's IMSIC, the same
 as a regular message-signaled interrupt (MSI). In that case, an incoming
@@ -41,7 +41,7 @@ destination, there should be no reason for a destination hart to
 misinterpret the purpose of an incoming external interrupt that
 represents an IPI.
 
-If harts do not have IMSICs, then the method specified by the RISC-V Privileged
+If harts do not have IMSICs, then the method specified by the base Privileged
 Architecture is assumed to be used for IPIs, signaling software
 interrupts at destination harts. On the other hand, when harts have
 IMSICs, the machinery for triggering software interrupts at remote harts

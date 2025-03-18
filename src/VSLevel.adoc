@@ -1,10 +1,10 @@
 [[VSLevel]]
 == Interrupts for Virtual Machines (VS Level)
 
-When the hypervisor extension is implemented, a hart's set of possible
+When the H extension is implemented, a hart's set of possible
 privilege modes includes the _virtual supervisor_ (VS) and _virtual
 user_ (VU) modes for hosting virtual harts. The Advanced Interrupt
-Architecture adds to the hypervisor extension new interrupt facilities
+Architecture adds to the H extension new interrupt facilities
 aligned with those described earlier for supervisor-level interrupts.
 
 As introduced in <<CSRs>>, several hypervisor and VS
@@ -23,7 +23,7 @@ hardware assistance.
 
 === VS-level external interrupts with a guest interrupt file
 
-When a hart implements the hypervisor extension, it is recommended that
+When a hart implements the H extension, it is recommended that
 the hart also have an IMSIC with guest interrupt files. Assuming guest
 interrupt files are available, each can be assigned to a virtual hart at
 the physical hart to act as the supervisor-level interrupt file for that
@@ -181,7 +181,7 @@ When emulating an external interrupt controller for a virtual hart, if
 configurable interrupt priority is not supported for the virtual hart
 other than for external interrupts, then external interrupts may be
 asserted to VS level simply by setting bit VSEIP in `hvip`, as defined by the
-RISC-V Privileged Architecture. However, to emulate both an external interrupt
+H extension. However, to emulate both an external interrupt
 controller and priority configurability for non-external interrupts, a
 hypervisor must make use of CSR `hvictl` (Hypervisor Virtual Interrupt Control),
 described later in the next section.
@@ -308,7 +308,7 @@ and `mvip` do for supervisor level, as explained in
 
 Each bit of registers `hvien` and `hvip` corresponds with an interrupt number in the
 range 0-63. Bits 12:0 of `hvien` are reserved and must be read-only zeros, while
-bits 12:0 of `hvip` are defined by the RISC-V Privileged Architecture. Specifically,
+bits 12:0 of `hvip` are defined by the H extension. Specifically,
 bits 10, 6, and 2 of `hvip` are writable bits that correspond to VS-level
 external interrupts (VSEIP), VS-level timer interrupts (VSTIP), and
 VS-level software interrupts (VSSIP), respectively.
@@ -333,7 +333,7 @@ are both zero. The combined effects of `hideleg` and `hvien` on `vsip` and `vsie
 For interrupt numbers 13-63, a bit in `vsie` is writable if and only if the
 corresponding bit is set in either `hideleg` or `hvien`. When an interrupt is delegated
 by `hideleg`, the writable bit in `vsie` is an alias of the corresponding bit in `sie`; else
-it is an independent writable bit. The Privileged Architecture specifies
+it is an independent writable bit. The H extension specifies
 when bits 12:0 of `vsie` are aliases of bits in `hie`. As usual, bits that are not
 writable in `vsie` must be read-only zeros.
 
@@ -361,6 +361,13 @@ interrupts beyond those supported by `hviprio1` and `hviprio2`; or
 the use of an IMSIC’s guest interrupt file, while also supporting
 configurable priorities both for external interrupts and for major
 interrupts to the virtual hart.
+
+[NOTE]
+====
+Among the possible uses, `hvictl` is needed for a hypervisor
+to fully emulate HS-mode in VS-mode, which is a requirement for
+the hosting of nested hypervisors without paravirtualization.
+====
 
 The format of `hvictl` is:
 
@@ -420,6 +427,12 @@ identity 9, as follows:
 |===
 
 When `hvictl`.IID = 9, DPR is ignored.
+
+[NOTE]
+====
+Register `hvictl` has no effect on any of `mip`, `sip`, `hip`, or `vsip`;
+it affects only `vstopi` and the trapping of some instructions.
+====
 
 [[vstopi]]
 ==== Virtual supervisor top interrupt CSR (`vstopi`)
@@ -487,8 +500,8 @@ the manner documented for `stopi` in <<stopi>>.
 
 ==== Interrupt traps to VS-mode
 
-The Advanced Interrupt Architecture modifies the standard RISC-V Privileged
-Architecture such that an interrupt is pending at VS level if and only
+The Advanced Interrupt Architecture modifies the H extension
+such that an interrupt is pending at VS level if and only
 if `vstopi` is not zero. CSRs `vsip` and `vsie` do not by themselves determine whether a
 VS-level interrupt is pending, though they may do so indirectly through
 their effect on `vstopi`.

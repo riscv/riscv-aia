@@ -14,7 +14,7 @@ especially high, so wired interrupts are a frugal alternative. Wired
 interrupts also continue to be universally supported by all current
 computer platforms, unlike MSIs, making another reason for many
 commodity devices or controllers to choose wired interrupts over MSIs,
-unless implementing a standard like PCI Express that dictates MSIs.
+unless conforming to a standard like PCI Express that dictates MSIs.
 
 This chapter specifies an _Advanced PLIC_ (APLIC) that is not backward
 compatible with the earlier RISC-V PLIC. Full conformance to the Advanced
@@ -208,8 +208,8 @@ Within a given interrupt domain, each of the domain’s harts has a unique
 _index number_ in the range 0 to latexmath:[${{2}^{14}-{1}}$]
 (= 16,383). The index number a domain associates with a hart may or may
 not have any relationship to the unique hart identifier ("hart ID")
-that the RISC-V Privileged Architecture assigns to the hart. Two different
-interrupt domains may employ entirely different index numbers for the
+that the Privileged Architecture assigns to the hart. Two different
+interrupt domains may employ a different mapping of index numbers to the
 same set of harts. However, if any of an APLIC's interrupt domains can
 forward interrupts by MSI, then all machine-level domains of the APLIC
 share a common mapping of index numbers to harts.
@@ -392,6 +392,11 @@ All other register bits are reserved and read as zeros.
 Bit IE (Interrupt Enable) is a global enable for all active interrupt
 sources at this interrupt domain. Only when IE = 1 are
 pending-and-enabled interrupts actually signaled or forwarded to harts.
+
+The value of bit IE affects only whether interrupts are delivered to harts.
+It has no effect on any other APLIC state, including
+the interrupt-enable and interrupt-pending bits of interrupt sources
+and IDC registers `idelivery`, `topi`, and `claimi`.
 
 Field DM (Delivery Mode) is *WARL* and determines how this interrupt domain
 delivers interrupts to harts. The two possible values for DM are:
@@ -941,7 +946,7 @@ The Hart Index field specifies the hart to which interrupts from this
 source will be forwarded.
 
 If the interrupt domain is at supervisor level and the domain's harts
-implement the RISC-V Privileged Architecture's hypervisor extension, then Guest Index is a *WLRL* field that must be able to hold all integer values in the range 0 through GEILEN. (Parameter _GEILEN_ is defined by the Privileged Architecture's hypervisor extension.) Otherwise, field Guest Index is read-only zero. For a supervisor-level interrupt domain, a nonzero Guest
+implement the H extension, then Guest Index is a *WLRL* field that must be able to hold all integer values in the range 0 through GEILEN. (Parameter _GEILEN_ is defined by the H extension.) Otherwise, field Guest Index is read-only zero. For a supervisor-level interrupt domain, a nonzero Guest
 Index is the number of the target hart's guest interrupt file to which
 MSIs will be sent. When Guest Index is zero, MSIs from a
 supervisor-level domain are forwarded to the target hart at supervisor
@@ -1078,6 +1083,11 @@ unconnected to any physical harts.
 |1 = | interrupt delivery is enabled
 |===
 
+The `idelivery` register affects only whether
+interrupts are delivered to the relevant hart.
+It has no effect on any other APLIC state,
+including IDC registers `topi` and `claimi`.
+
 If an IDC structure is for a nonexistent hart (i.e., corresponding to a
 hart index number that is not valid for any actual hart in the interrupt
 domain), setting `idelivery` to 1 does not deliver interrupts to any hart.
@@ -1120,6 +1130,8 @@ number less than the value of `ithreshold`. Otherwise, the value returned from a
 All other bit positions are zeros.
 
 The interrupt identity reported in `topi` is the minor identity for an external interrupt at the target hart.
+
+The value of `topi` is not affected by `domaincfg`.IE or by `idelivery`.
 
 Writes to `topi` are ignored.
 

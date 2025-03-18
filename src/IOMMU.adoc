@@ -170,7 +170,7 @@ that can directly receive MSIs from devices is limited by the total
 number of guest interrupt files implemented by all IMSICs in the system,
 because all MSIs to RISC-V harts must go through IMSICs. For a single RISC-V hart, the
 number of guest interrupt files is the _GEILEN_ parameter defined by the
-Privileged Architecture, which can be at most 31 for RV32 and 63 for
+H extension, which can be at most 31 for RV32 and 63 for
 RV64.
 
 With the use of memory-resident interrupt files, on the other hand, the
