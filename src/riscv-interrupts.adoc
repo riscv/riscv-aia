@@ -9,7 +9,7 @@
 :description: Advanced Interrupt Architecture 
 :company: RISC-V.org
 :authors: Editors: John Hauser, jh.riscv@jhauser.us
-:revdate: Revised 20230630
+:revdate: Revised 20250312
 :revnumber: 1.0
 :url-riscv: http://riscv.org
 :doctype: book
