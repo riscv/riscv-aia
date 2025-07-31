@@ -1,0 +1,5 @@
+name: aia
+title: Advanced Interrupt Architecture
+version: v1.0
+nav:
+- modules/ROOT/nav.adoc
