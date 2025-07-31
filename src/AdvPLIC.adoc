@@ -339,7 +339,7 @@ structure is 32 bytes and has these defined registers:
 |`0x04` |4 bytes |`iforce` 
 |`0x08` |4 bytes |`ithreshold` 
 |`0x18` |4 bytes |`topi`
-|`ox1C` |4 bytes |`claimi`
+|`0x1C` |4 bytes |`claimi`
 |===
 
 IDC structures are packed contiguously, 32 bytes per structure, so the
@@ -1052,7 +1052,7 @@ boundary) and has these defined registers:
 |===
 |offset |size |register name
 |`0x00` |4 bytes |`idelivery`
-|`ox04` |4 bytes |`iforce`
+|`0x04` |4 bytes |`iforce`
 |`0x08` |4 bytes |`ithreshold`
 |`0x18` |4 bytes |`topi`
 |`0x1C` |4 bytes |`claimi`
