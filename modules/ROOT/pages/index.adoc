@@ -1,3 +1,7 @@
-= Advanced Interrupt Architecture
+image:risc-v_logo.svg[]
 
-Advanced Interrupt Architecture placeholder.
+== Advanced Interrupt Architecture
+
+
+Version 1.0: Ratified 
+June 30, 2023.
