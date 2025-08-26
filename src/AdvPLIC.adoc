@@ -128,7 +128,7 @@ control.
 
 [[AdvPLIC-ex-1Domain]]
 .Example of a RISC-V system that has a single hart implementing only M-mode, with a single machine-level interrupt domain for that hart. 
-image:AdvPLIC-ex-1Domain.png[ ]
+image::AdvPLIC-ex-1Domain.png[ ]
 
 An APLIC's interrupt domains are arranged in a tree hierarchy, with the
 root domain always being at machine level. Incoming interrupt wires
@@ -150,11 +150,11 @@ application harts, even at machine level.
 
 [[AdvPLIC-ex-2Domains]]
 .An example system with four harts that implement M-mode and S-mode, with two APLIC interrupt domains, one each for machine and supervisor levels. 
-image:AdvPLIC-ex-2Domains.png[]
+image::AdvPLIC-ex-2Domains.png[]
 
 [[AdvPLIC-ex-3Domains]]
 .A RISC-V system that extends the example of <<AdvPLIC-ex-2Domains>> with a fifth M-mode-only "manager" hart, with a separate machine-level interrupt domain above the other domains. 
-image:AdvPLIC-ex-3Domains.png[]
+image::AdvPLIC-ex-3Domains.png[]
 
 [NOTE]
 ====
