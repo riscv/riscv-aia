@@ -1,4 +1,4 @@
-.RISC-V Advanced Interrupt Architecture
+.Advanced Interrupt Architecture
 * xref:intro.adoc[Introduction]
 * xref:CSRs.adoc[Control and Status Registers (CSRs) Added to Harts]
 * xref:IMSIC.adoc[Incoming MSI Controller (IMSIC)]
