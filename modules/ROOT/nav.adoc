@@ -1,4 +1,6 @@
 .Advanced Interrupt Architecture
+* xref:contributors.adoc[Contributors]
+* xref:colophon.adoc[Preface]
 * xref:intro.adoc[Introduction]
 * xref:CSRs.adoc[Control and Status Registers (CSRs) Added to Harts]
 * xref:IMSIC.adoc[Incoming MSI Controller (IMSIC)]
