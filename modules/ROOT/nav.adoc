@@ -1,4 +1,5 @@
 .Advanced Interrupt Architecture
+* xref:index.adoc[Advanced Interrupt Architecture]
 * xref:contributors.adoc[Contributors]
 * xref:colophon.adoc[Preface]
 * xref:intro.adoc[Introduction]
