@@ -3,5 +3,6 @@ image::risc-v_logo.svg[]
 == Advanced Interrupt Architecture
 
 
-Version 1.0: Ratified 
-June 30, 2023.
+Editors: John Hauser, jh.riscv@jhauser.us
+
+Version 1.0, Revised 20250312
