@@ -1,6 +1,6 @@
 image::risc-v_logo.svg[]
 
-== Advanced Interrupt Architecture
+== The RISC-V Advanced Interrupt Architecture
 
 
 Editors: John Hauser, jh.riscv@jhauser.us
