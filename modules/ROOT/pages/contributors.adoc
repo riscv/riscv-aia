@@ -5,5 +5,3 @@ Contributors to all versions of this specification in alphabetical order
 Donahue, Greg Favor, John Hauser, James Kenney, David Kruckemyer, Shubu
 Mukherjee, Stefan O’Rear, Vernon Pang, Anup Patel, Josh Scheid, Ved
 Shanbhogue, and Andrew Waterman.
-
-This document is released under a Creative Commons Attribution 4.0 International License.

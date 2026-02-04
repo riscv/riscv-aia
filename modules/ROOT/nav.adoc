@@ -1,6 +1,7 @@
 .Advanced Interrupt Architecture
 * xref:index.adoc[Advanced Interrupt Architecture]
 * xref:contributors.adoc[Contributors]
+* xref:copyright.adoc[Copyright and License]
 * xref:colophon.adoc[Preface]
 * xref:intro.adoc[Introduction]
 * xref:CSRs.adoc[Control and Status Registers (CSRs) Added to Harts]
