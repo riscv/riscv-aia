@@ -6,4 +6,8 @@ nav:
 
 asciidoc:
   attributes:
+    page-group: hardware
+
+asciidoc:
+  attributes:
     page-pdf_url: ../aia/_attachments/riscv-interrupts.pdf
