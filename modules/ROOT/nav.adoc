@@ -1,6 +1,17 @@
 ```asciidoc
 .AIA Specification
 * xref:index.adoc[Introduction]
+* xref:colophon.adoc[Preface]
+* xref:contributors.adoc[Contributors]
+* xref:copyright.adoc[Copyright]
+* xref:intro.adoc[Introduction]
+* xref:CSRs.adoc[CSRs Added to Harts]
+* xref:IMSIC.adoc[Incoming MSI Controller (IMSIC)]
+* xref:AdvPLIC.adoc[Advanced PLIC (APLIC)]
+* xref:MSLevel.adoc[Interrupts for Machine and Supervisor Levels]
+* xref:VSLevel.adoc[Interrupts for Virtual Machines (VS Level)]
+* xref:IPIs.adoc[Interprocessor Interrupts (IPIs)]
+* xref:IOMMU.adoc[IOMMU Support for MSIs to Virtual Machines]
 
 .All RISC-V Specifications
 * xref:isa-manual::index.adoc[ISA Manual]
