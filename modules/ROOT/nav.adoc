@@ -1,4 +1,3 @@
-```asciidoc
 .AIA Specification
 * xref:index.adoc[Introduction]
 * xref:colophon.adoc[Preface]
@@ -12,26 +11,3 @@
 * xref:VSLevel.adoc[Interrupts for Virtual Machines (VS Level)]
 * xref:IPIs.adoc[Interprocessor Interrupts (IPIs)]
 * xref:IOMMU.adoc[IOMMU Support for MSIs to Virtual Machines]
-
-.All RISC-V Specifications
-* xref:isa-manual::index.adoc[ISA Manual]
-* xref:aia::index.adoc[AIA] _(current)_
-* xref:iommu::index.adoc[IOMMU]
-* xref:plic::index.adoc[PLIC]
-* xref:soc::index.adoc[Server SoC]
-* xref:techtrace::index.adoc[Efficient Trace]
-* xref:qos::index.adoc[CBQRI]
-* xref:reri::index.adoc[RAS ERI]
-* xref:etrace::index.adoc[E-Trace]
-* xref:ntrace::index.adoc[Nexus Trace]
-* xref:connectors::index.adoc[Trace Connectors]
-* xref:tci::index.adoc[TCI]
-* xref:semihost::index.adoc[Semihosting]
-* xref:brs::index.adoc[BRS]
-* xref:rimt::index.adoc[ACPI RIMT]
-* xref:rpmi::index.adoc[RPMI]
-* xref:sbi::index.adoc[SBI]
-* xref:uefi::index.adoc[UEFI]
-* xref:abi::index.adoc[ELF psABI]
-* xref:instrinsic::index.adoc[Vector Intrinsics]
-```
