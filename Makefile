@@ -19,7 +19,7 @@ SRC_DIR := src
 BUILD_DIR := build
 
 DOCKER_RUN := docker run --rm -v ${PWD}:/build -w /build \
-riscvintl/riscv-docs-base-container-image:latest
+ghcr.io/riscv/riscv-docs-base-container-image:latest
 
 HEADER_SOURCE := ${SRC_DIR}/riscv-interrupts.adoc
 PDF_RESULT := riscv-interrupts.pdf
