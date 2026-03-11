@@ -103,8 +103,8 @@ number (see Chapter #ch:MSLevel[[ch:MSLevel]] concerning a hart’s
 handling of interrupt priorities), the number reported is negated to
 _normalize_ it to the convention of the Advanced Interrupt Architecture.
 If the original PLIC’s priority number for an interrupt
-is latexmath:[$p$], the normalized priority number communicated to the
-target hart is latexmath:[${\mbox{2}^\textrm{IPRIOLEN}-p}$].
+is latexmath:[p], the normalized priority number communicated to the
+target hart is latexmath:[{\mbox{2}^\textrm{IPRIOLEN}-p}].
 
 Negation of original PLIC priority numbers to normalize them matters
 only when a hart supports configurability of the priorities of major

@@ -83,7 +83,7 @@ always be configured as Detached. See
 modes_.)
 
 Each of an APLIC's interrupt sources has a fixed unique _identity
-number_ in the range 1 to latexmath:[$N$], where latexmath:[$N$] is the
+number_ in the range 1 to latexmath:[N], where latexmath:[N] is the
 total number of sources at the APLIC. The number zero is not a valid
 interrupt identity number at an APLIC. The maximum number of interrupt
 sources an APLIC may support is 1023.
@@ -127,7 +127,7 @@ it receives, avoiding the need to call upon M-mode to exercise that
 control.
 
 [[AdvPLIC-ex-1Domain]]
-.Example of a RISC-V system that has a single hart implementing only M-mode, with a single machine-level interrupt domain for that hart. 
+.Example of a RISC-V system that has a single hart implementing only M-mode, with a single machine-level interrupt domain for that hart.
 image::AdvPLIC-ex-1Domain.png[ ]
 
 An APLIC's interrupt domains are arranged in a tree hierarchy, with the
@@ -135,9 +135,9 @@ root domain always being at machine level. Incoming interrupt wires
 arrive first at the root domain. Each domain may then selectively
 delegate all or a subset of interrupt sources to its child domains in
 the hierarchy. Within a given APLIC, interrupt source numbers are
-invariant across all domains, so source identity number latexmath:[$i$]
+invariant across all domains, so source identity number latexmath:[i]
 always refers to the same source in every domain, corresponding to
-incoming wire number latexmath:[$i$]. For an interrupt domain below the
+incoming wire number latexmath:[i]. For an interrupt domain below the
 root, interrupt sources not delegated down to that domain appear to the
 domain as being not implemented.
 
@@ -149,11 +149,11 @@ interrupts exclusively for hart 0, beyond the reach of the four
 application harts, even at machine level.
 
 [[AdvPLIC-ex-2Domains]]
-.An example system with four harts that implement M-mode and S-mode, with two APLIC interrupt domains, one each for machine and supervisor levels. 
+.An example system with four harts that implement M-mode and S-mode, with two APLIC interrupt domains, one each for machine and supervisor levels.
 image::AdvPLIC-ex-2Domains.png[]
 
 [[AdvPLIC-ex-3Domains]]
-.A RISC-V system that extends the example of <<AdvPLIC-ex-2Domains>> with a fifth M-mode-only "manager" hart, with a separate machine-level interrupt domain above the other domains. 
+.A RISC-V system that extends the example of <<AdvPLIC-ex-2Domains>> with a fifth M-mode-only "manager" hart, with a separate machine-level interrupt domain above the other domains.
 image::AdvPLIC-ex-3Domains.png[]
 
 [NOTE]
@@ -205,7 +205,7 @@ be available to machine level only.
 === Hart index numbers
 
 Within a given interrupt domain, each of the domain’s harts has a unique
-_index number_ in the range 0 to latexmath:[${{2}^{14}-{1}}$]
+_index number_ in the range 0 to latexmath:[{{2}^{14}-{1}}]
 (= 16,383). The index number a domain associates with a hart may or may
 not have any relationship to the unique hart identifier ("hart ID")
 that the Privileged Architecture assigns to the hart. Two different
@@ -334,10 +334,10 @@ structure is 32 bytes and has these defined registers:
 
 [%autowidth,float="center",align="center",cols="^,<,<",grid=none,frame=none]
 |===
-|offset | size |register name 
-|`0x00` |4 bytes |`idelivery` 
-|`0x04` |4 bytes |`iforce` 
-|`0x08` |4 bytes |`ithreshold` 
+|offset | size |register name
+|`0x00` |4 bytes |`idelivery`
+|`0x04` |4 bytes |`iforce`
+|`0x08` |4 bytes |`ithreshold`
 |`0x18` |4 bytes |`topi`
 |`ox1C` |4 bytes |`claimi`
 |===
@@ -380,8 +380,8 @@ The `domaincfg` register has this format:
 
 [%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
 |===
-|bits 31:24 |read-only 0x80 
-|bit 8|IE 
+|bits 31:24 |read-only 0x80
+|bit 8|IE
 |bit 7|read-only 0
 |bit 2 |DM (*WARL*)
 |bit 0 |BE (*WARL*)
@@ -403,7 +403,7 @@ delivers interrupts to harts. The two possible values for DM are:
 
 [%autowidth,float="center",align="center",cols=">,<",grid=none,frame=none]
 |===
-|0 = |direct delivery mode 
+|0 = |direct delivery mode
 |1 =|MSI delivery mode
 |===
 
@@ -434,7 +434,7 @@ with this fact, the read-only value in `domaincfg’s` most-significant byte, bi
 obtained: When interpreted in the correct byte order, bit 31 is one, and
 in the wrong order, bit 31 is zero. Second, if the value of BE is
 uncertain (prior to software initializing the interrupt domain,
-presumably), an 8-bit value latexmath:[$x$] can be safely written to `domaincfg` by writing (latexmath:[$x$]<<24)|latexmath:[$x$], where <<24 represents
+presumably), an 8-bit value latexmath:[x] can be safely written to `domaincfg` by writing (latexmath:[x]<<24)|latexmath:[x], where <<24 represents
 shifting left by 24 bits, and the vertical bar (|) represents bitwise
 logical OR. After `domaincfg` is written once, the value of BE should then be known,
 so subsequent writes should not need to repeat the same trick.
@@ -445,46 +445,46 @@ for the APLIC, it is implementation-defined (or possibly
 platform-defined) how these other resets may affect `domaincfg`.
 
 [[AdvPLIC-reg-sourcecfg]]
-====  Source configurations (`sourcecfg[1]–sourcecfg[1023]`) 
+====  Source configurations (`sourcecfg[1]–sourcecfg[1023]`)
 
-For each possible interrupt source latexmath:[$i$], register `sourcecfg[latexmath:[$i$]]` controls
-the _source mode_ for source latexmath:[$i$] in this interrupt domain as
+For each possible interrupt source latexmath:[i], register `sourcecfg[latexmath:[i]]` controls
+the _source mode_ for source latexmath:[i] in this interrupt domain as
 well as any delegation of the source to a child domain. When
-source latexmath:[$i$] is not implemented, or appears in this domain not
-to be implemented, `sourcecfg[latexmath:[$i$]]` is read-only zero. If source latexmath:[$i$] was not
+source latexmath:[i] is not implemented, or appears in this domain not
+to be implemented, `sourcecfg[latexmath:[i]]` is read-only zero. If source latexmath:[i] was not
 delegated to this domain and is then changed (at the parent domain) to
-become delegated to this domain, `sourcecfg[latexmath:[$i$]]` remains zero until successfully written with a nonzero value.
+become delegated to this domain, `sourcecfg[latexmath:[i]]` remains zero until successfully written with a nonzero value.
 
-Bit 10 of `sourcecfg[latexmath:[$i$]]` is a 1-bit field called D (Delegate). If D = 1,
-source latexmath:[$i$] is delegated to a child domain, and if D = 0, it
-is not delegated to a child domain. Interpretation of the rest of `sourcecfg[latexmath:[$i$]]` depends on field D.
+Bit 10 of `sourcecfg[latexmath:[i]]` is a 1-bit field called D (Delegate). If D = 1,
+source latexmath:[i] is delegated to a child domain, and if D = 0, it
+is not delegated to a child domain. Interpretation of the rest of `sourcecfg[latexmath:[i]]` depends on field D.
 
-When interrupt source latexmath:[$i$] is delegated to a child domain, `sourcecfg[latexmath:[$i$]]` has this format:
+When interrupt source latexmath:[i] is delegated to a child domain, `sourcecfg[latexmath:[i]]` has this format:
 
 [%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
 |===
-|bit 10 |D, =1 
+|bit 10 |D, =1
 |bits 9:0 |Child Index (*WLRL*)
 |===
 
 All other register bits are reserved and read as zeros.
 
 Child Index is a *WLRL* field that specifies the interrupt domain to which this
-source is delegated. For an interrupt domain with latexmath:[$C$] child
+source is delegated. For an interrupt domain with latexmath:[C] child
 domains, this field must be able to hold integer values in the range 0
-to latexmath:[${C-{1}}$]. Each interrupt domain has a fixed mapping
+to latexmath:[{C-{1}}]. Each interrupt domain has a fixed mapping
 from these index numbers to child domains.
 
 If an interrupt domain has no children in the domain hierarchy, bit D
 cannot be set to one in any `sourcecfg` register for that domain. For such a leaf
 domain, attempting to write a `sourcecfg` register with a value that has bit 10 = 1 causes the entire register to be set to zero instead.
 
-When interrupt source latexmath:[$i$] is not delegated to a child
-domain, `sourcecfg[latexmath:[$i$]]` has this format:
+When interrupt source latexmath:[i] is not delegated to a child
+domain, `sourcecfg[latexmath:[i]]` has this format:
 
 [%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
 |===
-|bit 10 |D, =0 
+|bit 10 |D, =0
 |bits 2:0 |SM (*WARL*)
 |===
 
@@ -515,14 +515,14 @@ supported for SM.
 
 An interrupt source is inactive in the interrupt domain if either the
 source is delegated to a child domain (D = 1) or it is not delegated
-(D = 0) and SM is Inactive. Whenever interrupt source latexmath:[$i$] is
+(D = 0) and SM is Inactive. Whenever interrupt source latexmath:[i] is
 inactive in an interrupt domain, the corresponding interrupt-pending and
 interrupt-enable bits within the domain are read-only zeros, and
-register `target[latexmath:[$i$]]` is also read-only zero. If source latexmath:[$i$] is changed
+register `target[latexmath:[i]]` is also read-only zero. If source latexmath:[i] is changed
 from inactive to an active mode, the interrupt source's pending and
 enable bits remain zeros, unless set automatically for a reason
 specified later in this section or in
-<<AdvPLIC-pendingBits>>, and the defined subfields of `target[latexmath:[$i$]]` obtain UNSPECIFIED values.
+<<AdvPLIC-pendingBits>>, and the defined subfields of `target[latexmath:[i]]` obtain UNSPECIFIED values.
 
 When a source is configured as Detached, its wire input is ignored;
 however, the interrupt-pending bit may still be set by a write to a `setip` or `setipnum` register. (This mode can be useful for receiving MSIs, for example.)
@@ -552,7 +552,7 @@ is zero.
 Any write to a `sourcecfg` register might (or might not) cause the corresponding interrupt-pending bit to be set to one if the rectified input value is high (= 1) under the new source mode. A write to a `sourcecfg` register will not by itself cause a pending bit to be cleared except when the source is made inactive. (But see <<AdvPLIC-pendingBits>>.)
 
 [[AdvPLIC-reg-mmsiaddrcfg]]
-====  Machine MSI address configuration (`mmsiaddrcfg` and `mmsiaddrcfgh`) 
+====  Machine MSI address configuration (`mmsiaddrcfg` and `mmsiaddrcfgh`)
 
 For machine-level interrupt domains, registers `mmsiaddrcfg` and `mmsiaddrcfgh` may optionally provide parameters used to determine the addresses to write outgoing MSIs.
 
@@ -656,7 +656,7 @@ zero. For this reason, it is likely that only a complete system reset
 affects these registers, and any other resets do not.
 
 [[AdvPLIC-reg-smsiaddrcfg]]
-====  Supervisor MSI address configuration (`smsiaddrcfg` and `smsiaddrcfgh`) 
+====  Supervisor MSI address configuration (`smsiaddrcfg` and `smsiaddrcfgh`)
 
 For machine-level interrupt domains, registers `smsiaddrcfg` and `smsiaddrcfgh` may optionally
 provide parameters used by supervisor-level domains to determine the
@@ -718,14 +718,14 @@ For machine-level domains that are not the root domain, if `smsiaddrcfg` and `sm
 implemented and are not read-only zeros, then they are read-only copies
 of the same registers from the root domain.
 
-====  Set interrupt-pending bits (`setip[0]`-`setip[31]`) 
+====  Set interrupt-pending bits (`setip[0]`-`setip[31]`)
 
-Reading or writing `setip[latexmath:[$k$]]` register reads or potentially modifies the pending
-bits for interrupt sources latexmath:[$k\times{32}$] through
-latexmath:[$k\times{32}+{31}$]. For an implemented interrupt
-source latexmath:[$i$] within that range, the pending bit for
-source latexmath:[$i$] corresponds with register bit
-(latexmath:[$i\bmod{32}$]).
+Reading or writing `setip[latexmath:[k]]` register reads or potentially modifies the pending
+bits for interrupt sources latexmath:[k\times{32}] through
+latexmath:[k\times{32}+{31}]. For an implemented interrupt
+source latexmath:[i] within that range, the pending bit for
+source latexmath:[i] corresponds with register bit
+(latexmath:[i\bmod{32}]).
 
 A read of a `setip` register returns the pending bits of the corresponding
 interrupt sources. Bit positions in the result value that do not
@@ -739,24 +739,24 @@ be set by writing to a `setip` register.
 
 ==== Set interrupt-pending bit by number (`setipnum`)
 
-If latexmath:[$i$] is an active interrupt source number in the domain,
-writing 32-bit value latexmath:[$i$] to register `setipnum` causes the pending bit
-for source latexmath:[$i$] to be set to one if possible. See
+If latexmath:[i] is an active interrupt source number in the domain,
+writing 32-bit value latexmath:[i] to register `setipnum` causes the pending bit
+for source latexmath:[i] to be set to one if possible. See
 <<AdvPLIC-pendingBits>> for exactly when a pending bit may
 be set by writing to `setipnum`.
 
 A write to `setipnum` is ignored if the value written is not an active interrupt
 source number in the domain. A read of `setipnum` always returns zero.
 
-====  Rectified inputs, clear interrupt-pending bits (`in_clrip[0]`-`in_clrip[31]`) 
+====  Rectified inputs, clear interrupt-pending bits (`in_clrip[0]`-`in_clrip[31]`)
 
-Reading register `in_clrip[latexmath:[$k$]]` returns the rectified input (<<AdvPLIC-reg-sourcecfg>>) for interrupt sources
-latexmath:[$k\times{32}$] through
-latexmath:[${k\times{32}+{31}}$], while writing `in_clrip[latexmath:[$k$]]` potentially
+Reading register `in_clrip[latexmath:[k]]` returns the rectified input (<<AdvPLIC-reg-sourcecfg>>) for interrupt sources
+latexmath:[k\times{32}] through
+latexmath:[{k\times{32}+{31}}], while writing `in_clrip[latexmath:[k]]` potentially
 modifies the pending bits for the same sources. For an implemented
-interrupt source latexmath:[$i$] within the specified range,
-source latexmath:[$i$] corresponds with register bit
-(latexmath:[$i\bmod{32}$]).
+interrupt source latexmath:[i] within the specified range,
+source latexmath:[i] corresponds with register bit
+(latexmath:[i\bmod{32}]).
 
 A read of an `in_clrip` register returns the rectified input values of the
 corresponding interrupt sources. Bit positions in the result value that
@@ -768,23 +768,23 @@ be cleared by writing to an `in_clrip` register.
 
 ==== Clear interrupt-pending bit by number (`clripnum`)
 
-If latexmath:[$i$] is an active interrupt source number in the domain,
-writing 32-bit value latexmath:[$i$] to register `clripnum` causes the pending bit
-for source latexmath:[$i$] to be cleared if possible. See
+If latexmath:[i] is an active interrupt source number in the domain,
+writing 32-bit value latexmath:[i] to register `clripnum` causes the pending bit
+for source latexmath:[i] to be cleared if possible. See
 <<AdvPLIC-pendingBits>> for exactly when a pending bit may
 be cleared by writing to `clripnum`.
 
 A write to `clripnum` is ignored if the value written is not an active interrupt
 source number in the domain. A read of `clripnum` always returns zero.
 
-====  Set interrupt-enable bits (`setie[0]`-`setie[31]`) 
+====  Set interrupt-enable bits (`setie[0]`-`setie[31]`)
 
-Reading or writing register `setie[latexmath:[$k$]]` reads or potentially modifies the enable
-bits for interrupt sources latexmath:[$k\times{32}$] through
-latexmath:[${k\times{32}+{31}}$]. For an implemented interrupt
-source latexmath:[$i$] within that range, the enable bit for
-source latexmath:[$i$] corresponds with register bit
-latexmath:[$i\bmod{32}$].
+Reading or writing register `setie[latexmath:[k]]` reads or potentially modifies the enable
+bits for interrupt sources latexmath:[k\times{32}] through
+latexmath:[{k\times{32}+{31}}]. For an implemented interrupt
+source latexmath:[i] within that range, the enable bit for
+source latexmath:[i] corresponds with register bit
+latexmath:[i\bmod{32}].
 
 A read of a `setie` register returns the enable bits of the corresponding
 interrupt sources. Bit positions in the result value that do not
@@ -796,18 +796,18 @@ the interrupt-enable bit for that source is set to one.
 
 ==== Set interrupt-enable bit by number (`setienum`)
 
-If latexmath:[$i$] is an active interrupt source number in the domain,
-writing 32-bit value latexmath:[$i$] to register `setienum` causes the enable bit for source latexmath:[$i$] to be set to one.
+If latexmath:[i] is an active interrupt source number in the domain,
+writing 32-bit value latexmath:[i] to register `setienum` causes the enable bit for source latexmath:[i] to be set to one.
 
 A write to `setienum` is ignored if the value written is not an active interrupt source number in the domain. A read of `setienum` always returns zero.
 
-====  Clear interrupt-enable bits (`clrie[0]`-`clrie[31]`) 
+====  Clear interrupt-enable bits (`clrie[0]`-`clrie[31]`)
 
-Writing register `clrie[latexmath:[$k$]]` potentially modifies the enable bits for interrupt sources latexmath:[$k\times{32}$] through
-latexmath:[${k\times{32}+{31}}$]. For an implemented interrupt
-source latexmath:[$i$] within that range, the enable bit for
-source latexmath:[$i$] corresponds with register bit
-latexmath:[$i\bmod{32}$].
+Writing register `clrie[latexmath:[k]]` potentially modifies the enable bits for interrupt sources latexmath:[k\times{32}] through
+latexmath:[{k\times{32}+{31}}]. For an implemented interrupt
+source latexmath:[i] within that range, the enable bit for
+source latexmath:[i] corresponds with register bit
+latexmath:[i\bmod{32}].
 
 On a write to a `clrie` register, for each bit that is one in the 32-bit value written, the interrupt-enable bit for that source is cleared.
 
@@ -815,12 +815,12 @@ A read of a `clrie` register always returns zero.
 
 ==== Clear interrupt-enable bit by number (`clrienum`)
 
-If latexmath:[$i$] is an active interrupt source number in the domain,
-writing 32-bit value latexmath:[$i$] to register `clrienum` causes the enable bit for source latexmath:[$i$] to be cleared.
+If latexmath:[i] is an active interrupt source number in the domain,
+writing 32-bit value latexmath:[i] to register `clrienum` causes the enable bit for source latexmath:[i] to be cleared.
 
 A write to `clrienum` is ignored if the value written is not an active interrupt source number in the domain. A read of `clrienum` always returns zero.
 
-====  Set interrupt-pending bit by number, little-endian (`setipnum_le`) 
+====  Set interrupt-pending bit by number, little-endian (`setipnum_le`)
 
 Register `setipnum_le` acts identically to `setipnum` except that byte order is always little-endian, as though field BE (Big-Endian) of register `domaincfg` is zero.
 
@@ -828,7 +828,7 @@ For systems that are big-endian-only, with `domaincfg`.BE hardwired to one, `set
 
 `setipnum_le` may be used as a write port for MSIs.
 
-====  Set interrupt-pending bit by number, big-endian (`setipnum_be`) 
+====  Set interrupt-pending bit by number, big-endian (`setipnum_be`)
 
 Register `setipnum_be` acts identically to `setipnum` except that byte order is always big-endian, as though field BE (Big-Endian) of register `domaincfg` is one.
 
@@ -883,18 +883,18 @@ Extempore MSIs are not affected by the IE bit of the domain's `domaincfg` regist
 When the interrupt domain is configured in direct delivery mode (`domaincfg`.DM = 0), register `genmsi` is read-only zero.
 
 [[AdvPLIC-reg-target]]
-====  Interrupt targets (`target[1]-target[1023]`) 
+====  Interrupt targets (`target[1]-target[1023]`)
 
-If interrupt source latexmath:[$i$] is inactive in this domain, register `target[latexmath:[$i$]]` is read-only zero. If source latexmath:[$i$] is active, `target[latexmath:[$i$]]` determines the
+If interrupt source latexmath:[i] is inactive in this domain, register `target[latexmath:[i]]` is read-only zero. If source latexmath:[i] is active, `target[latexmath:[i]]` determines the
 hart to which interrupts from the source are signaled or forwarded. The
-exact interpretation of `target[latexmath:[$i$]]` depends on the delivery mode configured by field DM of register `domaincfg`.
+exact interpretation of `target[latexmath:[i]]` depends on the delivery mode configured by field DM of register `domaincfg`.
 
 If `domaincfg`.DM is changed, the `target` registers for all active interrupt sources within the domain obtain UNSPECIFIED values in all fields defined for the new delivery mode.
 
 ===== Active source, direct delivery mode
 
-For an active interrupt source latexmath:[$i$], if the domain is
-configured in direct delivery mode (`domaincfg`.DM = 0), then register `target[latexmath:[$i$]]` has this format:
+For an active interrupt source latexmath:[i], if the domain is
+configured in direct delivery mode (`domaincfg`.DM = 0), then register `target[latexmath:[i]]` has this format:
 
 [%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
 |===
@@ -911,9 +911,9 @@ Field IPRIO (Interrupt Priority) specifies the _priority number_ for the
 interrupt source. This field is a *WARL* unsigned integer of _IPRIOLEN_ bits,
 where IPRIOLEN is a constant parameter for the given APLIC, in the range
 of 1 to 8. Only values 1 through
-latexmath:[${2}^{\textrm{IPRIOLEN}} - {1}$] are allowed for
+latexmath:[{2}^{\textrm{IPRIOLEN}} - {1}] are allowed for
 IPRIO, not zero. A write to a `target` register sets IPRIO equal to bits
-latexmath:[$({{IPRIOLEN} - {1}})$]:0 of the 32-bit value
+latexmath:[({{IPRIOLEN} - {1}})]:0 of the 32-bit value
 written, unless those bits are all zeros, in which case the priority
 number is set to 1 instead. (If IPRIOLEN = 1, these rules cause IPRIO to
 be effectively read-only with value 1.)
@@ -930,8 +930,8 @@ denoting higher priority, to match the encoding of priorities by IMSICs.
 
 ===== Active source, MSI delivery mode
 
-For an active interrupt source latexmath:[$i$], if the domain is
-configured in MSI delivery mode (`domaincfg`.DM = 1), then register `target[latexmath:[$i$]]` has this format:
+For an active interrupt source latexmath:[i], if the domain is
+configured in MSI delivery mode (`domaincfg`.DM = 1), then register `target[latexmath:[i]]` has this format:
 
 [%autowidth,float="center",align="center",cols="<,<",grid=none,frame=none]
 |===
@@ -953,20 +953,20 @@ supervisor-level domain are forwarded to the target hart at supervisor
 level. For a machine-level domain, Guest Index is read-only zero, and
 MSIs are forwarded to a target hart always at machine level.
 
-Together, fields Hart Index and Guest Index of register `target[latexmath:[$i$]]` determine the
-address for MSIs forwarded for interrupt source latexmath:[$i$]. The
+Together, fields Hart Index and Guest Index of register `target[latexmath:[i]]` determine the
+address for MSIs forwarded for interrupt source latexmath:[i]. The
 remaining field EIID (External Interrupt Identity) specifies the data
 value for those MSIs, eventually becoming the minor identity for an
 external interrupt at the target hart.
 
 If the interrupt domain's harts have IMSIC interrupt files that
-implement latexmath:[$N$] distinct interrupt identities
+implement latexmath:[N] distinct interrupt identities
 (<<IMSIC-intrFilesAndIdents>>),
-then EIID is a latexmath:[$k$]-bit unsigned integer field, where
-latexmath:[$\lceil\log_{2}N\rceil \leq k \leq {11}$]. EIID is thus
-able to hold at least values 0 through latexmath:[$N$]. A write to a `target`
-register sets the latexmath:[$k$] implemented bits of EIID equal to the
-least-significant latexmath:[$k$] bits of the 32-bit value written.
+then EIID is a latexmath:[k]-bit unsigned integer field, where
+latexmath:[\lceil\log_{2}N\rceil \leq k \leq {11}]. EIID is thus
+able to hold at least values 0 through latexmath:[N]. A write to a `target`
+register sets the latexmath:[k] implemented bits of EIID equal to the
+least-significant latexmath:[k] bits of the 32-bit value written.
 
 === Reset
 
@@ -1103,10 +1103,10 @@ When a read of register `claimi` returns an interrupt identity of zero
 
 `ithreshold` is a *WLRL* register that determines the minimum interrupt priority (maximum priority number) for an interrupt to be signaled to the corresponding hart. Register `ithreshold` implements exactly IPRIOLEN bits, and thus is capable of
 holding all priority numbers from 0 to
-latexmath:[${{2}^{\textrm{IPRIOLEN}} - {1}}$].
+latexmath:[{{2}^{\textrm{IPRIOLEN}} - {1}}].
 
-When `ithreshold` is a nonzero value latexmath:[$P$], interrupt sources with priority
-numbers latexmath:[$P$] and higher do not contribute to signaling
+When `ithreshold` is a nonzero value latexmath:[P], interrupt sources with priority
+numbers latexmath:[P] and higher do not contribute to signaling
 interrupts to the hart, as though those sources were not enabled,
 regardless of the settings of their interrupt-enable bits. When `ithreshold` is zero, all enabled interrupt sources can contribute to signaling interrupts to the hart.
 
@@ -1186,7 +1186,7 @@ written roughly as follows:
 |save processor registers
 |i = read register `claimi` from the hart's IDC structure at the APLIC
 |i = i>>16
-|call the interrupt handler for external interrupt latexmath:[$i$] (minor identity)
+|call the interrupt handler for external interrupt latexmath:[i] (minor identity)
 |restore processor registers
 |return from trap
 |===
@@ -1219,7 +1219,7 @@ system reset.
 
 For a machine-level interrupt domain, if MSI target addresses are
 determined by `mmsiaddrcfg` and `mmsiaddrcfgh`, then the address for an outgoing MSI for interrupt
-source latexmath:[$i$] is computed from those registers and from the
+source latexmath:[i] is computed from those registers and from the
 Hart Index field of register `target[latexmath:[i]]` as follows:
 
 
@@ -1230,20 +1230,20 @@ Hart Index field of register `target[latexmath:[i]]` as follows:
 | MSI address = ( Base PPN \| (g<<(HHXS+12)) \| (h<<LHXS) )<<12
 |===
 
-Here, latexmath:[<<k$] and latexmath:[>>k$] represent shifting left
-and right by latexmath:[$k$] bits, an ampersand (&) represents bitwise
+Here, latexmath:[<<k] and latexmath:[>>k] represent shifting left
+and right by latexmath:[k] bits, an ampersand (&) represents bitwise
 logical AND, and a vertical bar (|) represents bitwise logical OR.
 Assuming the recommendations of <<IMSIC-systemMemRegions>> are
 followed for the arrangement of IMSIC interrupt files in the machine's
-address space, value latexmath:[$g$] is intended to be the number of a
-hart group (always zero if HHXW = 0), while latexmath:[$h$] is the
+address space, value latexmath:[g] is intended to be the number of a
+hart group (always zero if HHXW = 0), while latexmath:[h] is the
 number of the target hart within that group. Represented in the terms of
-<<IMSIC-systemMemRegions>>, HHXW = latexmath:[$j$], LHXW = latexmath:[$k$], HHXS = latexmath:[${E-24}$], LHXS = latexmath:[${C-12}$], and Base PPN = latexmath:[$A$]>>12.
+<<IMSIC-systemMemRegions>>, HHXW = latexmath:[j], LHXW = latexmath:[k], HHXS = latexmath:[{E-24}], LHXS = latexmath:[{C-12}], and Base PPN = latexmath:[A]>>12.
 
 For a supervisor-level domain, if MSI target addresses are determined by
 the root domain's configuration registers (`smsiaddrcfg` and others), then to
 construct the address for an outgoing MSI for interrupt
-source latexmath:[$i$], the Hart Index from register `target[latexmath:[i]]` must first be
+source latexmath:[i], the Hart Index from register `target[latexmath:[i]]` must first be
 converted into the index number that machine-level domains use for the
 same hart. (These numbers are often the same, but they may not be.) The
 address for the MSI is then computed using this machine-level hart index
@@ -1258,9 +1258,9 @@ together with the Base PPN and LHXS values from `smsiaddrcfg` and `smsiaddrcfgh`
 |===
 
 Represented in the terms of
-<<IMSIC-systemMemRegions>>, HHXW = latexmath:[$j$], LHXW = latexmath:[$k$], HHXS = latexmath:[${E-24}$], LHXS = latexmath:[${D-12}$], and Base PPN = latexmath:[$B$]>>12.
+<<IMSIC-systemMemRegions>>, HHXW = latexmath:[j], LHXW = latexmath:[k], HHXS = latexmath:[{E-24}], LHXS = latexmath:[{D-12}], and Base PPN = latexmath:[B]>>12.
 
-The data for an outgoing MSI write is taken from the EIID field of `target[latexmath:[$i$]]`, zero-extended to 32 bits. An MSI's 32-bit data is always written in
+The data for an outgoing MSI write is taken from the EIID field of `target[latexmath:[i]]`, zero-extended to 32 bits. An MSI's 32-bit data is always written in
 little-endian byte order, regardless of the BE field of the domain's `domaincfg`
 register.
 
@@ -1324,15 +1324,15 @@ following sequence can then be used to synchronize between an APLIC and
 a specific hart:
 
 . At the hart's IMSIC, clear the pending bit for the specific minor
-interrupt identity latexmath:[$i$] used exclusively for APLIC
+interrupt identity latexmath:[i] used exclusively for APLIC
 synchronization.
 . Acquire the shared lock for the APLIC's `genmsi` register.
 . Write `genmsi` to generate an MSI to the hart with interrupt
-identity latexmath:[$i$].
+identity latexmath:[i].
 . Repeatedly read `genmsi` until bit Busy is false.
 . Release the lock for `genmsi`.
 . Repeatedly read the pending bit for minor interrupt identity
-latexmath:[$i$] at the hart's IMSIC until it is found set.
+latexmath:[i] at the hart's IMSIC until it is found set.
 
 The loops of steps 4 and 6 are expected normally to succeed very
 quickly, often on the first or second attempt. When this sequence is

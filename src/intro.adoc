@@ -1,4 +1,4 @@
-:imagesdir: 
+:imagesdir:
 
 [[ch:intro]]
 == Introduction
@@ -78,7 +78,7 @@ of this document.
 
 === Limits
 
-In its current version, the RISC-V Advanced Interrupt Architecture can support RISC-V 
+In its current version, the RISC-V Advanced Interrupt Architecture can support RISC-V
 symmetric multiprocessing (SMP) systems with up to 16,384 harts. If the
 harts are 64-bit (RV64) and implement the H extension, and if
 all features of the Advanced Interrupt Architecture are fully
@@ -346,20 +346,20 @@ harts is sufficiently rare that standardizing hardware support for
 multicast cannot be justified in this case.
 
 Along with multicast delivery, other architectures support an option for
-"1-of-latexmath:[$N$]" delivery of interrupts, whereby the hardware
+"1-of-latexmath:[N]" delivery of interrupts, whereby the hardware
 chooses a single destination hart from among a configured set of
-latexmath:[$N$] harts, with the goal of automatic load balancing of
+latexmath:[N] harts, with the goal of automatic load balancing of
 interrupt handling among the harts. Experiments in the 2010s called into
-question the utility of 1-of-latexmath:[$N$] modes in practice, showing
+question the utility of 1-of-latexmath:[N] modes in practice, showing
 that software could often do a better job of load balancing than the
 hardware algorithms implemented in actual chips. Linux was consequently
-modified to discontinue using 1-of-latexmath:[$N$] interrupt delivery
+modified to discontinue using 1-of-latexmath:[N] interrupt delivery
 even on systems that have it.
 
 We remain open to the argument that hardware load balancing of interrupt
 handling may be beneficial for certain specialized markets, such as
 networking. However, the claims made so far in this regard do not
-justify requiring support for 1-of-latexmath:[$N$] delivery in all RISC-V servers. With more evidence, some mechanism for 1-of-latexmath:[$N$]
+justify requiring support for 1-of-latexmath:[N] delivery in all RISC-V servers. With more evidence, some mechanism for 1-of-latexmath:[N]
 delivery might become a future option.
 
 The original Platform-Level Interrupt Controller (PLIC) for RISC-V is
@@ -370,7 +370,7 @@ _claim_ the interrupt at the PLIC is the one responsible for servicing
 it. Usually this sets up a race, where the subset of harts configured to
 receive the multicast interrupt all take an external interrupt trap
 simultaneously and compete to be the first to claim the interrupt at the
-PLIC. The intention is to provide a form of 1-of-latexmath:[$N$]
+PLIC. The intention is to provide a form of 1-of-latexmath:[N]
 interrupt delivery. However, for all the harts that fail to win the
 claim, the interrupt trap becomes wasted effort.
 
