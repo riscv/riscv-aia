@@ -7,7 +7,7 @@ user_ (VU) modes for hosting virtual harts. The Advanced Interrupt
 Architecture adds to the H extension new interrupt facilities
 aligned with those described earlier for supervisor-level interrupts.
 
-As introduced in <<CSRs>>, several hypervisor and VS
+As introduced in xref:CSRs.adoc#CSRs[], several hypervisor and VS
 CSRs are added: `hvien`, `hvictl`, `hviprio1`, `hviprio2`, `vsiselect`, `vsireg`, `vstopei`, and `vstopi`. (And for RV32, the following
 high-half CSRs are also added: `hidelegh`, `hvienh`, `hviph`, `hviprio1h`, `hviprio2h`, `vsiph` and `vsieh`.) As always, when
 executing in VS-mode or VU-mode, the VS CSRs substitute for the
@@ -40,7 +40,7 @@ the range `0x70`-`0xFF` select registers of this guest interrupt file, just as
 values of `siselect` in the same range select registers of the IMSIC's true
 supervisor-level interrupt file. The registers of an interrupt file that
 are accessed indirectly through `vsiselect` and `vsireg` are documented in
-<<IMSIC>> on the IMSIC, along with IMSIC-only CSR `vstopei`.
+xref:IMSIC.adoc#IMSIC[] on the IMSIC, along with IMSIC-only CSR `vstopei`.
 Because all IMSIC interrupt files act identically, the guest interrupt
 file that a virtual hart accesses through CSRs `siselect`, `sireg`, and `stopei` is
 indistinguishable from a true supervisor-level interrupt file as seen
@@ -142,7 +142,7 @@ the old interrupt file, reconfigure the APLIC to send them to the new
 interrupt file. As needed, synchronize with all IOMMUs and APLICs to
 ensure that no straggler MSIs will arrive at the old interrupt file
 after this step. Synchronizing with an APLIC can be accomplished using
-the algorithm of <<AdvPLIC-MSISync>>.
+the algorithm of xref:AdvPLIC.adoc#AdvPLIC-MSISync[].
 . At the old interrupt file, dump to memory all implemented
 interrupt-pending and interrupt-enable bits (the `eip` and `eie` arrays). After this
 step is done, the old interrupt file is no longer in use.
@@ -193,7 +193,7 @@ described later in the next section.
 Like for supervisor level, the Advanced Interrupt Architecture
 optionally allows major VS-level interrupts to be configured by software
 to intermix in priority with VS-level external interrupts. As documented
-in <<intrs-S>>, interrupt priorities for
+in xref:MSLevel.adoc#intrs-S[], interrupt priorities for
 supervisor level are configured by the `iprio` array accessed indirectly through
 CSRs `siselect` and `sireg`. The `siselect` addresses for the `iprio` array registers are `0x30`-`0x3F`.
 
@@ -289,7 +289,7 @@ added CSRs that must be swapped on a virtual hart switch.
 
 Major interrupts outside the priority-configurable subset can still be
 directed to VS level, but their priority will simply be the default
-order defined in <<majorIntrs>>.
+order defined in xref:MSLevel.adoc#majorIntrs[].
 ====
 
 If a hypervisor really must emulate configurability of priority for
@@ -304,7 +304,7 @@ can assert interrupts to the virtual hart using CSRs `hvien` (Hypervisor
 Virtual-Interrupt-Enable) and `hvip` (Hypervisor Virtual-Interrupt-Pending
 bits). These CSRs affect interrupts for VS level much the same way that `mvien`
 and `mvip` do for supervisor level, as explained in
-<<virtIntrs-S>>.
+xref:MSLevel.adoc#virtIntrs-S[].
 
 Each bit of registers `hvien` and `hvip` corresponds with an interrupt number in the
 range 0-63. Bits 12:0 of `hvien` are reserved and must be read-only zeros, while
@@ -496,7 +496,7 @@ above), in which case default priority order is determined solely by
 `hvictl`.DPR. If bit IPRIOM (IPRIO Mode) of `hvictl` is zero, IPRIO in `vstopi` is 1; else, if the
 priority number for the highest-priority candidate is within the range 1
 to 255, IPRIO is that value; else, IPRIO is set to either 0 or 255 in
-the manner documented for `stopi` in <<stopi>>.
+the manner documented for `stopi` in xref:MSLevel.adoc#stopi[].
 
 ==== Interrupt traps to VS-mode
 

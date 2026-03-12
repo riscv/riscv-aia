@@ -55,7 +55,7 @@ some instructions, not `mip`, `sip`, `hip`, or `vsip`.
 
 *Changes for the ratified version 1.0*
 
-Resolved some inconsistencies in <<CSRs>> about when to raise
+Resolved some inconsistencies in xref:CSRs.adoc#CSRs[] about when to raise
 a virtual instruction exception versus an illegal instruction exception.
 
 *Changes for RC5 (Release Candidate 5)*
@@ -67,7 +67,7 @@ access `sireg` from a virtual machine (VS or VU-mode) should
 preferably raise an illegal instruction exception instead of a virtual
 instruction exception.
 
-Added clarification about the term _IOMMU_ used in <<IOMMU>>.
+Added clarification about the term _IOMMU_ used in xref:IOMMU.adoc#IOMMU[].
 
 Added clarification about MSI write replaced by MRIF update and notice
 MSI sent after the update.
@@ -91,13 +91,13 @@ partner here is `mip`.)
 Removed the still-draft Duo-PLIC chapter to a separate document.
 
 Allocated major interrupts 35 and 43 for signaling RAS events
-(<<majorIntrs>>).
+(xref:MSLevel.adoc#majorIntrs[]).
 
-In <<virtIntrs-S>> added the options for bits 1 and 9 to
+In xref:MSLevel.adoc#virtIntrs-S[] added the options for bits 1 and 9 to
 be writable in CSR `mvien`, and specified the effects of setting each
 of these bits.
 
-Upgraded <<IOMMU>> ("IOMMU Support") to the _frozen_ state.
+Upgraded xref:IOMMU.adoc#IOMMU[] ("IOMMU Support") to the _frozen_ state.
 
 *Changes for RC2*
 
@@ -106,6 +106,6 @@ integer values of the number of bits implemented for that field, and
 that writes to `hvictl` always set IID in the most straightforward
 way.
 
-A comment was added to <<IPIs>> warning about the possible
+A comment was added to xref:IPIs.adoc#IPIs[] warning about the possible
 need for FENCE instructions when IPIs are sent to other harts by writing
 MSIs to those harts' IMSICs.

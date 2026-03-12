@@ -125,7 +125,7 @@ device are initially guest physical addresses, as they are configured at
 the device by the guest OS. These guest addresses must be translated by
 an IOMMU, which gets configured by the hypervisor to redirect those MSIs
 to the interrupt files for the correct guest external interrupts. For
-more on this topic, see <<IOMMU>>.
+more on this topic, see xref:IOMMU.adoc#IOMMU[].
 
 === Interrupt priorities
 
@@ -375,7 +375,7 @@ latexmath:[g\times2^E+B+2^{k+D}-1],
 
 pages not occupied by an interrupt file should be read-only zeros.
 
-See also <<AdvPLIC-MSIAddrs>> for the
+See also xref:AdvPLIC.adoc#AdvPLIC-MSIAddrs[] for the
 default algorithms an Advanced PLIC may use to determine the destination
 addresses of outgoing MSIs, which should be the addresses of IMSIC
 interrupt files.
@@ -383,7 +383,7 @@ interrupt files.
 === CSRs for external interrupts via an IMSIC
 
 Software accesses a hart's IMSIC primarily through the CSRs introduced
-in <<CSRs>>. There is a separate set of CSRs for each
+in xref:CSRs.adoc#CSRs[]. There is a separate set of CSRs for each
 implemented privilege level that can receive interrupts. The
 machine-level CSRs interact with the IMSIC's machine-level interrupt
 file, while, if supervisor mode is implemented, the supervisor-level
@@ -393,7 +393,7 @@ guest interrupt file, selected by the VGEIN field of CSR `hstatus`.
 
 For machine level, the relevant CSRs are `miselect`, `mireg`, and `mtopei`. When supervisor mode is implemented, the set of supervisor-level CSRs matches those of machine level: `siselect`, `sireg`, and `stopei`. And when the H extension is implemented, there are three corresponding VS CSRs: `vsiselect`, `vsireg`, and `vstopei`.
 
-As explained in <<CSRs>>, registers `miselect` and `mireg` provide indirect access to additional machine-level registers. Likewise for supervisor-level `siselect` and `sireg`, and VS-level `vsiselect` and `vsireg` . In each case, a value of the **_*iselect_** _CSR_ (`miselect`, `siselect` , or `vsiselect)`) in the range 0x70-0xFF selects a register of the
+As explained in xref:CSRs.adoc#CSRs[], registers `miselect` and `mireg` provide indirect access to additional machine-level registers. Likewise for supervisor-level `siselect` and `sireg`, and VS-level `vsiselect` and `vsireg` . In each case, a value of the **_*iselect_** _CSR_ (`miselect`, `siselect` , or `vsiselect)`) in the range 0x70-0xFF selects a register of the
 corresponding IMSIC interrupt file, either the machine-level interrupt
 file (`miselect`), the supervisor-level interrupt file (`siselect`), or a guest interrupt file (`vsiselect`).
 

@@ -417,7 +417,7 @@ domain.
 If the interrupt domain's harts have IMSICs, then unless the relevant
 interrupt files of those IMSICs support value `0x40000000` for register `eidelivery`, setting DM
 to zero (direct delivery mode) will have the same effect as setting IE
-to zero. See <<IMSIC-reg-eidelivery>>
+to zero. See xref:IMSIC.adoc#IMSIC-reg-eidelivery[]
 and <<AdvPLIC-directMode-intrDelivery>>.
 
 BE (Big-Endian) is a *WARL* field that determines the byte order for most
@@ -634,7 +634,7 @@ implementations will be able to follow that recommendation.
 
 It is expected that most systems will arrange the physical addresses of
 target IMSICs in a simple linear correspondence with hart index numbers.
-(See <<IMSIC-systemMemRegions>>.)
+(See xref:IMSIC.adoc#IMSIC-systemMemRegions[].)
 Registers `mmsiaddrcfg` and `mmsiaddrcfgh` (along with `smsiaddrcfg` and `smsiaddrcfgh` from the next subsection) allow
 sufficiently trusted machine-level software, early after system reset,
 to configure the pattern of physical addresses for target IMSICs and
@@ -961,7 +961,7 @@ external interrupt at the target hart.
 
 If the interrupt domain's harts have IMSIC interrupt files that
 implement latexmath:[N] distinct interrupt identities
-(<<IMSIC-intrFilesAndIdents>>),
+(xref:IMSIC.adoc#IMSIC-intrFilesAndIdents[]),
 then EIID is a latexmath:[k]-bit unsigned integer field, where
 latexmath:[\lceil\log_{2}N\rceil \leq k \leq {11}]. EIID is thus
 able to hold at least values 0 through latexmath:[N]. A write to a `target`
@@ -1154,7 +1154,7 @@ directly to harts (field DM of `domaincfg` is zero), the APLIC supplies the
 _external interrupt_ signals, at the domain’s privilege level, for all
 harts of the domain, so long as one of the following is true: (a) the
 harts do not have IMSICs, or (b) the `eidelivery` registers of the relevant IMSIC
-interrupt files are set to `0x40000000` (<<IMSIC-reg-eidelivery>>). For a
+interrupt files are set to `0x40000000` (xref:IMSIC.adoc#IMSIC-reg-eidelivery[]). For a
 machine-level domain, the interrupt signals from the APLIC appear as bit
 MEIP (Machine External Interrupt-Pending) in each hart's `mip` CSR. For a
 supervisor-level domain, the interrupt signals appear as bit SEIP
@@ -1233,12 +1233,12 @@ Hart Index field of register `target[latexmath:[i]]` as follows:
 Here, latexmath:[<<k] and latexmath:[>>k] represent shifting left
 and right by latexmath:[k] bits, an ampersand (&) represents bitwise
 logical AND, and a vertical bar (|) represents bitwise logical OR.
-Assuming the recommendations of <<IMSIC-systemMemRegions>> are
+Assuming the recommendations of xref:IMSIC.adoc#IMSIC-systemMemRegions[] are
 followed for the arrangement of IMSIC interrupt files in the machine's
 address space, value latexmath:[g] is intended to be the number of a
 hart group (always zero if HHXW = 0), while latexmath:[h] is the
 number of the target hart within that group. Represented in the terms of
-<<IMSIC-systemMemRegions>>, HHXW = latexmath:[j], LHXW = latexmath:[k], HHXS = latexmath:[{E-24}], LHXS = latexmath:[{C-12}], and Base PPN = latexmath:[A]>>12.
+xref:IMSIC.adoc#IMSIC-systemMemRegions[], HHXW = latexmath:[j], LHXW = latexmath:[k], HHXS = latexmath:[{E-24}], LHXS = latexmath:[{C-12}], and Base PPN = latexmath:[A]>>12.
 
 For a supervisor-level domain, if MSI target addresses are determined by
 the root domain's configuration registers (`smsiaddrcfg` and others), then to
@@ -1258,7 +1258,7 @@ together with the Base PPN and LHXS values from `smsiaddrcfg` and `smsiaddrcfgh`
 |===
 
 Represented in the terms of
-<<IMSIC-systemMemRegions>>, HHXW = latexmath:[j], LHXW = latexmath:[k], HHXS = latexmath:[{E-24}], LHXS = latexmath:[{D-12}], and Base PPN = latexmath:[B]>>12.
+xref:IMSIC.adoc#IMSIC-systemMemRegions[], HHXW = latexmath:[j], LHXW = latexmath:[k], HHXS = latexmath:[{E-24}], LHXS = latexmath:[{D-12}], and Base PPN = latexmath:[B]>>12.
 
 The data for an outgoing MSI write is taken from the EIID field of `target[latexmath:[i]]`, zero-extended to 32 bits. An MSI's 32-bit data is always written in
 little-endian byte order, regardless of the BE field of the domain's `domaincfg`
