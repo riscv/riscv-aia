@@ -40,7 +40,7 @@ In a machine without IMSICs, every RISC-V hart accepts interrupts from exactly o
 hart. A hart’s external interrupt controller (the PLIC or APLIC) signals
 interrupts to the hart through a dedicated connection, usually a wire,
 for each privilege level that the hart may receive interrupts. (Recall
-<<intrsWithoutIMSICs>>). A
+xref:intro.adoc#intrsWithoutIMSICs[Figure 1. Traditional delivery of wired interrupts to harts without support for MSIs.]). A
 system without IMSICs will typically have only one PLIC or APLIC,
 serving as the external interrupt controller for all RISC-V harts.
 
@@ -57,7 +57,7 @@ having all harts share a single APLIC.
 RISC-V harts that employ IMSICs as their external interrupt controllers can
 receive external interrupts only in the form of MSIs. In that case, the
 role of an APLIC is to convert wired interrupts into MSIs for harts.
-(Recall <<intrsWithIMSICs>>.)
+(Recall xref:intro.adoc#intrsWithIMSICs[Figure 2. Interrupt delivery by MSIs when harts have IMSICs for receiving them].)
 The APLIC is said to _forward_ incoming wire-signaled interrupts to
 harts by sending MSIs to the harts.
 
