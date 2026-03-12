@@ -6,6 +6,6 @@ nav:
 
 asciidoc:
   attributes:
-    page-pdf_url: ../_attachments/riscv-interrupts.pdf
+    page-pdf_url: _attachments/riscv-interrupts.pdf
     more_details_url: https://riscv.atlassian.net/wiki/spaces/HOME/pages/806289428/RISC-V+Advanced+Interrupt+Architecture
     page-group: hardware
