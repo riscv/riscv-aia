@@ -469,7 +469,7 @@ read `mtopi` to avoid redundant restoring and saving of processor registers when
 an interrupt arrives during the handling of another trap (either a
 synchronous exception or an earlier interrupt):
 
-[,c]
+[source,c]
 ----
 save processor registers
 i = read CSR mcause
@@ -745,7 +745,7 @@ read `stopi` to avoid redundant restoring and saving of processor registers when
 an interrupt arrives during the handling of another trap (either a
 synchronous exception or an earlier interrupt):
 
-[,c]
+[source,c]
 ----
 save processor registers
 i = read CSR scause
