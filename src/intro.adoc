@@ -139,7 +139,7 @@ central hub for interrupts, routing and prioritizing external interrupts
 for each hart as illustrated in <<intrsWithoutIMSICs>>.
 Interrupts may be selectively routed either to machine level or to
 supervisor level at each hart. The APLIC is specified in
-xref:AdvPLIC.adoc#AdvPLIC[].
+xref:AdvPLIC.adoc#AdvPLIC[Advanced Platform-Level Interrupt Controller (APLIC)].
 
 Without IMSICs, the current Advanced Interrupt Architecture does not
 support the direct signaling of external interrupts to virtual machines,
@@ -175,9 +175,9 @@ interrupt-pending bits and a matching array of interrupt-enable bits,
 the latter indicating which individual interrupts the hart is currently
 prepared to receive.
 
-IMSIC units are fully defined in xref:IMSIC.adoc#IMSIC[]. The
+IMSIC units are fully defined in xref:IMSIC.adoc#IMSIC[Incoming MSI Controller (IMSIC)]. The
 format of MSIs used by the RISC-V Advanced Interrupt Architecture is described
-in that chapter, xref:IMSIC.adoc#MSIEncoding[].
+in that chapter, xref:IMSIC.adoc#MSIEncoding[MSI encoding].
 
 When the harts in a RISC-V system have IMSICs, the system will normally still
 contain an APLIC, but its role is changed. Instead of signaling
@@ -185,12 +185,12 @@ interrupts to harts directly by wires as in <<intrsWithoutIMSICs>>, an APLIC con
 
 If RISC-V harts implement the H extension,
 IMSICs may have additional _guest interrupt files_ for delivering
-interrupts to virtual machines. Besides xref:IMSIC.adoc#IMSIC[] on
-the IMSIC, see xref:VSLevel.adoc#VSLevel[] which specifically
+interrupts to virtual machines. Besides xref:IMSIC.adoc#IMSIC[Incoming MSI Controller (IMSIC)] on
+the IMSIC, see xref:VSLevel.adoc#VSLevel[Interrupts for Virtual Machines (VS Level)] which specifically
 covers interrupts to virtual machines. If the system also contains an
 IOMMU to perform address translation of memory accesses made by I/O
 devices, then MSIs from those same devices may require special handling.
-This topic is addressed in xref:IOMMU.adoc#IOMMU[], "IOMMU Support for MSIs to Virtual Machines."
+This topic is addressed in xref:IOMMU.adoc#IOMMU[IOMMU Support for MSIs to Virtual Machines].
 
 ==== Other interrupts
 
@@ -200,7 +200,7 @@ harts. The Privileged Architecture's timer interrupts remain supported
 in full, and software interrupts remain at least partly supported,
 although neither appears in <<intrsWithoutIMSICs>>
 and <<intrsWithIMSICs>>. For the specifics on software interrupts,
-refer to xref:IPIs.adoc#IPIs[], "Interprocessor Interrupts (IPIs).""
+refer to xref:IPIs.adoc#IPIs[Interprocessor Interrupts (IPIs)].
 
 The Advanced Interrupt Architecture adds considerable support for _local
 interrupts_ at a hart, whereby a hart essentially interrupts itself in
@@ -292,7 +292,7 @@ own minor identities. However, this document has need to discuss minor
 identities only with regard to external interrupts.
 
 The local interrupts defined by the Advanced Interrupt Architecture and
-their handling are covered mainly in xref:MSLevel.adoc#MSLevel[],
+their handling are covered mainly in xref:MSLevel.adoc#MSLevel[Interrupts for Machine and Supervisor Levels],
 "Interrupts for Machine and Supervisor Levels."
 
 === Selection of harts to receive an interrupt
@@ -315,7 +315,7 @@ hart.
 To send an interprocessor interrupt (IPI) to multiple harts, the
 originating hart need only execute a loop, sending an individual IPI to
 each destination hart. For IPIs to a single destination hart, see
-xref:IPIs.adoc#IPIs[].
+xref:IPIs.adoc#IPIs[Interprocessor Interrupts (IPIs)].
 
 [NOTE]
 ====
@@ -409,8 +409,8 @@ without the H extension).
 
 Software development tools like compilers and assemblers need not be
 concerned about whether an IMSIC exists but should just allow attempts
-to access the IMSIC CSRs (described in xref:CSRs.adoc#CSRs[]
-and xref:IMSIC.adoc#IMSIC[]) if Smaia or Ssaia is indicated. Without an
+to access the IMSIC CSRs (described in xref:CSRs.adoc#CSRs[Control and Status Registers (CSRs) Added to Harts]
+and xref:IMSIC.adoc#IMSIC[Incoming MSI Controller (IMSIC)]) if Smaia or Ssaia is indicated. Without an
 actual IMSIC, such attempts may trap, but that is not a problem for the
 development tools.
 

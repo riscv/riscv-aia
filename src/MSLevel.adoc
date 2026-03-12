@@ -10,7 +10,7 @@ labels, the _external_ interrupts at each privilege level are given
 secondary, minor identities by an external interrupt controller such as
 an APLIC or IMSIC, distinguishing interrupts from different devices or
 causes. These minor identities for external interrupts were covered in
-xref:IMSIC.adoc#IMSIC[] and xref:AdvPLIC.adoc#AdvPLIC[] specifying the IMSIC and APLIC components.
+xref:IMSIC.adoc#IMSIC[Incoming MSI Controller (IMSIC)] and xref:AdvPLIC.adoc#AdvPLIC[Advanced Platform-Level Interrupt Controller (APLIC)] specifying the IMSIC and APLIC components.
 
 The Advanced Interrupt Architecture reserves another 24 major interrupt
 identities for additional _local interrupts_ that arise within or in
@@ -238,7 +238,7 @@ default order specified in the previous section <<majorIntrs>>, or may be a modi
 
 The machine-level priorities for major interrupts 0-63 may be configured
 by a set of registers accessed through the `miselect` and `mireg` CSRs introduced in
-xref:CSRs.adoc#CSRs[]. When XLEN = 32, sixteen of these registers are defined, listed below with their `miselect` addresses:
+xref:CSRs.adoc#CSRs[Control and Status Registers (CSRs) Added to Harts]. When XLEN = 32, sixteen of these registers are defined, listed below with their `miselect` addresses:
 
 [%autowidth,float="center",align="center",cols="<m,<m",grid=none,frame=none]
 |===
@@ -297,7 +297,7 @@ The width of priority numbers for external interrupts is _IPRIOLEN_.
 This parameter is affected by the main external interrupt controller for
 the hart, whether a PLIC, APLIC, or IMSIC.
 
-For an APLIC, IPRIOLEN is in the range 1-8 as specified in xref:AdvPLIC.adoc#AdvPLIC[] on the APLIC.
+For an APLIC, IPRIOLEN is in the range 1-8 as specified in xref:AdvPLIC.adoc#AdvPLIC[Advanced Platform-Level Interrupt Controller (APLIC)] on the APLIC.
 
 For an IMSIC, IPRIOLEN is 6, 7, or 8. IPRIOLEN may be 6 only if the
 number of external interrupt identities implemented by the IMSIC is 63.
