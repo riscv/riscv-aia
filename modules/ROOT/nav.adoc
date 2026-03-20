@@ -1,5 +1,5 @@
-.AIA Specification
-* xref:index.adoc[Introduction]
+.Advanced Interrupt Architecture
+* xref:index.adoc[Title Page]
 * xref:colophon.adoc[Preface]
 * xref:contributors.adoc[Contributors]
 * xref:copyright.adoc[Copyright]
