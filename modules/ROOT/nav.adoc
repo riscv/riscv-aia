@@ -1,7 +1,7 @@
 .Advanced Interrupt Architecture
 * xref:index.adoc[Title Page]
-* xref:colophon.adoc[Preface]
 * xref:contributors.adoc[Contributors]
+* xref:colophon.adoc[Preface]
 * xref:copyright.adoc[Copyright]
 * xref:intro.adoc[Introduction]
 * xref:CSRs.adoc[CSRs Added to Harts]
