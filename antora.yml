@@ -1,0 +1,14 @@
+name: aia
+title: Advanced Interrupt Architecture
+version: v1.0
+nav:
+- modules/ROOT/nav.adoc
+
+asciidoc:
+  attributes:
+    page-group: hardware
+    page-card-description: 'Interrupt architecture and related interfaces.'
+    page-release-date: 'June 2023'
+    page-pdf_url: _attachments/riscv-interrupts.pdf
+    more_details_url: https://riscv.atlassian.net/wiki/external/MTc1MTUwOTg5NTRkNDk0YjlkOGY1MDk5MTljZGU2MjA
+    source-highlighter: highlight.js

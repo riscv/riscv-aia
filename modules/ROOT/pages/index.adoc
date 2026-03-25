@@ -1,0 +1,21 @@
+[.space-below]
+image::common::risc-v_logo.svg[id="riscvlogo"xs,alt="RISCV"]
+
+
+
+[.space-below]
+== The RISC-V Advanced Interrupt Architecture
+
+
+Editors: John Hauser, jh.riscv@jhauser.us
+
+Version 1.0, Revised 20250312
+
+// Preamble
+[WARNING]
+.This document is in the link:http://riscv.org/spec-state[Ratified state]
+====
+No changes are allowed. Any desired or needed changes can be the subject of a
+follow-on new extension. Ratified extensions are never revised.
+====
+
