@@ -109,18 +109,18 @@ Normally, the range for external interrupts, 0x70-0xFF, is populated only when
 an IMSIC is implemented; else, attempts to access `mireg` when `miselect` is in this range
 cause an illegal instruction exception. The contents of the
 external-interrupts region are documented in
-<<IMSIC>> on the IMSIC.
+xref:IMSIC.adoc#IMSIC[Incoming MSI Controller (IMSIC)] on the IMSIC.
 
 CSR `mtopei` also exists only when an IMSIC is implemented, so is documented in
-<<IMSIC>> along with the indirectly accessed IMSIC
+xref:IMSIC.adoc#IMSIC[Incoming MSI Controller (IMSIC)] along with the indirectly accessed IMSIC
 registers.
 
 CSR `mtopi` reports the highest-priority interrupt that is pending and enabled
-for machine level, as specified in <<mtopi>>.
+for machine level, as specified in xref:MSLevel.adoc#mtopi[Machine top interrupt CSR (`mtopi`)].
 
 When S-mode is implemented, CSRs `mvien` and `mvip` support interrupt filtering and
 virtual interrupts for supervisor level. These facilities are explained
-in <<virtIntrs-S>>.
+in xref:MSLevel.adoc#virtIntrs-S[Interrupt filtering and virtual interrupts for supervisor level].
 
 If extension Smcsrind is also implemented, then when `miselect` has a value in the
 range 0x30-0x3F
@@ -214,11 +214,11 @@ SXLEN. Hence, for example, if MXLEN = 64 and SXLEN = 32, then these
 registers are 64 bits when the current privilege mode is M (running RV64
 code) but 32 bits when the privilege mode is S (RV32 code).
 
-CSR `stopei` is described with the IMSIC in <<IMSIC>>.
+CSR `stopei` is described with the IMSIC in xref:IMSIC.adoc#IMSIC[Incoming MSI Controller (IMSIC)].
 
 Register `stopi` reports the highest-priority interrupt that is pending and
 enabled for supervisor level, as specified in
-<<stopi>>.
+xref:MSLevel.adoc#stopi[Supervisor top interrupt CSR (`stopi`)].
 
 If extension Sscsrind is also implemented, then when `siselect` has a value in the range `0x30-0x3F` or `0x70-0xFF`, attempts to access alias CSRs `sireg2` through `sireg6` raise an illegal instruction exception (unless executing in a virtual machine, covered in the next section).
 
@@ -228,7 +228,7 @@ If extension Sscsrind is also implemented, then when `siselect` has a value in t
 If a hart implements the H extension,
 then the hypervisor and VS CSRs listed in <<CSRs-hypervisor>> are also either added or widened to 64 bits.
 
-The new hypervisor CSRs in the table (`hvien`, `hvictl` , `hviprio1`, and `hviprio2`) augment `hvip` for injecting interrupts into VS level. The use of these registers is covered in <<VSLevel>> on interrupts for virtual machines.
+The new hypervisor CSRs in the table (`hvien`, `hvictl` , `hviprio1`, and `hviprio2`) augment `hvip` for injecting interrupts into VS level. The use of these registers is covered in xref:VSLevel.adoc#VSLevel[Interrupts for Virtual Machines (VS Level)] on interrupts for virtual machines.
 
 The new VS CSRs (`vsiselect`, `vsireg`, `vstopei`, and `vstopi`) all match supervisor CSRs, and substitute for those supervisor CSRs when executing in a virtual machine (in VS-mode or VU-mode).
 
@@ -396,7 +396,7 @@ than M-mode:
 If one of these bits is zero in `mstateen0`, an attempt to access the corresponding state from a privilege mode less privileged than M-mode results in an illegal instruction trap. As always, the state-enable CSRs do not affect
 the accessibility of any state when in M-mode, only in less privileged modes. For more explanation, see the documentation for extension Smstateen.
 
-The AIA bit controls access to AIA CSRs `siph`, `sieh`, `stopi`, `hidelegh`, `hvien`/`hvienh`, `hviph`, `hvictl`, `hviprio1`/`hviprio1h`, `hviprio2`/`hviprio2h`, `vsiph`, `vsieh`, and `vstopi`, as well as to the supervisor-level interrupt priorities accessed through `siselect` + `sireg` (the `iprio` array of <<intrPrios-S>>).
+The AIA bit controls access to AIA CSRs `siph`, `sieh`, `stopi`, `hidelegh`, `hvien`/`hvienh`, `hviph`, `hvictl`, `hviprio1`/`hviprio1h`, `hviprio2`/`hviprio2h`, `vsiph`, `vsieh`, and `vstopi`, as well as to the supervisor-level interrupt priorities accessed through `siselect` + `sireg` (the `iprio` array of xref:MSLevel.adoc#intrPrios-S[Configuring priorities of major interrupts at supervisor level]).
 
 The IMSIC bit is implemented in `mstateen0` only if the hart has an IMSIC. If the
 H extension is also implemented, this bit does not affect the
@@ -436,6 +436,6 @@ If one of these bits is zero in `hstateen0`, and the same bit is one in `mstatee
 
 If the CSRIND bit is one in `mstateen0` but is zero in `hstateen0`, then all attempts from VS or VU-mode to access `siselect` or `sireg` raise a virtual instruction exception, not an illegal instruction exception, regardless of the value of `vsiselect` or any other `mstateen` bits.
 
-The IMSIC bit is implemented in `hstateen0` only if the hart has an IMSIC. Furthermore, even with an IMSIC, `hstateen0`.IMSIC may (or may not) be read-only zero if the IMSIC has no _guest interrupt files_ for guest external interrupts (<<IMSIC>>). When this bit is zero (whether read-only zero or set to zero), a virtual machine is prevented from accessing the hart's IMSIC the same as when `hstatus.VGEIN` = 0.
+The IMSIC bit is implemented in `hstateen0` only if the hart has an IMSIC. Furthermore, even with an IMSIC, `hstateen0`.IMSIC may (or may not) be read-only zero if the IMSIC has no _guest interrupt files_ for guest external interrupts (xref:IMSIC.adoc#IMSIC[Incoming MSI Controller (IMSIC)]). When this bit is zero (whether read-only zero or set to zero), a virtual machine is prevented from accessing the hart's IMSIC the same as when `hstatus.VGEIN` = 0.
 
 Extension Ssstateen is defined as the supervisor-level view of Smstateen. Therefore, the combination of Ssaia and Ssstateen incorporates the bits defined above for `hstateen0` but not those for `mstateen0`, since machine-level CSRs are not visible to supervisor level.

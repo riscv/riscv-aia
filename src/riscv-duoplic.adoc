@@ -118,9 +118,9 @@ priority and larger numbers as higher priorities. When a Duo-PLIC is
 acting as an original PLIC and reports to a hart an interrupt priority
 number, the number reported is negated to _normalize_ it to the
 convention of the Advanced Interrupt Architecture. If the original
-PLIC’s priority number for an interrupt is latexmath:[$p$], the
+PLIC’s priority number for an interrupt is latexmath:[p], the
 normalized priority number communicated to the target hart is
-latexmath:[${\mbox{2}^\textrm{IPRIOLEN}-p}$].
+latexmath:[{\mbox{2}^\textrm{IPRIOLEN}-p}].
 
 __
 

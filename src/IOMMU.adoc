@@ -63,7 +63,7 @@ of PCI bus number, device number, and function number.
 accesses using address-translation data structures—typically page
 tables—specified by software via the corresponding device context. The
 smallest granularity of address translation implemented by all IOMMUs is
-not larger than a 4-KiB page, matching that of standard RISC-V 
+not larger than a 4-KiB page, matching that of standard RISC-V
 address-translation page tables. (An IOMMU may in fact employ page
 tables in the same format as the page-based address translation defined
 by the RISC-V Privileged Architecture, but this is not required.)
@@ -130,7 +130,7 @@ translation is controlled by the MSI page table configured in the
 appropriate device context at the IOMMU. Because every interrupt file,
 real or virtual, occupies a naturally aligned 4-KiB page of address
 space, the required address translation is from a virtual (guest) page
-address to a physical page address, the same as supported by regular RISC-V 
+address to a physical page address, the same as supported by regular RISC-V
 page-based address translation.
 
 [[IOMMU-guestIntrFiles]]
@@ -233,7 +233,7 @@ memory-resident interrupt files:
 * memory-resident interrupt files with atomic update.
 
 Memory-resident interrupt files are most efficient when the memory
-system supports logical atomic memory operations (AMOs) corresponding to RISC-V 
+system supports logical atomic memory operations (AMOs) corresponding to RISC-V
 instructions AMOAND and AMOOR, for memory accesses made both from harts
 and from the IOMMU. The AMOAND and AMOOR operations are required for
 _atomic update_ of a memory-resident interrupt file. A reduced level of
@@ -316,7 +316,7 @@ invalid identity 0 and all identities greater than latexmath:[N].
 There is no need to specify to an IOMMU a desired size latexmath:[N]
 for an MRIF smaller than 2047 valid interrupt identities. The only use
 an IOMMU would make of this information would be to discard any MSIs
-indicating an interrupt identity greater than latexmath:[$N$]. If
+indicating an interrupt identity greater than latexmath:[N]. If
 devices are properly configured by software, such errant MSIs should not
 occur; but even if they do, it is just as effective for software to
 ignore spurious interrupt identities _after_ they have been recorded in
@@ -331,12 +331,12 @@ indicating an invalid interrupt identity of zero.
 
 The data component of an MSI write specifies the interrupt identity to
 raise in the destination interrupt file. (Recall
-<<MSIEncoding>>.) This data may be in
+xref:IMSIC.adoc#MSIEncoding[MSI encoding].) This data may be in
 little-endian or big-endian byte order. If an IOMMU supports
 memory-resident interrupt files, it can store to an MRIF MSIs of the
 same endianness that the machine's IMSICs accept. All IMSIC interrupt
 files are required to accept MSIs in little-endian byte order written to
-memory-mapped register `seteipnum_le` (<<IMSIC-memRegion>>). IMSIC interrupt
+memory-mapped register `seteipnum_le` (xref:IMSIC.adoc#IMSIC-memRegion[Memory region for an interrupt file]). IMSIC interrupt
 files may also accept MSIs in big-endian byte order if register `seteipnum_be` is
 implemented alongside `seteipnum_le`.
 
@@ -535,7 +535,7 @@ the relevant VM. An incoming 32-bit write made by a device is recognized
 as an MSI write to a virtual interrupt file if the destination guest
 physical page matches the supplied address pattern in all bit positions
 that are zeros in the supplied address mask. In detail, a memory access
-to guest physical address latexmath:[$A$] is an access to a virtual
+to guest physical address latexmath:[A] is an access to a virtual
 interrupt file’s memory-mapped page if
 
 [.text-center]
@@ -553,21 +553,21 @@ address as
 [.text-center]
 interrupt file number = extract(A >> 12, address mask)
 
-Here, extract(latexmath:[$x$], latexmath:[$y$]) is a "bit extract"
-that discards all bits from latexmath:[$x$] whose matching bits in the
-same positions in the mask latexmath:[$y$] are zeros, and packs the
-remaining bits from latexmath:[$x$] contiguously at the
+Here, extract(latexmath:[x], latexmath:[y]) is a "bit extract"
+that discards all bits from latexmath:[x] whose matching bits in the
+same positions in the mask latexmath:[y] are zeros, and packs the
+remaining bits from latexmath:[x] contiguously at the
 least-significant end of the result, keeping the same bit order as
-latexmath:[$x$] and filling any other bits at the most-significant end
-of the result with zeros. For example, if the bits of latexmath:[$x$]
-and latexmath:[$y$] are
+latexmath:[x] and filling any other bits at the most-significant end
+of the result with zeros. For example, if the bits of latexmath:[x]
+and latexmath:[y] are
 
 [.text-center]
-latexmath:[$x$] = a b c d e f g h 
+latexmath:[x] = a b c d e f g h
 [.text-center]
-latexmath:[$y$] = 1 0 1 0 0 1 1 0
+latexmath:[y] = 1 0 1 0 0 1 1 0
 
-then the value of extract(latexmath:[$x$], latexmath:[$y$]) has bits
+then the value of extract(latexmath:[x], latexmath:[y]) has bits
 0 0 0 0 a c f g.
 
 === MSI page tables
@@ -593,14 +593,14 @@ substitutes for the targeted virtual interrupt file (as in
 file in which to store incoming MSIs for the virtual interrupt file (as
 in <<IOMMU-MRIF>>).
 
-The number of entries in an MSI page table is latexmath:[${2}^{k}$]
-where latexmath:[$k$] is the number of bits that are ones in the MSI
+The number of entries in an MSI page table is latexmath:[{2}^{k}]
+where latexmath:[k] is the number of bits that are ones in the MSI
 address mask used to extract the interrupt file number from the
 destination guest physical address. If an MSI page table has 256 or
 fewer entries, the start of the table is aligned to a 4-KiB page address
 in real physical memory. If an MSI page table has
-latexmath:[${{2}^{k} > {256}}$] entries, the table must be
-naturally aligned to a latexmath:[${2}^{k}\times {16-byte}$]
+latexmath:[{{2}^{k} > {256}}] entries, the table must be
+naturally aligned to a latexmath:[{2}^{k}\times {16-byte}]
 address boundary. If an MSI page table is not aligned as required, all
 entries in the table appear to an IOMMU as UNSPECIFED, and any address an IOMMU
 may compute and use for reading an individual MSI PTE from the table is
@@ -743,7 +743,7 @@ MRIF, or is discarded.
 
 When the IMSIC interrupt files in the system implement memory-mapped
 register `seteipnum_be` for receiving MSIs in big-endian byte order
-(<<IMSIC-memRegion>>), then an IOMMU
+(xref:IMSIC.adoc#IMSIC-memRegion[Memory region for an interrupt file]), then an IOMMU
 must be able to store MSIs in both little-endian and big-endian byte
 orders to the destination MRIF. If the IMSIC interrupt files in the
 system do not implement register `seteipnum_be`, an IOMMU should ordinarily store only
@@ -753,15 +753,15 @@ address is zero, and in big-endian byte order if bit 2 of the
 destination address is one.
 
 If a naturally aligned 32-bit write is to guest physical
-address latexmath:[$A$] within a page covered by an MRIF-mode PTE, and
-if the write data is latexmath:[$D$] when interpreted in the byte order
-indicated by bit 2 of latexmath:[$A$], then the write is processed as
-follows: If either latexmath:[$A$][11:3] or latexmath:[$D$][31:11] is not
-zero, or if bit 2 of latexmath:[$A$] is one and big-endian MSIs are not
+address latexmath:[A] within a page covered by an MRIF-mode PTE, and
+if the write data is latexmath:[D] when interpreted in the byte order
+indicated by bit 2 of latexmath:[A], then the write is processed as
+follows: If either latexmath:[A][11:3] or latexmath:[D][31:11] is not
+zero, or if bit 2 of latexmath:[A] is one and big-endian MSIs are not
 supported, then the incoming write is accepted but discarded. Else, the
 original incoming write is recognized as an MSI and is replaced by one
 of the following memory accesses, setting the interrupt-pending bit that
-corresponds to the interrupt identity latexmath:[$D$] in the destination
+corresponds to the interrupt identity latexmath:[D] in the destination
 MRIF to one:
 
 * an atomic AMOOR operation, if atomic updates are supported; or
