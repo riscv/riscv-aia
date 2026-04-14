@@ -7,7 +7,7 @@ image::common::risc-v_logo.svg[id="riscvlogo"xs,alt="RISCV"]
 == The RISC-V Advanced Interrupt Architecture
 
 
-Editors: John Hauser, jh.riscv@jhauser.us
+Editors: John Hauser
 
 Version 1.0, Revised 20250312
 
