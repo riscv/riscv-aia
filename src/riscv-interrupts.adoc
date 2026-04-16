@@ -6,9 +6,9 @@
 //2023-08-17
 [[risc-v-aia]]
 = The RISC-V Advanced Interrupt Architecture
-:description: Advanced Interrupt Architecture 
+:description: Advanced Interrupt Architecture
 :company: RISC-V.org
-:authors: Editors: John Hauser, jh.riscv@jhauser.us
+:authors: Editors: John Hauser
 :revdate: Revised 20250312
 :revnumber: 1.0
 :url-riscv: http://riscv.org
@@ -39,14 +39,14 @@
 :sectnums:
 :sectnumlevels: 4
 :toc: preamble
-:toclevels: 4 
+:toclevels: 4
 :source-highlighter: pygments
 ifdef::backend-pdf[]
 :source-highlighter: rouge
 endif::[]
 :table-caption: Table
 :figure-caption: Figure
-:xrefstyle: short 
+:xrefstyle: short
 :chapter-refsig: Chapter
 :section-refsig: Section
 :appendix-refsig: Appendix
