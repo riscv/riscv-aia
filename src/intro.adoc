@@ -1,4 +1,4 @@
-:imagesdir: 
+:imagesdir:
 
 [[ch:intro]]
 == Introduction
@@ -78,7 +78,7 @@ of this document.
 
 === Limits
 
-In its current version, the RISC-V Advanced Interrupt Architecture can support RISC-V 
+In its current version, the RISC-V Advanced Interrupt Architecture can support RISC-V
 symmetric multiprocessing (SMP) systems with up to 16,384 harts. If the
 harts are 64-bit (RV64) and implement the H extension, and if
 all features of the Advanced Interrupt Architecture are fully
@@ -253,10 +253,13 @@ Virtual supervisor external interrupt +
 Machine external interrupt
 |12 +
 13 +
-14-15 |- +
+14 +
+15 |- +
+- +
 - +
 - |Supervisor guest external interrupt +
 Counter overflow interrupt +
+Asynchronous memory buffer interrupt +
 _Reserved by base Privileged Architecture_
 |16-23 |- |_Reserved for standard local interrupts_
 |24-31 |- |_Designated for custom use_
