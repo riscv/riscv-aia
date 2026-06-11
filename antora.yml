@@ -1,6 +1,6 @@
-name: aia-dev
+name: aia
 title: Advanced Interrupt Architecture
-version: frozen
+version: v500.0
 nav:
 - modules/ROOT/nav.adoc
 
