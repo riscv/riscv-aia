@@ -214,7 +214,8 @@ whose priority may be configured in hardware are these:
 |1 |Supervisor software interrupt
 |5 |Supervisor timer interrupt
 |13|Counter overflow interrupt
-|14-23|_Reserved for standard local interrupts_
+|14|Asynchronous memory buffer interrupt
+|15-23|_Reserved for standard local interrupts_
 |===
 
 For interrupts directed to VS level, software-configurable priorities
@@ -242,10 +243,11 @@ zero_
 |bits 31:24 | Priority number for interrupt 5, supervisor timer
 interrupt
 |bits 39:32 | _Reserved for priority number for interrupt 8; reads as
-zero_ 
+zero_
 |bits 47:40 | Priority number for interrupt 13, counter overflow
-interrupt 
-|bits 55:48 | Priority number for interrupt 14
+interrupt
+|bits 55:48 | Priority number for interrupt 14, asynchronous memory
+buffer interrupt
 |bits 63:56 | Priority number for interrupt 15
 |===
 
