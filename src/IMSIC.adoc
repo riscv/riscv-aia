@@ -416,6 +416,16 @@ level, values of the `*iselect` CSR in the range `0x70-0xFF` select these regist
 
 Register numbers 0x71 and 0x73-0x7F are reserved. When an `_*iselect_` _CSR_  has one of these values, reads from the matching `_*ireg_` _CSR_ (`mireg`, `sireg`, or `vsireg`) return zero, and writes to the `_*ireg_` _CSR_ are ignored. (For `vsiselect` and `vsireg`, all accesses depend on `hstatus`.VGEIN being the valid number of a guest interrupt file.)
 
+The Ssaiamrifd extension adds indirect registers `eimrifcfg` (0x75),
+`eimrifcfgh` (0x76), and `eimrifctl` (0x77) to support VM-exit-less
+device MSI delivery through IOMMU MRIF mode (<<IOMMU-MRIFs>>).
+Independent register sets control the VGEIN=1 guest context and the
+optional S-file MRIF context. The configuration registers specify the
+MRIF physical page number and enable MRIF backing; only the guest
+configuration includes a notice interrupt identity (NID). Writing
+`eimrifctl`.SYNC requests an asynchronous MRIF refresh. See
+<<Ssaiamrifd>> for register layouts and access rules.
+
 Registers `eip0` through `eip63` contain the pending bits for all implemented interrupt identities, and are collectively called the `_eip_` _array_. Registers `eie0` through `eie63` contain the enable bits for the same interrupt identities, and are collectively called the `_eie_` _array_.
 
 The indirectly accessed interrupt-file registers and CSRs `mtopei`, `stopei`, and `vstopei` are all documented in more detail in the next two sections.

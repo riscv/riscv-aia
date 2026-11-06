@@ -1,0 +1,353 @@
+[[Ssaiamrifd]]
+== "Ssaiamrifd" Extension for VM-exit-less MRIF Delivery
+
+Ssaiamrifd allows an IMSIC to deliver device interrupts from an
+IOMMU memory-resident interrupt file (MRIF) directly to a guest,
+without a VM exit to process the notice MSI. It reuses the IOMMU's
+MRIF update and notification mechanisms (<<IOMMU-MRIFs>>), requiring
+changes only to the IMSIC.
+
+The extension requires Ssaia and H. The hart, IMSIC, and IOMMU must
+share coherent MRIF memory that supports atomic updates.
+
+An MRIF guest context can coexist with physical guest interrupt files
+(VS-files). It uses neither a VS-file's 4-KiB MSI page nor its hardware
+`eip/eie` arrays, and does not provide guest IPI MSI delivery. Native
+interrupt files retain their existing behavior, including IPI delivery.
+
+=== Contexts and register access
+
+Each hart has one guest MRIF context, associated with VGEIN=1. An
+independent MRIF context for the S-file is optional. Each context has
+its own configuration and synchronization control. In this chapter,
+VGEIN=0 identifies the S-file context and VGEIN=1 identifies the guest
+context; register access follows the rules below.
+
+The committed `eimrifcfg`.EN bit selects the backing store for each
+context. With EN=1, pending and enable state resides in the MRIF, and
+the corresponding indirect `eip/eie` interfaces are unavailable.
+Committing a configuration with EN=0 restores the native interrupt-file
+path. For the guest context, this selects VS-file 1 if implemented;
+otherwise the usual rules for unavailable guest interfaces apply. Other
+VS-files are unaffected.
+
+An implementation of the guest MRIF context must support VGEIN=1 and
+bit 1 of `hgeip/hgeie`. It need not provide the physical VS-file's
+`eip/eie` arrays or 4-KiB MSI page.
+
+Access to the MRIF control registers is available only when
+`hstatus`.VGEIN is 0 or 1:
+
+* M-mode and HS-mode access the S-file registers through
+  `siselect/sireg` at either value.
+* M-mode and HS-mode access the guest registers through
+  `vsiselect/vsireg` when VGEIN=1, including when the guest EN bit is 0.
+* VS-mode may access the guest `eimrifctl` through `sireg` when
+  VGEIN=1. Accesses to `eimrifcfg`, or to `eimrifcfgh` when XLEN=32,
+  raise a virtual instruction exception. Configuration remains under
+  M-mode or HS-mode control.
+
+At other VGEIN values, these register numbers retain their existing
+AIA behavior. The following indirect register numbers apply to each
+implemented context. XLEN is the current execution width (<<CSRs>>).
+
+[cols="^1m,<2m,<2,<2",options="header"]
+|===
+|Number |Register |XLEN=32 view |XLEN=64 view
+|0x75 |eimrifcfg |Low 32 configuration bits |Full 64-bit configuration
+|0x76 |eimrifcfgh |High 32 configuration bits |Reserved
+|0x77 |eimrifctl |32 bits |32 bits
+|===
+
+These numbers remain reserved in the `miselect` register space.
+
+==== MRIF configuration (`eimrifcfg` / `eimrifcfgh`)
+
+The field positions below refer to the complete 64-bit logical
+configuration.
+
+[cols="^2,<1m,<4",options="header"]
+|===
+|Bits |Field |Description
+|63 |EN |Enable MRIF backing for this context
+|62:56 |Reserved |Read-only zero
+|55:12 |MRIFPPN |System physical page number of the MRIF
+|11 |Reserved |Read-only zero
+|10:0 |NID |Guest context only: notice interrupt identity in this hart's S-file
+|===
+
+MRIFPPN is a WARL field containing a 44-bit physical page number.
+The MRIF occupies 512 bytes starting at `eimrifcfg.MRIFPPN << 12`,
+using the layout in <<IOMMU-MRIFFormat>>, with the scan-bound
+encoding defined in <<Ssaiamrifd-MAXBLK>>.
+
+The S-file configuration has no NID field. Bits 10:0 are reserved: reads
+return zero and writes are ignored. In the guest configuration, NID is a
+WARL field used to identify an MRIF notice. Notice identities must be
+nonzero and supported by the destination S-file. When that S-file uses
+MRIF backing, the NID must be at least 2. The NID assigned to an enabled
+guest MRIF must not be used for another MRIF's notices or for ordinary
+MSIs sent to the same S-file.
+
+With XLEN=32, a write to `eimrifcfg` replaces the staged low half for
+that context. A write to `eimrifcfgh` combines the staged low half with
+the new high half, applies the fields' WARL constraints, and atomically
+commits the complete configuration. Reads of the two registers return
+the corresponding halves of the committed configuration. After each
+commit, the staged low half is updated to the committed low half. Thus,
+a high-half write preserves the committed low half unless software has
+staged a new value.
+
+With XLEN=64, `eimrifcfg` reads and writes the complete configuration.
+A write also updates the staged low half. Register number 0x76 is
+reserved: reads return zero and writes are ignored.
+
+Reset clears the committed configuration and staged low half in each
+context, selecting the native S-file and VS-file paths.
+
+==== MRIF synchronization control (`eimrifctl`)
+
+Register `eimrifctl` is 32 bits for either XLEN.
+
+[cols="^1,<1m,^2,<4",options="header"]
+|===
+|Bit |Field |Access |Description
+|1 |SYNC |W1S |Request an MRIF refresh; reads return zero
+|===
+
+All other bits are reserved, read as zero, and must be written as zero.
+Writing SYNC requests the IMSIC to reread the MRIF and refresh the
+context's `stopei/vstopei` state and interrupt signal. The write does
+not wait for MRIF reads or priority selection and provides no
+completion status. When the committed EN bit is 0, the request is
+ignored and initiates no MRIF access.
+Each SYNC refresh must obtain the current MAXBLK from block 0 rather
+than reuse a cached scan bound.
+
+Software must order MRIF memory writes before the SYNC CSR write.
+For ordinary memory writes, it executes `FENCE w,o` before writing
+SYNC. The same ordering is required before committing a configuration
+with EN=1. The fence orders memory writes (W) before the CSR write
+(O); it does not wait for the asynchronous refresh to finish.
+
+[[Ssaiamrifd-MAXBLK]]
+=== MRIF scan bounds
+
+A 512-byte MRIF consists of eight 64-byte logical blocks. Block `b`
+starts at byte offset `64*b` and covers interrupt identities
+`256*b` through `256*b+255`.
+
+The IMSIC reads MRIF data in aligned 64-byte blocks. Each read must
+return a single consistent snapshot of the entire block, atomic with
+respect to overlapping AMO updates of any supported operand width.
+A read may observe an actual state between two ordered AMOs.
+
+All Ssaiamrifd MRIF contexts must use the scan-bound encoding below.
+Software must initialize the encoding before enabling a context.
+MRIF interrupt identities start at 2. The pending and enable positions
+for identities 0 and 1 are reserved for metadata and do not participate in
+priority selection, interrupt signaling, or calculation of the enabled
+interrupt range. Here, EIP[i] and EIE[i] denote the bits for identity
+`i`: EIP[0] and EIP[1] are the low two bits of the doubleword at offset
+0x000, and EIE[0] and EIE[1] are the low two bits of the doubleword at
+offset 0x008.
+
+[cols="<2m,<2m,<4",options="header"]
+|===
+|MRIF position |Field |Description
+|EIP[0] |MAXBLK[0] |Least-significant bit of the last block index
+|EIP[1] |MAXBLK[1] |Middle bit of the last block index
+|EIE[0] |MAXBLK[2] |Most-significant bit of the last block index
+|EIE[1] |Reserved |Software writes zero; hardware ignores this bit
+|===
+
+MAXBLK encodes the last block to scan as a binary value from 0 to 7.
+The IMSIC reads block 0 to obtain the bound, reuses that block's data,
+and scans only blocks 0 through MAXBLK. A value of 0 still scans the
+first block; 7 scans the complete MRIF. The bound may be conservative,
+but must include every block containing a set enable bit for an
+implemented, nonreserved interrupt identity.
+
+The IOMMU continues to use its existing AMOOR and notice mechanisms.
+An erroneous AMOOR that sets EIP[0] or EIP[1] can only leave MAXBLK
+unchanged or increase it; these bits never produce interrupts 0 or 1.
+
+==== Updating a live scan bound
+
+Software must serialize EIE and MAXBLK updates for a given MRIF.
+Changes to the encoding use masked atomic operations that preserve
+other pending and enable bits in the accessed unit. EIE and MAXBLK
+updates may use any naturally aligned AMOOR/AMOAND operand width
+supported by the hart and MRIF memory, including byte (8-bit), word
+(32-bit), or doubleword (64-bit) operations. Software must derive the
+address and mask from the MRIF's little-endian layout.
+
+Software must complete any AMOOR operations that widen the range
+before AMOAND operations that narrow it. Intermediate MAXBLK values
+must not fall below the original bound while widening or the target
+bound while narrowing, and must always cover all enabled interrupts.
+Order the AMOs with `FENCE rw,rw`.
+
+Complete any required increase in MAXBLK before setting a real EIE
+bit. Before reducing MAXBLK, clear any EIE bits outside the new range.
+Use `FENCE rw,rw` to order bound changes and EIE updates.
+
+After updating real EIE bits, execute `FENCE w,o` and write SYNC once.
+Changing MAXBLK alone requires neither SYNC nor a top CSR access, and
+the MRIF context remains enabled throughout the update.
+
+During initialization, software may fill in EIE and MAXBLK directly.
+Ordinary pending-bit updates and interrupt claims do not require
+MAXBLK maintenance.
+
+=== Guest MRIF delivery (VGEIN=1)
+
+The IOMMU's MRIF-mode MSI PTE identifies a target MRIF, the target
+hart's S-file 4-KiB MMIO page, and a notice NID. In the following
+flow, G denotes the guest register set associated with VGEIN=1.
+
+. The IOMMU AMOORs the device interrupt's pending bit into the target
+  MRIF, then sends a notice MSI carrying NID to the S-file MMIO page.
+. The IMSIC tests `G.eimrifcfg.EN && (NID == G.eimrifcfg.NID)`.
+. On a match, the IMSIC consumes the notice and starts two paths in
+  parallel. The query path reads block 0 at
+  `G.eimrifcfg.MRIFPPN << 12`, obtains MAXBLK as specified in
+  <<Ssaiamrifd-MAXBLK>>, and scans blocks 0 through MAXBLK to select
+  the highest-priority eligible interrupt for the guest `vstopei` state.
+  The signaling path independently tests for an eligible pending
+  interrupt and updates `hgeip[1]`, supporting VS external or HS guest
+  external interrupts under the existing delivery controls. Starting
+  this path does not wait for the query path's block 0 read or priority
+  selection. An access to `vstopei` waits for the required MRIF query
+  to complete. The notice does not set a pending bit in the S-file.
+. Without a match, the notice is an ordinary S-file MSI with EIID=NID.
+  The S-file uses its own backing configuration and delivery controls
+  to update pending state and signal an HS external interrupt.
+
+.Device MSI delivery through an MRIF
+[listing,options="unbreakable"]
+----
+G = guest register set (VGEIN=1)
+
+Device MSI {EIID >= 2}
+    |
+    v
+IOMMU
+    | 1. AMOOR target MRIF pending bit
+    | 2. Notice MSI {NID}
+    v
+Target hart: S-file 4-KiB MMIO page
+    |
+    v
+IMSIC: G.eimrifcfg.EN && (NID == G.eimrifcfg.NID)?
+    |
+    +-- match --> Parallel paths (no ordering between 1 and 2)
+    |                |
+    |                +-- 1. Read block 0 / decode MAXBLK
+    |                |      Scan MRIF blocks 0..MAXBLK
+    |                |      Select highest-priority eligible interrupt
+    |                |      Update G1 vstopei state
+    |                |      (vstopei access waits if not ready)
+    |                |
+    |                `-- 2. Check eligible pending interrupt
+    |                       Update hgeip[1] under delivery controls
+    |                       Raise VS external / HS guest external interrupt
+    |
+    `-- no match --> Ordinary MSI: set NID pending in S-file
+                        |
+                        `--> HS external interrupt
+----
+
+Guest notice matching uses the enabled G1 configuration independently
+of the current VGEIN, including during HS-mode execution or while
+another VS-file is selected. The result belongs to G1 and is exposed
+through `vstopei` only when VGEIN=1; other VS-file views are unchanged.
+
+[NOTE]
+====
+Software should select VGEIN=1 while running a guest that uses MRIF
+delivery and provide another mechanism for that guest's IPIs. Native
+interrupt files retain their IPI capability.
+====
+
+=== S-file MRIF delivery (VGEIN=0)
+
+Here, S denotes the S-file register set, labeled VGEIN=0. The S-file's
+configuration contains only EN and MRIFPPN. Its 4-KiB MMIO page remains
+its MSI input when MRIF backing is enabled. Unlike guest MRIF delivery,
+where the IOMMU has already set pending state, an ordinary S-file MSI
+requires the IMSIC to set the received EIID in the S-file's own MRIF.
+
+. Decode the interrupt identity using the existing
+  `seteipnum_le/seteipnum_be` rules (<<IMSIC-memRegion>>). Identity 0
+  and unimplemented identities are ignored as before.
+. Apply guest NID matching first. A matched notice is consumed by the
+  guest path and does not enter the S-file path. Otherwise, use the
+  received identity as the S-file EIID; an unmatched notice therefore
+  has EIID=NID.
+. With `S.eimrifcfg.EN=0`, use the native S-file path and finish.
+  With EN=1, ignore identity 1. For valid identities 2 and higher,
+  the IMSIC AMOORs the pending bit into the MRIF at
+  `S.eimrifcfg.MRIFPPN << 12`.
+. Once the update is visible to subsequent reads, read block 0 and
+  determine the scan bound. Within that range, start or merge the
+  refresh work: select an eligible interrupt for `stopei` and, in
+  parallel, test for eligible pending interrupts to update SEIP. HS
+  external interrupt signaling does not wait for priority selection.
+
+.S-file MSI delivery with optional MRIF backing
+[listing,options="unbreakable"]
+----
+S = S-file register set (VGEIN=0)
+
+S-file 4-KiB MMIO write {EIID}
+    | (not consumed by the guest NID match)
+    v
+S.eimrifcfg.EN?
+    |
+    +-- 0 --> Original S-file path
+    |
+    `-- 1 --> EIID >= 2: AMOOR pending bit into S-file MRIF
+                  |
+                  v
+              MRIF update visible to subsequent reads
+                  |
+                  v
+              Read block 0 / decode MAXBLK
+                  |
+                  +--> Query highest-priority eligible interrupt
+                  |    in blocks 0..MAXBLK
+                  |       `--> Update stopei (access waits if needed)
+                  |
+                  `--> Check eligible pending / update SEIP
+                          `--> HS external interrupt
+----
+
+=== Refresh, signaling, and interrupt claims
+
+An eligible interrupt is implemented, nonreserved, pending, enabled,
+and permitted by `eithreshold`. Priority ordering and top CSR encoding
+follow the existing IMSIC rules. Registers `eidelivery/eithreshold`
+retain their behavior, and signaling depends on the existence of an
+eligible pending interrupt.
+
+Enabling an MRIF, changing an enabled configuration, or updating
+`eidelivery/eithreshold` refreshes the top and interrupt signal state
+as needed, without waiting for a new MSI. Accesses to an MRIF's
+`stopei/vstopei` wait for outstanding MRIF transactions and queries
+required by relevant MSI updates, notices, SYNC requests,
+configuration commits, or delivery-control changes accepted before
+the access.
+
+Reading `stopei` or `vstopei` without writing it does not clear pending
+state. A write claims the selected interrupt; the written value is
+ignored. Every claim must atomically clear that identity's pending bit
+while preserving other concurrent pending-bit updates. A single CSR
+instruction that both reads and writes must return the same identity it
+clears. A claim with a zero top result changes no pending bits.
+
+After a claim, the IMSIC refreshes interrupt selection and signaling.
+If no eligible interrupt remains, the top result is zero and the MRIF's
+interrupt signal is deasserted. Stale query results must not overwrite
+state produced by later MSIs, SYNC requests, configuration commits,
+claims, or delivery-control changes.
