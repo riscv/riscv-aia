@@ -85,6 +85,7 @@ are non-ISA.
 |6. Interrupts for Virtual Machines (VS Level) |Yes
 |7. Interprocessor Interrupts (IPIs) |No
 |8. IOMMU Support for MSIs to Virtual Machines |No
+|9. Ssaiamrifd Extension |Yes
 |===
 
 *Changes for version 20250312*
@@ -198,3 +199,4 @@ include::IPIs.adoc[]
 //IPIs.tex
 include::IOMMU.adoc[]
 //IOMMU.tex
+include::Ssaiamrifd.adoc[]
